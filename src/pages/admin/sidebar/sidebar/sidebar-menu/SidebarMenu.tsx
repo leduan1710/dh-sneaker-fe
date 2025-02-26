@@ -26,7 +26,7 @@ const MenuWrapper = styled(Box)(
       text-transform: uppercase;
       font-weight: bold;
       font-size: ${theme.typography.pxToRem(12)};
-      color: ${theme.colors.alpha.trueWhite[50]};
+      color: ${theme.colors.alpha.black};
       padding: ${theme.spacing(0, 2.5)};
       line-height: 1.4;
     }
@@ -55,7 +55,7 @@ const SubMenuWrapper = styled(Box)(
     
         .MuiButton-root {
           display: flex;
-          color: ${theme.colors.alpha.trueWhite[70]};
+          color: ${theme.colors.alpha.black[50]};
           background-color: transparent;
           width: 100%;
           justify-content: flex-start;
@@ -72,13 +72,13 @@ const SubMenuWrapper = styled(Box)(
           }
 
           .MuiButton-startIcon {
-            color: ${theme.colors.alpha.trueWhite[30]};
+            color: ${theme.colors.alpha.black[50]};
             font-size: ${theme.typography.pxToRem(20)};
             margin-right: ${theme.spacing(1)};
           }
           
           .MuiButton-endIcon {
-            color: ${theme.colors.alpha.trueWhite[50]};
+            color: ${theme.colors.alpha.black[70]};
             margin-left: auto;
             opacity: .8;
             font-size: ${theme.typography.pxToRem(20)};
@@ -86,12 +86,12 @@ const SubMenuWrapper = styled(Box)(
 
           &.active,
           &:hover {
-            background-color: ${alpha(theme.colors.alpha.trueWhite[100], 0.06)};
-            color: ${theme.colors.alpha.trueWhite[100]};
+            background-color: rgb(237, 243, 255);
+            color: rgba(1, 71, 210, 0.82);
 
             .MuiButton-startIcon,
             .MuiButton-endIcon {
-              color: ${theme.colors.alpha.trueWhite[100]};
+              color: rgba(1, 71, 210, 0.82);
             }
           }
         }
@@ -124,7 +124,7 @@ const SubMenuWrapper = styled(Box)(
 
               &:before {
                 content: ' ';
-                background: ${theme.colors.alpha.trueWhite[100]};
+                background: ${theme.colors.alpha.black[100]};
                 opacity: 0;
                 transition: ${theme.transitions.create(['transform', 'opacity'])};
                 width: 6px;
@@ -157,23 +157,6 @@ function SidebarMenu() {
     return (
         <>
             <MenuWrapper>
-                <List component="div">
-                    <SubMenuWrapper>
-                        <List component="div">
-                            <ListItem component="div">
-                                <Button
-                                    disableRipple
-                                    component={RouterLink}
-                                    onClick={closeSidebar}
-                                    to="/admin"
-                                    startIcon={<DesignServicesTwoToneIcon />}
-                                >
-                                    Admin
-                                </Button>
-                            </ListItem>
-                        </List>
-                    </SubMenuWrapper>
-                </List>
                 <List
                     component="div"
                     subheader={
@@ -290,43 +273,10 @@ function SidebarMenu() {
                                     disableRipple
                                     component={RouterLink}
                                     onClick={closeSidebar}
-                                    to="/admin/management/origin"
+                                    to="/admin/management/report-product"
                                     startIcon={<TableChartTwoToneIcon />}
                                 >
-                                    {t('product.Origin')}
-                                </Button>
-                            </ListItem>
-                            <ListItem component="div">
-                                <Button
-                                    disableRipple
-                                    component={RouterLink}
-                                    onClick={closeSidebar}
-                                    to="/admin/management/brand"
-                                    startIcon={<TableChartTwoToneIcon />}
-                                >
-                                    {t('product.Brand')}
-                                </Button>
-                            </ListItem>
-                            <ListItem component="div">
-                                <Button
-                                    disableRipple
-                                    component={RouterLink}
-                                    onClick={closeSidebar}
-                                    to="/admin/management/styles"
-                                    startIcon={<TableChartTwoToneIcon />}
-                                >
-                                    {t('product.Styles')}
-                                </Button>
-                            </ListItem>
-                            <ListItem component="div">
-                                <Button
-                                    disableRipple
-                                    component={RouterLink}
-                                    onClick={closeSidebar}
-                                    to="/admin/management/material"
-                                    startIcon={<TableChartTwoToneIcon />}
-                                >
-                                    {t('product.Material')}
+                                    {t('admin.ReportProduct')}
                                 </Button>
                             </ListItem>
                         </List>

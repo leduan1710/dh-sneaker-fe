@@ -18,7 +18,7 @@ const LogoImage = styled(Box)(
     ({ theme }) => `
         width: 100%;
         height: auto;
-        background-color: ${darken(theme.colors.alpha.black[100], 0.4)};
+        background-color: transparent;
         border-radius: ${theme.general.borderRadiusSm};
         overflow: hidden;
         display: flex;
@@ -48,14 +48,14 @@ function Logo() {
     const user = useSelector((state: ReducerProps) => state.user);
 
     return (
-        <TooltipWrapper title={user?.role == "SHOP" ? "Fashion Ecommerce Shop Management" : "Fashion Ecommerce Admin Management"} arrow>
-            <LogoWrapper to={user?.role == "SHOP" ? "/shop" : "/admin"}>
+        <TooltipWrapper title={"DH Sneaker Admin Management"} arrow>
+            <LogoWrapper to={"/admin"}>
                 <Badge
                     sx={{
                         '.MuiBadge-badge': {
                             fontSize: theme.typography.pxToRem(11),
                             right: -2,
-                            top: 8,
+                            top: 2,
                         },
                     }}
                     overlap="circular"
@@ -63,11 +63,11 @@ function Logo() {
                 >
                     <LogoImage>
                         <img
-                            src={require('../../../static/Name.png')}
+                            src={require('../../../static/dhsneaker-logo.png')}
                             alt="Logo"
                             style={{
-                                maxWidth: '120px',
-                                maxHeight: '60px',
+                                maxWidth: '170px',
+                                maxHeight: '90px',
                                 objectFit: 'contain',
                             }}
                         />

@@ -6,15 +6,15 @@ import MultiCaroselProductJV from '../../components/user-guest/product/MultiCaro
 import Footer from '../../components/user-guest/footer/Footer';
 import ProductNew from '../../components/user-guest/product/ProductNew';
 import { GetGuestApi, PostGuestApi } from '../../untils/Api';
-import { Button, Chip, Container, Divider, Grid } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { Button, Chip, Container, Divider, Grid, useMediaQuery } from '@mui/material';
+import { styled, useTheme } from '@mui/material/styles';
 import { Height } from '@mui/icons-material';
 import BannerShop from '../../components/user-guest/BannerShop';
 import { HOST_BE } from '../../common/Common';
 import MultiCaroselCategory from '../../components/user-guest/category/MultiCaroselCategory';
 import DrawMore from '../../components/user-guest/category/DrawMore';
 import ListProduct from '../../components/user-guest/product/ListProduct';
-import HotStyles from '../../components/user-guest/home/HotStyle';
+import HotStyle from '../../components/user-guest/home/HotStyle';
 
 const StyledButton = styled(Button)(({ theme }) => ({
     width: '100%',
@@ -36,6 +36,8 @@ interface optionsFilterProps {
     originId: any;
 }
 const HomePage: React.FC<HomePageProps> = (props) => {
+    const theme = useTheme();
+    const isMediumScreen = useMediaQuery('(max-width:1025px)');    
     const { t } = useTranslation();
     const [category, setCategory] = useState<any>(undefined);
     const [isGetStart, setIsGetStart] = useState<boolean>(false);
@@ -137,7 +139,7 @@ const HomePage: React.FC<HomePageProps> = (props) => {
     // }, [req]);
     return (
         <>
-            <div style={{ width: '100%' , marginTop: "110px"}}>
+            <div style={{ width: '100%', marginTop: isMediumScreen ? '0px' : '110px' }}>
                 <div className="rounded-lg">
                     <img
                         className="rounded-lg"
@@ -149,50 +151,39 @@ const HomePage: React.FC<HomePageProps> = (props) => {
             <Container>
                 <Grid container spacing={2} justifyContent="center" style={{ padding: '39px 5px' }}>
                     <Grid item xs={6} sm={2} textAlign="center">
-                        <StyledButton
-                            variant="outlined"
-                            href="/collections/nu"
-                        >
+                        <StyledButton variant="outlined" href="/collections/nu">
                             MLB
                         </StyledButton>
                     </Grid>
                     <Grid item xs={6} sm={2} textAlign="center">
-                        <StyledButton
-                            variant="outlined"
-                            href="/collections/nam"
-                        >
+                        <StyledButton variant="outlined" href="/collections/nam">
                             CROCS
                         </StyledButton>
                     </Grid>
                     <Grid item xs={6} sm={2} textAlign="center">
-                        <StyledButton
-                            variant="outlined"
-                            href="/collections/tre-em"
-                        >
+                        <StyledButton variant="outlined" href="/collections/tre-em">
                             ADIDAS
                         </StyledButton>
                     </Grid>
                     <Grid item xs={6} sm={2} textAlign="center">
-                        <StyledButton
-                            variant="outlined"
-                            href="/collections/phu-kien-jibbitz"
-                            
-                        >
+                        <StyledButton variant="outlined" href="/collections/phu-kien-jibbitz">
                             TRẺ EM
                         </StyledButton>
                     </Grid>
                     <Grid item xs={6} sm={2} textAlign="center">
-                        <StyledButton
-                            variant="outlined"
-                            href="/collections/phu-kien-jibbitz"
-                        >
+                        <StyledButton variant="outlined" href="/collections/phu-kien-jibbitz">
                             JIBBITZ
+                        </StyledButton>
+                    </Grid>
+                    <Grid item xs={6} sm={2} textAlign="center">
+                        <StyledButton variant="outlined" href="/collections/phu-kien-jibbitz">
+                            SẢN PHẨM KHÁC
                         </StyledButton>
                     </Grid>
                 </Grid>
             </Container>
             <Container>
-                <HotStyles></HotStyles>
+                <HotStyle></HotStyle>
             </Container>
             {/* <div style={{ marginTop: 100 }} className="">
                 {!isGetStart ? (

@@ -18,7 +18,7 @@ const AdminSidebarLayout: FC<AdminSidebarLayoutProps> = () => {
         sx={{
           flex: 1,
           height: '100%',
-
+          backgroundColor: '#ffffff',
           '.MuiPageTitle-wrapper': {
             background:
               theme.palette.mode === 'dark'

@@ -126,7 +126,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                         <a
                             href="/category"
                             style={{ fontSize: '19px' }}
-                            className={`hover:border-blue-300 border-b-2 border-white mr-4 cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
+                            className={`hover:border-blue-300 border-b-2 border-white mr-5 cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
                                 index === 0 ? 'font-bold text-blue-400' : ''
                             }`}
                         >
@@ -135,7 +135,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                         <a
                             href="#product-new-id"
                             style={{ fontSize: '19px' }}
-                            className={`hover:border-blue-300 border-b-2 border-white mr-4 cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
+                            className={`hover:border-blue-300 border-b-2 border-white mr-5 cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
                                 index === 1 ? 'font-bold text-blue-400' : ''
                             }`}
                         >
@@ -144,7 +144,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                         <a
                             href={`/category-view/${MALE_ID}`}
                             style={{ fontSize: '19px' }}
-                            className={`hover:border-blue-300 border-b-2 border-white mr-4 cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
+                            className={`hover:border-blue-300 border-b-2 border-white mr-5 cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
                                 index === 2 ? 'font-bold text-blue-400' : ''
                             }`}
                         >
@@ -153,7 +153,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                         <a
                             href={`/category-view/${FEMALE_ID}`}
                             style={{ fontSize: '19px'}}
-                            className={`hover:border-blue-300 border-b-2 border-white mr-4 cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
+                            className={`hover:border-blue-300 border-b-2 border-white  cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
                                 index === 3 ? 'font-bold text-blue-400' : ''
                             }`}
                         >

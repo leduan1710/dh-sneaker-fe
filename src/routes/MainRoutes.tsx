@@ -55,7 +55,7 @@ import OrderRevenueManagement from '../pages/shop/scenes/Revenue';
 import ComplaintReport from '../pages/admin/scenes/ComplaintReportOrder';
 import ReportProductAdmin from '../pages/admin/scenes/ReportProduct';
 import HomeLayout from '../pages/user-guest/HomeLayout';
-import ProductDetail from '../pages/user-guest/ProductDetail';
+import ProductDetail from '../pages/user-guest/product/ProductDetail2';
 
 //--------------------------------------------------------------
 //--------------------------------------------------------------
@@ -123,6 +123,7 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                 <BrowserRouter>
                     <Routes>
                         <Route path="/" element={<HomeLayout />}>
+
                             {defaultPage}
                             <Route path="/login" element={<Login />}></Route>
                             <Route path="/login-register" element={<LoginRegister />}></Route>

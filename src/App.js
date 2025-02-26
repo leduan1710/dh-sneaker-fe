@@ -23,8 +23,8 @@ function App() {
     //get role if have token
     const getRoleAndUser = async () => {
         try {
-            // const res_role = await GetApi('/user/get-role', localStorage.getItem('token'));
-            // store.dispatch(change_role(res_role.data.role));
+            const res_role = await GetApi('/user/get-role', localStorage.getItem('token'));
+            store.dispatch(change_role(res_role.data.role));
             const res_user = await GetApi('/user/get-user', localStorage.getItem('token'));
             store.dispatch(change_user(res_user.data.user));
             if (res_user.data.user.id) {

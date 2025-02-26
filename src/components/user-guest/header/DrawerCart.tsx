@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import { useTranslation } from 'react-i18next';
-import { Divider } from '@mui/material';
+import { Checkbox, Divider } from '@mui/material';
 import { TextField } from '@mui/material';
 import {
     addCheckout,
@@ -44,7 +44,6 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
     const listItemInCart = useSelector((state: ReducerProps) => state.listItemInCart);
     const role = useSelector((state: ReducerProps) => state.role);
     const numberCart = useSelector((state: ReducerProps) => state.numberCart);
-    const [discounts, setDiscounts] = useState<any>(undefined);
     const store = useStore();
     const [groupedShop, setGroupedShop] = useState<any>([]);
 
@@ -60,32 +59,8 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
         });
         if (resProductDetail.data.message == 'Success') {
             store.dispatch(set_list_item_in_cart(resProductDetail.data.productDetails));
-            const discountIds = resProductDetail.data.productDetails
-                .map((productDetail: any) => productDetail.discountId)
-                .filter((discountId: any) => discountId !== null);
-            const resDiscount = await PostGuestApi(`/api/discount-many/`, { discountIdList: discountIds });
-            if (resDiscount.data.message == 'Success') {
-                setDiscounts(resDiscount.data.discounts);
-            }
         }
     };
-    const groupedByShopId = () => {
-        const new_list = listItemInCart.reduce((accumulator: any, current: any) => {
-            let group = accumulator.find((g: any) => g.shopId === current.shopId);
-
-            if (!group) {
-                group = { shopId: current.shopId, productDetails: [] };
-                accumulator.push(group);
-            }
-
-            // Thêm object vào nhóm tương ứng
-            group.productDetails.push(current);
-
-            return accumulator;
-        }, []);
-        setGroupedShop(new_list);
-    };
-    //
     const handleBuy = () => {
         const isAdded = addCheckoutBuyAll();
         if (isAdded) {
@@ -115,35 +90,34 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
         const totalPrice = listItemInCart.reduce((accumulator: any, currentValue: any) => {
             const inx = list_cart.findIndex((item: any) => item.productDetailId == currentValue.id);
             if (list_cart[inx].isCheck) {
-                if (discounts) {
-                    const inx_discount = discounts.findIndex((item: any) => item.id == currentValue.discountId);
-                    if (inx_discount != -1) {
-                        return (
-                            accumulator +
-                            list_cart[inx].quantity * currentValue.price * (1 - discounts[inx_discount].percent)
-                        );
-                    } else {
-                        return accumulator + list_cart[inx].quantity * currentValue.price;
-                    }
-                } else {
-                    return accumulator;
-                }
+                return accumulator + list_cart[inx].quantity * currentValue.sellPrice;
             } else {
                 return accumulator;
             }
         }, 0);
         setTotalPrice(totalPrice);
     };
+
+    const getIsCheck = () => {
+        const listProductDetail = JSON.parse(localStorage.getItem('listCart') || '[]');
+        if (listProductDetail.length > 0) {
+            return listProductDetail.every((item: any) => item.isCheck === true);
+        } else {
+            return false;
+        }
+    };
+    const [isCheckAll, setIsCheckAll] = useState<boolean>(getIsCheck());
+
     //
     useEffect(() => {
         if (localStorage.getItem('listCart')) getDataInCart();
     }, [numberCart]);
-    useEffect(() => {
-        groupedByShopId();
-    }, [listItemInCart]);
+    // useEffect(() => {
+    //     groupedByShopId();
+    // }, [listItemInCart]);
     useEffect(() => {
         getTotalPriceAndItem();
-    }, [numberCart, discounts]);
+    }, [numberCart]);
     const DrawerList = (
         <Box sx={{ width: '100%', minWidth: 400 }} role="presentation">
             <div className="pt-3 pl-3 pb-3 flex justify-start items-center bg-general sticky top-0 right-0 left-0 z-10">
@@ -162,10 +136,23 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
                     {t('homepage.Exit')}
                 </span>
             </div>
+            <div>
+                <Checkbox
+                    checked={isCheckAll}
+                    onChange={() => {
+                        if (isCheckAll) {
+                            const listProductDetail = JSON.parse(localStorage.getItem('listCart') || '[]');
+                            listProductDetail.map((item: any) => (item.isCheck = false));
+                            localStorage.setItem('listCart', JSON.stringify(listProductDetail));
+                        }
+                        setIsCheckAll((prev) => !prev);
+                    }}
+                />
+            </div>
             <div style={{ minHeight: 1000 }} className="mt-2 mb-6 ml-9 mr-9 relative ">
                 <AnimatePresence>
-                    {groupedShop.length > 0
-                        ? groupedShop.map((shop: any, index: number) => (
+                    {listItemInCart.length > 0
+                        ? listItemInCart.map((item: any, index: number) => (
                               <motion.li
                                   style={{ listStyleType: 'none' }}
                                   key={index}
@@ -177,11 +164,14 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
                                   }}
                                   transition={{ duration: 0.2 }}
                               >
-                                  <ListCartByShop
-                                      key={shop.shopId}
-                                      shop={shop}
+                                  <CartItem
+                                      key={item.id}
+                                      productDetail={item}
                                       setTotalPrice={setTotalPrice}
                                       setTotalItem={setTotalItem}
+                                      isCheck_F={isCheckAll}
+                                      setIsCheckAll={setIsCheckAll}
+                                      getIsCheck={getIsCheck}
                                       toggleDrawer={toggleDrawer}
                                   />
                               </motion.li>

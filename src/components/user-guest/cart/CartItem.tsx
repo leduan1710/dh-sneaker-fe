@@ -44,7 +44,6 @@ const CartItem: React.FC<CartItemProps> = (props) => {
     const { productDetail, setTotalPrice, setTotalItem, isCheck_F, setIsCheckAll, getIsCheck, toggleDrawer } = props;
     const productDetailInStore = findProductDetailInStore(productDetail.id);
     const role = useSelector((state: ReducerProps) => state.role);
-    const [discount, setDiscount] = useState<any>(undefined);
     const [quantity, setQuantity] = useState<number>(0);
     const numberCart = useSelector((state: ReducerProps) => state.numberCart);
     const [isCheck, setIsCheck] = useState<boolean>(false);
@@ -82,25 +81,11 @@ const CartItem: React.FC<CartItemProps> = (props) => {
         setCheckInStore(productDetailInStore.productDetailId, !isCheck);
         //if check
         if (!isCheck) {
-            if (discount) {
-                setTotalPrice(
-                    (prev: any) => (prev += parseInt(productDetail.price) * quantity * (1 - discount.percent)),
-                );
-                setTotalItem((prev: any) => (prev = parseInt(prev) + quantity));
-            } else {
-                setTotalPrice((prev: any) => (prev += parseInt(productDetail.price) * quantity));
-                setTotalItem((prev: any) => (prev = parseInt(prev) + quantity));
-            }
+            setTotalPrice((prev: any) => (prev += parseInt(productDetail.price) * quantity));
+            setTotalItem((prev: any) => (prev = parseInt(prev) + quantity));
         } else {
-            if (discount) {
-                setTotalPrice(
-                    (prev: any) => (prev -= parseInt(productDetail.price) * quantity * (1 - discount.percent)),
-                );
-                setTotalItem((prev: any) => (prev = parseInt(prev) - quantity));
-            } else {
-                setTotalPrice((prev: any) => (prev -= parseInt(productDetail.price) * quantity));
-                setTotalItem((prev: any) => (prev = parseInt(prev) - quantity));
-            }
+            setTotalPrice((prev: any) => (prev -= parseInt(productDetail.price) * quantity));
+            setTotalItem((prev: any) => (prev = parseInt(prev) - quantity));
         }
         setIsCheckAll(getIsCheck());
     };
@@ -115,20 +100,11 @@ const CartItem: React.FC<CartItemProps> = (props) => {
             }
         }
     };
-    const getDiscount = async () => {
-        if (productDetail.discountId != null) {
-            const resDiscount = await GetGuestApi(`/api/get-discount/${productDetail.discountId}`);
-            if (resDiscount.data.message == 'Success') {
-                setDiscount(resDiscount.data.discount);
-            }
-        }
-    };
     useEffect(() => {
         if (productDetailInStore) {
             setQuantity(productDetailInStore.quantity);
             setIsCheck(productDetailInStore.isCheck);
         }
-        getDiscount();
     }, []);
     useEffect(() => {
         if (isCheck_F != isCheck) {
@@ -179,9 +155,9 @@ const CartItem: React.FC<CartItemProps> = (props) => {
                             objectFit: 'cover',
                         }}
                         src={
-                            productDetail.images[0].startsWith('uploads')
-                                ? `${HOST_BE}/${productDetail.images[0]}`
-                                : productDetail.images[0]
+                            productDetail.image.startsWith('uploads')
+                                ? `${HOST_BE}/${productDetail.image}`
+                                : productDetail.image
                         }
                     />
                 </div>
@@ -190,26 +166,13 @@ const CartItem: React.FC<CartItemProps> = (props) => {
                         {shortedString(productDetail.name, 150)}
                     </div>
                     <div className="text-xs lg:text-sm select-none text-blue-300">
-                        <span>{productDetail.option1}</span>
+                        <span>{productDetail.sizeName}</span>
                         <span className="ml-3">|</span>
-                        <span className="ml-3">{productDetail.option2}</span>
+                        <span className="ml-3">{productDetail.colorName}</span>
                     </div>
                     <div className="mt-3 font-thin text-red-400 select-none flex items-center relative grid grid-cols-3">
                         {/* {formatPrice(parseInt(productDetail.price) * parseInt(productDetailInStore.quantity))} */}
-
-                        {discount ? (
-                            <div className="flex col-span-3 lg:col-span-2 text-xs lg:text-sm">
-                                <div className="line-through text-black ">{formatPrice(productDetail.price)}</div>
-                                <div className="ml-1">{formatPrice(productDetail.price * (1 - discount.percent))}</div>
-                                <div className="ml-1">
-                                    {discount ? (
-                                        <div className="font-bold"> -{convertToPercentage(discount.percent)}</div>
-                                    ) : null}
-                                </div>
-                            </div>
-                        ) : (
-                            <> {formatPrice(productDetail.price)}</>
-                        )}
+                        <> {formatPrice(productDetail.price)}</>
 
                         <span className="ml-12 font-bold text-black col-span-3 lg:col-span-1">
                             x {productDetailInStore ? productDetailInStore.quantity : 0}
@@ -268,22 +231,12 @@ const CartItem: React.FC<CartItemProps> = (props) => {
                 <div className="flex items-center pl-5">
                     <h1 className="font-bold text-sm">
                         {t('product.Total')} :{' '}
-                        {discount ? (
-                            <>
-                                {formatPrice(
-                                    parseInt(productDetail.price) *
-                                        (1 - discount.percent) *
-                                        parseInt(productDetailInStore ? productDetailInStore.quantity : 0),
-                                )}
-                            </>
-                        ) : (
-                            <>
-                                {formatPrice(
-                                    parseInt(productDetail.price) *
-                                        parseInt(productDetailInStore ? productDetailInStore.quantity : 0),
-                                )}
-                            </>
-                        )}
+                        <>
+                            {formatPrice(
+                                parseInt(productDetail.sellPrice) *
+                                    parseInt(productDetailInStore ? productDetailInStore.quantity : 0),
+                            )}
+                        </>
                     </h1>
                 </div>
                 <div className="flex items-center col-span-3 lg:col-span-1 lg:justify-end pr-5 pl-5 mt-2 lg:mt-0">
