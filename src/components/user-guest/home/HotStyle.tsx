@@ -57,7 +57,7 @@ const HotStyle = () => {
     return (
         <Container>
             <Carousel
-                swipeable={false}
+                swipeable={true}
                 draggable={false}
                 showDots={false}
                 responsive={responsive}
@@ -73,7 +73,15 @@ const HotStyle = () => {
                 {items.map((item) => (
                     <div key={item.id} style={{ display: 'flex', justifyContent: 'center' }}>
                         <a href={item.href} style={{ textDecoration: 'none', color: 'inherit' }}>
-                            <div style={{ height: '240px', width: '240px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <div
+                                style={{
+                                    height: '240px',
+                                    width: '240px',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                }}
+                            >
                                 <img
                                     src={item.imgSrc}
                                     alt={item.label}

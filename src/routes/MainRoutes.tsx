@@ -56,6 +56,7 @@ import ComplaintReport from '../pages/admin/scenes/ComplaintReportOrder';
 import ReportProductAdmin from '../pages/admin/scenes/ReportProduct';
 import HomeLayout from '../pages/user-guest/HomeLayout';
 import ProductDetail from '../pages/user-guest/product/ProductDetail2';
+import ProductCollection from '../pages/user-guest/category/Collection';
 
 //--------------------------------------------------------------
 //--------------------------------------------------------------
@@ -108,6 +109,7 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
             <Route path="/err404" element={<Page404 />}></Route>
             <Route path="/product/:productId" element={<ProductDetail />}></Route>
             <Route path="/category" element={<Category />}></Route>
+            <Route path="/collection" element={<ProductCollection />}></Route>
             <Route path="/category-view/:categoryId" element={<CategoryView />}></Route>
         </>
     );

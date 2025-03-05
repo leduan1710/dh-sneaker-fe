@@ -67,16 +67,16 @@ const ProductDetail: React.FC = () => {
 
     return (
         <>
-            <Container sx={{ marginTop: { xs: '0px', md: '110px' } }}>
+            <Container sx={{ marginTop: { xs: '0px', md: '160px' } }}>
                 <Box sx={{ paddingTop: { xs: '0px', md: '10px' } }}>
                     <Breadcrumbs separator="›" aria-label="breadcrumb">
                         <IconButton href="/">
                             <HomeIcon fontSize="small" />
                         </IconButton>
-                        <Typography color="textPrimary" fontSize={11}>
+                        <Typography color="textPrimary" fontSize={13} fontWeight={520}>
                             CROCS
                         </Typography>
-                        <Typography color="textPrimary" fontSize={12}>
+                        <Typography color="textPrimary" fontSize={13}>
                             {product?.name}
                         </Typography>
                     </Breadcrumbs>
@@ -153,9 +153,6 @@ const ProductDetail: React.FC = () => {
                                 Màu sắc: {product?.colorName}
                             </Typography>
                             <Divider></Divider>
-                            <Typography variant="h5" sx={{ mt: 1, mb: 1 }}>
-                                Kích thước:
-                            </Typography>
                             <Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
                                 <Typography variant="h5" sx={{ mt: 1, mb: 1 }}>
                                     Kích thước:
@@ -190,7 +187,7 @@ const ProductDetail: React.FC = () => {
                                                     : '1px solid rgba(99, 120, 127, 0.89)',
                                             borderRadius: '4px',
                                             fontSize: '14px',
-                                            fontWeight: '500',
+                                            fontWeight: '700',
                                             transition: 'background-color 0.3s, color 0.3s, border 0.3s',
                                             '&:hover': {
                                                 backgroundColor:
@@ -416,7 +413,7 @@ const ProductDetail: React.FC = () => {
                     </Grid>
                 </Grid>
             </Container>
-            <Container>
+            <Container sx={{ mt: 2, mb: 2 }}>
                 <Typography variant="h4" sx={{ mt: 2, mb: 2 }}>
                     SẢN PHẨM LIÊN QUAN
                 </Typography>

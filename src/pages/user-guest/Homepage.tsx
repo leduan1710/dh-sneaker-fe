@@ -6,7 +6,7 @@ import MultiCaroselProductJV from '../../components/user-guest/product/MultiCaro
 import Footer from '../../components/user-guest/footer/Footer';
 import ProductNew from '../../components/user-guest/product/ProductNew';
 import { GetGuestApi, PostGuestApi } from '../../untils/Api';
-import { Button, Chip, Container, Divider, Grid, useMediaQuery } from '@mui/material';
+import { Button, Chip, Container, Divider, Grid, Typography, useMediaQuery } from '@mui/material';
 import { styled, useTheme } from '@mui/material/styles';
 import { Height } from '@mui/icons-material';
 import BannerShop from '../../components/user-guest/BannerShop';
@@ -37,7 +37,7 @@ interface optionsFilterProps {
 }
 const HomePage: React.FC<HomePageProps> = (props) => {
     const theme = useTheme();
-    const isMediumScreen = useMediaQuery('(max-width:1025px)');    
+    const isMediumScreen = useMediaQuery('(max-width:1025px)');
     const { t } = useTranslation();
     const [category, setCategory] = useState<any>(undefined);
     const [isGetStart, setIsGetStart] = useState<boolean>(false);
@@ -139,11 +139,10 @@ const HomePage: React.FC<HomePageProps> = (props) => {
     // }, [req]);
     return (
         <>
-            <div style={{ width: '100%', marginTop: isMediumScreen ? '0px' : '110px' }}>
+            <div style={{ width: '100%', marginTop: isMediumScreen ? '165px' : '150px' }}>
                 <div className="rounded-lg">
                     <img
-                        className="rounded-lg"
-                        style={{ objectFit: 'cover', height: 600, width: '100%' }}
+                        style={{ objectFit: 'cover', height: 'auto', width: '100%' }}
                         src={require('../../static/dhsneaker-banner.png')}
                     />
                 </div>
@@ -182,8 +181,32 @@ const HomePage: React.FC<HomePageProps> = (props) => {
                     </Grid>
                 </Grid>
             </Container>
-            <Container>
+            <Container sx={{ pb: 5 }}>
                 <HotStyle></HotStyle>
+            </Container>
+            <Container>
+                <img
+                    style={{ objectFit: 'cover', height: 'auto', width: '100%' }}
+                    src="https://www.crocs.com.vn/cdn/shop/files/DRAGON_PC_VN_9f4c3945-a2ec-4448-8f90-477790e012db_1190x.webp?v=1740472835"
+                />
+                <img
+                    style={{ objectFit: 'cover', height: 'auto', width: '100%', marginTop: '5px' }}
+                    src="https://www.crocs.com.vn/cdn/shop/files/BAE_PC_VN_1190x.webp?v=1737080006"
+                />
+            </Container>
+            <Container sx={{ pb: 5, pt: 5, textAlign: 'center' }}>
+            <Typography variant="h2" mb={5} fontSize={35} color={'#000'}>🌻HÀNG MỚI🌻</Typography>
+            <HotStyle />
+        </Container>
+            <Container>
+                <img
+                    style={{ objectFit: 'cover', height: 'auto', width: '100%' }}
+                    src="https://www.crocs.com.vn/cdn/shop/files/ECHOWAVE_PC_VN_1190x.webp?v=1736937324"
+                />
+                <img
+                    style={{ objectFit: 'cover', height: 'auto', width: '100%', marginTop: '5px' }}
+                    src="https://www.crocs.com.vn/cdn/shop/files/FLORAL_PC_VN_e1db6f5b-44fb-4e1c-a2ba-06d3b914d3ad_1190x.webp?v=1737605505"
+                />
             </Container>
             {/* <div style={{ marginTop: 100 }} className="">
                 {!isGetStart ? (
