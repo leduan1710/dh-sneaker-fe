@@ -5,8 +5,8 @@ import CloseIcon from '@mui/icons-material/Close';
 
 interface ColorFilterSectionProps {
     title: string;
-    options: string[];
-    selectedOptions: string[];
+    options: any;
+    selectedOptions: any;
     toggleOption: (option: string) => void;
     expand: boolean;
     setExpand: (value: boolean) => void;
@@ -30,45 +30,43 @@ const ColorFilterSection: React.FC<ColorFilterSectionProps> = ({
             </Box>
             {expand && (
                 <Box display="flex" flexWrap="wrap" mt={1}>
-                    {options.map((option) => (
+                    {options.map((option: any, index: number) => (
                         <Button
-                            key={option}
+                            key={index}
                             variant="outlined"
                             sx={{
                                 margin: '4px',
-                                width: '95px',
-                                height: '36px',
-                                backgroundColor: selectedOptions.includes(option)
-                                    ? 'rgba(7, 110, 145, 0.89)'
-                                    : 'transparent',
-                                color: selectedOptions.includes(option) ? 'white' : 'inherit',
-                                border: selectedOptions.includes(option)
-                                    ? '1px solid rgba(7, 110, 145, 0.89)'
-                                    : '1px solid rgba(99, 120, 127, 0.89)',
-                                borderRadius: '4px',
-                                fontSize: '14px',
-                                fontWeight: '700',
-                                transition: 'background-color 0.3s, color 0.3s, border 0.3s',
+                                padding: '6px 10px',
+                                backgroundColor: selectedOptions.includes(option) ? 'rgb(241, 241, 241)' : 'white',
+                                color: 'inherit',
+                                border: '1px solid rgb(207, 214, 216)',
+                                borderRadius: '20px',
+                                fontSize: '12px',
+                                whiteSpace: 'nowrap',
+                                fontWeight: selectedOptions.includes(option) ? '700' : '500',
+                                transition: 'background-color 0.3s, color 0.3s, border 0.3s, box-shadow 0.3s',
                                 '&:hover': {
-                                    backgroundColor: selectedOptions.includes(option)
-                                        ? 'rgba(7, 110, 145, 0.7)'
+                                    backgroundColor: selectedOptions.includes(option.name)
+                                        ? 'rgba(200, 200, 200, 0.7)'
                                         : 'rgba(99, 120, 127, 0.1)',
-                                    border: '1px solid rgba(7, 110, 145, 0.89)',
+                                    border: '1px solid rgb(207, 214, 216)',
+                                    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)',
                                 },
                             }}
                             onClick={() => toggleOption(option)}
                         >
                             <Box
                                 sx={{
-                                    width: '16px',
-                                    height: '16px',
+                                    width: '20px',
+                                    height: '20px',
                                     borderRadius: '50%',
-                                    backgroundColor: option.toLowerCase(),
+                                    backgroundColor: option.colorCode.toLowerCase(),
                                     display: 'inline-block',
+                                    border: selectedOptions.includes(option) ? '2px solid black' : '0.5px solid rgba(200, 200, 200, 0.7)',
                                     marginRight: '8px',
                                 }}
                             />
-                            {option}
+                            {option.name}
                         </Button>
                     ))}
                 </Box>

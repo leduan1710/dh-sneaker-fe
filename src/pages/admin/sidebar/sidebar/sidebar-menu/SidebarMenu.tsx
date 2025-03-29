@@ -9,6 +9,16 @@ import MmsTwoToneIcon from '@mui/icons-material/MmsTwoTone';
 import TableChartTwoToneIcon from '@mui/icons-material/TableChartTwoTone';
 import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
 import DisplaySettingsTwoToneIcon from '@mui/icons-material/DisplaySettingsTwoTone';
+
+import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard';
+import StoreRoundedIcon from '@mui/icons-material/StoreRounded';
+import StoreTwoToneIcon from '@mui/icons-material/StoreTwoTone';
+import AssignmentTurnedInTwoToneIcon from '@mui/icons-material/AssignmentTurnedInTwoTone';
+import LocalOfferTwoToneIcon from '@mui/icons-material/LocalOfferTwoTone';
+import CardGiftcardTwoToneIcon from '@mui/icons-material/CardGiftcardTwoTone';
+import BarChartTwoToneIcon from '@mui/icons-material/BarChartTwoTone';
+import CategoryIcon from '@mui/icons-material/Category';
+import AssessmentTwoToneIcon from '@mui/icons-material/AssessmentTwoTone';
 import { SidebarContext } from '../../../../../contexts/SidebarContext';
 import { useTranslation } from 'react-i18next';
 
@@ -173,7 +183,7 @@ function SidebarMenu() {
                                     component={RouterLink}
                                     onClick={closeSidebar}
                                     to="/admin/dashboard"
-                                    startIcon={<BrightnessLowTwoToneIcon />}
+                                    startIcon={<SpaceDashboardIcon />}
                                 >
                                     Dashboard
                                 </Button>
@@ -185,7 +195,7 @@ function SidebarMenu() {
                     component="div"
                     subheader={
                         <ListSubheader component="div" disableSticky>
-                            {t('admin.Manage')}
+                            Sản phẩm
                         </ListSubheader>
                     }
                 >
@@ -196,8 +206,20 @@ function SidebarMenu() {
                                     disableRipple
                                     component={RouterLink}
                                     onClick={closeSidebar}
+                                    to="/admin/management/products"
+                                    startIcon={<StoreTwoToneIcon />}
+                                >
+                                  
+                                    Sản phẩm
+                                </Button>
+                            </ListItem>
+                            <ListItem component="div">
+                                <Button
+                                    disableRipple
+                                    component={RouterLink}
+                                    onClick={closeSidebar}
                                     to="/admin/management/categories"
-                                    startIcon={<TableChartTwoToneIcon />}
+                                    startIcon={<CategoryIcon />}
                                 >
                                     {t('admin.Category')}
                                 </Button>

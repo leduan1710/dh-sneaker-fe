@@ -18,52 +18,125 @@ import {
     useTheme,
     CardHeader,
     Avatar,
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
     styled,
-    InputAdornment,
+    DialogActions,
     TextField,
+    InputAdornment,
 } from '@mui/material';
-import TuneIcon from '@mui/icons-material/Tune';
-import SwapVertIcon from '@mui/icons-material/SwapVert';
-import AddIcon from '@mui/icons-material/Add';
+
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-
+import TuneIcon from '@mui/icons-material/Tune';
+import SwapVertIcon from '@mui/icons-material/SwapVert';
+import AddIcon from '@mui/icons-material/Add';
 import { HOST_BE } from '../../../../common/Common';
-import { filterSpecialInput, toastSuccess } from '../../../../untils/Logic';
+import { filterSpecialInput, formatPrice, shortedString, toastError, toastSuccess } from '../../../../untils/Logic';
 import { change_is_loading } from '../../../../reducers/Actions';
 import axios from 'axios';
-import { useStore } from 'react-redux';
+import { useSelector, useStore } from 'react-redux';
 import { GetApi, PostApi } from '../../../../untils/Api';
 import EditCateDialog from './EditDialog';
+import CheckIcon from '@mui/icons-material/Check';
+import ClearIcon from '@mui/icons-material/Clear';
 import DetailDialog from './DetailDialog';
 import { useTranslation } from 'react-i18next';
+import { ReducerProps } from '../../../../reducers/ReducersProps';
+import EditProductDialog from './EditDialog2';
+import DetailProductDialog from './DetailDialog';
 import SearchIcon from '@mui/icons-material/Search';
-import DeleteDialog from './DeleteDialog';
-import CreateCateDialog from './CreateDialog';
+import CreateProductDialog from './CreateDialog';
 
 const Input = styled('input')({
     display: 'none',
 });
 
-interface CategoriesTableProps {
-    className?: string;
-    initialCategories: any[];
+interface AlertDeleteDialogProps {
+    onClose: () => void;
+    open: boolean;
+    productId?: string;
+    onUpdate: () => void;
 }
 
-const applyPagination = (categories: any[], page: number, limit: number): any[] => {
-    return categories.slice(page * limit, page * limit + limit);
+const AlertDeleteDialog: React.FC<AlertDeleteDialogProps> = (props) => {
+    const { t } = useTranslation();
+    const { onClose, open, productId, onUpdate } = props;
+
+    const handleClose = () => {
+        onClose();
+    };
+    const handleDelete = async () => {
+        try {
+            const res = await PostApi(`/shop/delete/product/${productId}`, localStorage.getItem('token'), {});
+
+            if (res.data.message === 'Success') {
+                toastSuccess(t('toast.DeleteSuccess'));
+                onUpdate();
+            } else toastError(t('toast.DeleteFail'));
+        } catch (error) {
+            console.error('Failed to delete :', error);
+        }
+        onClose();
+    };
+
+    return (
+        <React.Fragment>
+            <Dialog
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="dialog-title"
+                aria-describedby="dialog-description"
+            >
+                <DialogTitle sx={{ textTransform: 'capitalize' }} id="dialog-title">
+                    {t('product.ShopManagement.DeleteProduct')}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="dialog-description">
+                        {t('product.ShopManagement.ConfirmToDeleteProduct')} ?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose}>{t('action.Cancel')}</Button>
+                    <Button onClick={handleDelete} autoFocus>
+                        {t('action.Confirm')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </React.Fragment>
+    );
 };
 
-const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
+interface ProductsTableProps {
+    className?: string;
+    initialProducts: any[];
+    categories: Array<any>;
+    sizes: Array<any>;
+    styles: Array<any>;
+    colors: Array<any>;
+    types: Array<any>;
+}
+
+const applyPagination = (products: any[], page: number, limit: number): any[] => {
+    return products.slice(page * limit, page * limit + limit);
+};
+
+const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, sizes, styles, colors, types }) => {
     const { t } = useTranslation();
     const store = useStore();
+    const user = useSelector((state: ReducerProps) => state.user);
     const [openCreate, setOpenCreate] = useState(false);
+
     const [openDetail, setOpenDetail] = useState(false);
     const [openEdit, setOpenEdit] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
-    const [categories, setCategories] = useState<any[]>(initialCategories);
-    const [selectedCategory, setSelectedCategory] = useState<any>();
+    const isLoading = useSelector((state: ReducerProps) => state.isLoading);
+    const [products, setProducts] = useState<any[]>(initialProducts);
+    const [selectedProduct, setSelectedProduct] = useState<any>();
     const [page, setPage] = useState<number>(0);
     const [limit, setLimit] = useState<number>(5);
 
@@ -75,7 +148,7 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
         setLimit(parseInt(event.target.value));
     };
 
-    const paginatedCategories = applyPagination(categories, page, limit);
+    const paginatedProducts = applyPagination(products, page, limit);
     const theme = useTheme();
 
     const handleClickOpenCreate = () => {
@@ -88,88 +161,93 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
         setOpenDetail(true);
     };
     const handleCloseDetailDialog = () => {
-        setSelectedCategory(undefined);
+        setSelectedProduct(undefined);
         setOpenDetail(false);
     };
     const handleClickOpenEditDialog = () => {
         setOpenEdit(true);
     };
     const handleCloseEditDialog = () => {
-        setSelectedCategory(undefined);
+        setSelectedProduct(undefined);
         setOpenEdit(false);
     };
     const handleClickOpenDeleteDialog = () => {
         setOpenDelete(true);
     };
     const handleCloseDeleteDialog = () => {
-        setSelectedCategory(undefined);
+        setSelectedProduct(undefined);
         setOpenDelete(false);
     };
 
-    const getDataCategory = async () => {
-        if (filterId.length != 24) {
-            store.dispatch(change_is_loading(true));
-            const resCategories = await GetApi('/admin/get/categories', localStorage.getItem('token'));
+    const getDataProduct = async () => {
+        if (user.shopId) {
+            if (name != '') {
+                store.dispatch(change_is_loading(true));
+                const res = await PostApi(`/shop/get/product-by-name`, localStorage.getItem('token'), { name: name });
 
-            if (resCategories.data.message == 'Success') {
-                setCategories(resCategories.data.categories);
+                if (res.data.message == 'Success') {
+                    setProducts(res.data.products);
+                    setPage(0);
+                }
+                store.dispatch(change_is_loading(false));
+            } else {
+                store.dispatch(change_is_loading(true));
+                const resProducts = await GetApi(
+                    `/shop/get/product-by-shop/${user.shopId}`,
+                    localStorage.getItem('token'),
+                );
+                if (resProducts.data.message == 'Success') {
+                    setProducts(resProducts.data.products);
+                }
+                store.dispatch(change_is_loading(false));
             }
-            store.dispatch(change_is_loading(false));
-        } else {
-            store.dispatch(change_is_loading(true));
-            const res = await GetApi(`/admin/get/category/${filterId}`, localStorage.getItem('token'));
-
-            if (res.data.message == 'Success') {
-                setCategories(res.data.category);
-            }
-            store.dispatch(change_is_loading(false));
         }
     };
-    const [filterId, setFilterId] = useState<string>('');
+
+    useEffect(() => {
+        setProducts(initialProducts);
+    }, [initialProducts]);
+    // filter Id
+    const [name, setFilterId] = useState<string>('');
     const typingTimeoutRef = useRef<any>(null);
     if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
     }
-    const filterById = async (id: string) => {
-        if (id != '') {
+    const filterById = async (name: string) => {
+        if (name != '') {
             store.dispatch(change_is_loading(true));
-            const res = await GetApi(`/admin/get/category/${id}`, localStorage.getItem('token'));
+            const res = await PostApi(`/shop/get/product-by-name`, localStorage.getItem('token'), { name: name });
 
             if (res.data.message == 'Success') {
-                setCategories(res.data.category);
+                setProducts(res.data.products);
                 setPage(0);
             }
             store.dispatch(change_is_loading(false));
         } else {
             store.dispatch(change_is_loading(true));
-            const resCategories = await GetApi('/admin/get/categories', localStorage.getItem('token'));
-
-            if (resCategories.data.message == 'Success') {
-                setCategories(resCategories.data.categories);
-                setPage(0);
+            const resProducts = await GetApi(`/shop/get/product-by-shop/${user.shopId}`, localStorage.getItem('token'));
+            if (resProducts.data.message == 'Success') {
+                setProducts(resProducts.data.products);
             }
             store.dispatch(change_is_loading(false));
         }
     };
     useEffect(() => {
         typingTimeoutRef.current = setTimeout(() => {
-            filterById(filterId);
+            filterById(name);
         }, 500);
-    }, [filterId]);
-    useEffect(() => {
-        setCategories(initialCategories);
-    }, [initialCategories]);
-
+    }, [name]);
     return (
         <Card className="relative">
             <CardHeader
                 sx={{ textTransform: 'capitalize' }}
                 action={<Box width={150}></Box>}
-                title={t('category.Admin.CategoryList')}
+                title={t('product.ShopManagement.ProductList')}
             />
- <div className="absolute top-2 right-5 flex items-center">
+
+            <div className="absolute top-2 right-5 flex items-center">
                 <TextField
-                    value={filterId}
+                    value={name}
                     variant="outlined"
                     className="border-gray-300"
                     style={{
@@ -200,10 +278,12 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
                         height: 36,
                         marginLeft: 1,
                         '&:hover': {
-                            backgroundColor: '#fff59d' // Màu vàng nhạt khi hover
-                        }
+                            backgroundColor: '#fff59d', // Màu vàng nhạt khi hover
+                        },
                     }}
-                    onClick={() => { /* Thêm hành động cho biểu tượng Tune */ }}
+                    onClick={() => {
+                        /* Thêm hành động cho biểu tượng Tune */
+                    }}
                 >
                     <TuneIcon fontSize="small" />
                 </IconButton>
@@ -215,10 +295,12 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
                         height: 36,
                         marginLeft: 1,
                         '&:hover': {
-                            backgroundColor: '#fff59d'
-                        }
+                            backgroundColor: '#fff59d',
+                        },
                     }}
-                    onClick={() => { /* Thêm hành động cho biểu tượng SwapVert */ }}
+                    onClick={() => {
+                        /* Thêm hành động cho biểu tượng SwapVert */
+                    }}
                 >
                     <SwapVertIcon fontSize="small" />
                 </IconButton>
@@ -230,20 +312,23 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
                         height: 36,
                         marginLeft: 1,
                         '&:hover': {
-                            backgroundColor: '#fff59d'
-                        }
+                            backgroundColor: '#fff59d',
+                        },
                     }}
                     onClick={handleClickOpenCreate}
-                    >
+                >
                     <AddIcon fontSize="small" />
-
                 </IconButton>
-                <CreateCateDialog
-                            open={openCreate}
-                            onClose={handleCloseCreate}
-                            categories={categories}
-                            onUpdate={getDataCategory}
-                    />
+                <CreateProductDialog
+                    open={openCreate}
+                    onClose={handleCloseCreate}
+                    categories={categories}
+                    styles={styles}
+                    colors={colors}
+                    types={types}
+                    sizes={sizes}
+                    onUpdate={getDataProduct}
+                />
             </div>
             <Divider />
             <TableContainer>
@@ -251,25 +336,48 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
                     <TableHead>
                         <TableRow>
                             <TableCell>ID</TableCell>
-                            <TableCell>{t('category.CategoryName')}</TableCell>
-                            <TableCell>{t('category.ParentCategoryId')}</TableCell>
-                            <TableCell>{t('category.CategoryImage')}</TableCell>
-                            <TableCell align="right">{t('category.Admin.Actions')}</TableCell>
+                            <TableCell>{t('product.Name')}</TableCell>
+                            <TableCell>Giá nhập</TableCell>
+                            <TableCell>Giá bán</TableCell>
+                            <TableCell>Giá CTV</TableCell>
+
+                            <TableCell>{t('product.Image')}</TableCell>
+                            <TableCell align="center">{t('product.Status')}</TableCell>
+                            <TableCell align="right">{t('action.Actions')}</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {paginatedCategories.map((category) => {
+                        {paginatedProducts.map((product) => {
                             return (
-                                <TableRow hover key={category.id}>
+                                <TableRow hover key={product.id}>
                                     <TableCell>
                                         <Typography
-                                            variant="body1"
+                                            variant="body2"
                                             fontWeight="bold"
                                             color="text.primary"
                                             gutterBottom
-                                            noWrap
+                                            style={{
+                                                maxWidth: '120px',
+                                                whiteSpace: 'normal',
+                                                overflowWrap: 'break-word',
+                                            }}
                                         >
-                                            {category.id}
+                                            {product.id}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography
+                                            variant="body2"
+                                            fontWeight="bold"
+                                            color="text.primary"
+                                            gutterBottom
+                                            style={{
+                                                maxWidth: '250px',
+                                                whiteSpace: 'normal',
+                                                overflowWrap: 'break-word',
+                                            }}
+                                        >
+                                            {shortedString(product.name, 40)}
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
@@ -280,7 +388,7 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
                                             gutterBottom
                                             noWrap
                                         >
-                                            {category.name}
+                                            {formatPrice(product.importPrice)}
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
@@ -291,12 +399,26 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
                                             gutterBottom
                                             noWrap
                                         >
-                                            {category.previousId}
+                                            {formatPrice(product.sellPrice)}
                                         </Typography>
                                     </TableCell>
+                                    <TableCell>
+                                        <Typography
+                                            variant="body1"
+                                            fontWeight="bold"
+                                            color="text.primary"
+                                            gutterBottom
+                                            noWrap
+                                        >
+                                            {formatPrice(product.ctvPrice)}
+                                        </Typography>
+                                    </TableCell>
+
+
                                     <TableCell>
                                         <Avatar
                                             variant="square"
+                                            alt=""
                                             sx={{
                                                 width: 100,
                                                 height: 100,
@@ -307,15 +429,29 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
                                                 backgroundClip: 'content-box, border-box',
                                                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
                                             }}
-                                            alt=""
                                             src={
-                                                category.image
-                                                    ? category.image.startsWith('uploads')
-                                                        ? `${HOST_BE}/${category.image}`
-                                                        : category.image
-                                                    : category.image
+                                                product.imageList
+                                                    ? product.imageList[0].startsWith('uploads')
+                                                        ? `${HOST_BE}/${product.imageList[0]}`
+                                                        : product.imageList[0]
+                                                    : product.imageList[0]
                                             }
                                         />
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <Typography
+                                            variant="body1"
+                                            fontWeight="bold"
+                                            color="text.primary"
+                                            gutterBottom
+                                            noWrap
+                                        >
+                                            {product.active ? (
+                                                <CheckIcon color="success" fontSize="small" />
+                                            ) : (
+                                                <ClearIcon color="error" fontSize="small" />
+                                            )}
+                                        </Typography>
                                     </TableCell>
                                     <TableCell align="right">
                                         <Tooltip title={t('action.Detail')} arrow>
@@ -330,7 +466,7 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
                                                 size="small"
                                                 onClick={() => {
                                                     handleClickOpenDetailDialog();
-                                                    setSelectedCategory(category);
+                                                    setSelectedProduct(product);
                                                 }}
                                             >
                                                 <InfoOutlinedIcon fontSize="small" />
@@ -349,7 +485,7 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
                                                 size="small"
                                                 onClick={() => {
                                                     handleClickOpenEditDialog();
-                                                    setSelectedCategory(category);
+                                                    setSelectedProduct(product);
                                                 }}
                                             >
                                                 <EditTwoToneIcon fontSize="small" />
@@ -365,7 +501,7 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
                                                 size="small"
                                                 onClick={() => {
                                                     handleClickOpenDeleteDialog();
-                                                    setSelectedCategory(category);
+                                                    setSelectedProduct(product);
                                                 }}
                                             >
                                                 <DeleteTwoToneIcon fontSize="small" />
@@ -378,29 +514,37 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <DetailDialog
+            <DetailProductDialog
                 open={openDetail}
                 onClose={handleCloseDetailDialog}
                 categories={categories}
-                category={selectedCategory}
+                styles={styles}
+                colors={colors}
+                types={types}
+                sizes={sizes}
+                product={selectedProduct}
             />
-            <EditCateDialog
+            <EditProductDialog
                 open={openEdit}
                 onClose={handleCloseEditDialog}
                 categories={categories}
-                category={selectedCategory}
-                onUpdate={getDataCategory}
+                styles={styles}
+                colors={colors}
+                types={types}
+                sizes={sizes}
+                product={selectedProduct}
+                onUpdate={getDataProduct}
             />
-            <DeleteDialog
+            <AlertDeleteDialog
                 open={openDelete}
                 onClose={handleCloseDeleteDialog}
-                categoryId={selectedCategory?.id}
-                onUpdate={getDataCategory}
+                productId={selectedProduct?.id}
+                onUpdate={getDataProduct}
             />
             <Box p={2}>
                 <TablePagination
                     component="div"
-                    count={categories.length}
+                    count={products.length}
                     onPageChange={handlePageChange}
                     onRowsPerPageChange={handleLimitChange}
                     page={page}
@@ -412,12 +556,12 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
     );
 };
 
-CategoriesTable.propTypes = {
-    initialCategories: PropTypes.array.isRequired,
+ProductsTable.propTypes = {
+    initialProducts: PropTypes.array.isRequired,
 };
 
-CategoriesTable.defaultProps = {
-    initialCategories: [],
+ProductsTable.defaultProps = {
+    initialProducts: [],
 };
 
-export default CategoriesTable;
+export default ProductsTable;

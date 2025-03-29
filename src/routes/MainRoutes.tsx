@@ -57,6 +57,8 @@ import ReportProductAdmin from '../pages/admin/scenes/ReportProduct';
 import HomeLayout from '../pages/user-guest/HomeLayout';
 import ProductDetail from '../pages/user-guest/product/ProductDetail2';
 import ProductCollection from '../pages/user-guest/category/Collection';
+import ProductManagement from '../pages/admin/scenes/Product';
+import Footer from '../components/admin-shop/footer/Footer';
 
 //--------------------------------------------------------------
 //--------------------------------------------------------------
@@ -109,7 +111,7 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
             <Route path="/err404" element={<Page404 />}></Route>
             <Route path="/product/:productId" element={<ProductDetail />}></Route>
             <Route path="/category" element={<Category />}></Route>
-            <Route path="/collection" element={<ProductCollection />}></Route>
+            <Route path="/collections" element={<ProductCollection />}></Route>
             <Route path="/category-view/:categoryId" element={<CategoryView />}></Route>
         </>
     );
@@ -152,6 +154,7 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                         <Route path="/checkout" element={<Checkout />}></Route>
                         <Route path="/user/order" element={<Order />}></Route>
                     </Routes>
+
                     <ChatUserShop />
                 </BrowserRouter>
             </>
@@ -166,6 +169,7 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                         {/* <Route path="" element={<DashboardAdmin />} /> */}
                         <Route path="dashboard" element={<DashboardAdmin />} />
                         <Route path="management/categories" element={<CategoryManagement />} />
+                        <Route path="management/products" element={<ProductManagement />} />
                         <Route path="management/shops" element={<ShopManagement />} />
                         <Route path="management/request-withdraw" element={<RequestWithdrawManagement />} />
                         <Route path="management/shop" element={<ReportShopManagement />} />

@@ -1,12 +1,12 @@
 import React from 'react';
-import { Box, Typography, Button, IconButton } from '@mui/material';
+import { Box, Typography, Button, IconButton, Grid } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 
 interface FilterSectionProps {
     title: string;
-    options: string[];
-    selectedOptions: string[];
+    options: any;
+    selectedOptions: any;
     toggleOption: (option: string) => void;
     expand: boolean;
     setExpand: (value: boolean) => void;
@@ -21,7 +21,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     setExpand,
 }) => {
     return (
-        <Box sx={{ mt: 2 }}>
+        <Box sx={{ mt: 1 }}>
             <Box display="flex" alignItems="center" justifyContent="space-between">
                 <Typography variant="h4">{title}</Typography>
                 <IconButton size="small" onClick={() => setExpand(!expand)}>
@@ -29,18 +29,20 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 </IconButton>
             </Box>
             {expand && (
-                <Box display="flex" flexWrap="wrap" mt={1}>
-                    {options.map((option) => (
+                <Grid container spacing={2} mt={1}>
+                    {options.map((option: any, index: number) => (
+                                                <Grid item key={index} xs={6}> {/* Chia đều 2 cột */}
+
                         <Button
-                            key={option}
+                            key={index}
                             variant="outlined"
+                            
                             sx={{
-                                margin: '4px',
-                                width: '95px',
+                                width: '100%',
                                 height: '36px',
                                 backgroundColor: selectedOptions.includes(option)
                                     ? 'rgba(7, 110, 145, 0.89)'
-                                    : 'transparent',
+                                    : 'white',
                                 color: selectedOptions.includes(option) ? 'white' : 'inherit',
                                 border: selectedOptions.includes(option)
                                     ? '1px solid rgba(7, 110, 145, 0.89)'
@@ -58,10 +60,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                             }}
                             onClick={() => toggleOption(option)}
                         >
-                            {option}
+                            {option.name}
                         </Button>
+                        </Grid>
                     ))}
-                </Box>
+                </Grid>
             )}
         </Box>
     );

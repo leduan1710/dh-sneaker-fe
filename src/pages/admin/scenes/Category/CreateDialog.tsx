@@ -45,49 +45,15 @@ const CreateCateDialog: React.FC<CreateCateDialogProps> = (props) => {
     const { onClose, open, categories, onUpdate } = props;
     const [selectImage, setSelectImage] = useState<File | null>(null);
 
-    const [parentCateId, setParentCateId] = useState('');
-    const [categoryLv1, setCategoryLv1] = useState('');
-    const [categoryLv2, setCategoryLv2] = useState('');
-    const [categoryLv3, setCategoryLv3] = useState('');
-
-    const categoryLvl1s = categories.filter((category) => !category.previousId);
-
-    console.log(categories)
-    // Category Level 2
-    const categoryLvl2s = categories.filter((category) => (categoryLv1 ? category.previousId === categoryLv1 : false));
-
-    // Category Level 3
-    const categoryLvl3s = categories.filter((category) => (categoryLv2 ? category.previousId === categoryLv2 : false));
-
-    const handleChange1 = (event: SelectChangeEvent) => {
-        setCategoryLv1(event.target.value);
-        setParentCateId(event.target.value);
-        setCategoryLv2(''); // Reset category level 2 selection
-        setCategoryLv3(''); // Reset category level 3 selection
-    };
-    const handleChange2 = (event: SelectChangeEvent) => {
-        setCategoryLv2(event.target.value);
-        setParentCateId(event.target.value);
-        setCategoryLv3(''); // Reset category level 3 selection
-    };
-    const handleChange3 = (event: SelectChangeEvent) => {
-        setCategoryLv3(event.target.value);
-        setParentCateId(event.target.value);
-    };
-
     const handleClose = () => {
         onClose();
         setSelectImage(null);
-        setCategoryLv1('')
-        setCategoryLv2(''); // Reset category level 2 selection
-        setCategoryLv3('');
     };
 
-    const handleAddCategory = async (name: string, image: File, previousId: string) => {
+    const handleAddCategory = async (name: string, image: File) => {
         store.dispatch(change_is_loading(true));
         const formData = new FormData();
         formData.append('name', name);
-        formData.append('previousId', previousId);
         const resCheck = await PostApi('/admin/check-name-category', localStorage.getItem('token'), { name: name });
         if (resCheck.data.message == 'Already exists') {
             toastWarning(t('toast.NameAlreadyExists'));
@@ -134,7 +100,7 @@ const CreateCateDialog: React.FC<CreateCateDialogProps> = (props) => {
                             const image = formJson.image;
 
                             console.log(name, image);
-                            await handleAddCategory(name, image, parentCateId);
+                            await handleAddCategory(name, image);
                             handleClose();
                         },
                     }}
@@ -154,61 +120,6 @@ const CreateCateDialog: React.FC<CreateCateDialogProps> = (props) => {
                             variant="outlined"
                             sx={{ mb: 1 }}
                         />
-                        <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
-                            <FormControl variant="standard" sx={{ m: 1, minWidth: 200 }}>
-                                <Select
-                                    id="select-parent-cate-lvl1"
-                                    value={categoryLv1}
-                                    onChange={handleChange1}
-                                    displayEmpty
-                                    label="ParentCateLvl1"
-                                >
-                                    <MenuItem value="">
-                                        <em>{t('orther.None')}</em>
-                                    </MenuItem>
-                                    {categoryLvl1s.map((category) => (
-                                        <MenuItem value={category.id}>{category.name}</MenuItem>
-                                    ))}
-                                </Select>
-                                <FormHelperText>{t('category.ParentCategoryLv1')}</FormHelperText>
-                            </FormControl>
-                            <FormControl variant="standard" sx={{ m: 1, minWidth: 200 }}>
-                                <Select
-                                    id="select-parent-cate-lvl2"
-                                    value={categoryLv2}
-                                    onChange={handleChange2}
-                                    displayEmpty
-                                    label="ParentCateLvl2"
-                                    disabled={!categoryLv1}
-                                >
-                                    <MenuItem value="">
-                                        <em>{t('orther.None')}</em>
-                                    </MenuItem>
-                                    {categoryLvl2s.map((category) => (
-                                        <MenuItem value={category.id}>{category.name}</MenuItem>
-                                    ))}
-                                </Select>
-                                <FormHelperText>{t('category.ParentCategoryLv2')}</FormHelperText>
-                            </FormControl>
-                            <FormControl variant="standard" sx={{ m: 1, minWidth: 200 }}>
-                                <Select
-                                    id="select-parent-cate-lvl3"
-                                    value={categoryLv3}
-                                    onChange={handleChange3}
-                                    displayEmpty
-                                    label="ParentCateLvl3"
-                                    disabled={!categoryLv2}
-                                >
-                                    <MenuItem value="">
-                                        <em>{t('orther.None')}</em>
-                                    </MenuItem>
-                                    {categoryLvl3s.map((category) => (
-                                        <MenuItem value={category.id}>{category.name}</MenuItem>
-                                    ))}
-                                </Select>
-                                <FormHelperText>{t('category.ParentCategoryLv3')}</FormHelperText>
-                            </FormControl>
-                        </Stack>
                         <Box sx={{ position: 'relative', display: 'inline-flex' }}>
                             <Avatar
                                 variant="square"

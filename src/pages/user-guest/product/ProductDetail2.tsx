@@ -10,6 +10,7 @@ import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined
 import HotStyle from '../../../components/user-guest/home/HotStyle';
 import { addCheckout, addToListCartStore, formatPrice, toastSuccess } from '../../../untils/Logic';
 import SizeGuideDialog from './SizeGuideDialog';
+import { HOST_BE } from '../../../common/Common';
 
 const ProductDetail: React.FC = () => {
     const { productId } = useParams();
@@ -84,11 +85,19 @@ const ProductDetail: React.FC = () => {
                 <Grid container spacing={2} mt={1} mb={2}>
                     {/* Phần bên trái */}
                     <Grid item xs={12} md={6} sx={{ display: 'flex' }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                maxHeight: '510px',
+                                overflowY: 'auto',
+                                mr: 2,
+                            }}
+                        >
                             {product?.imageList?.map((image: any, index: number) => (
-                                <Box key={index} sx={{ mb: 1, mr: 1 }}>
+                                <Box key={index} sx={{ mb: 1 }}>
                                     <img
-                                        src={image}
+                                        src={image.startsWith('uploads') ? `${HOST_BE}/${image}` : image}
                                         alt={product.name}
                                         onClick={() => setSelectedImage(image)}
                                         style={{
@@ -108,12 +117,14 @@ const ProductDetail: React.FC = () => {
 
                         <Box sx={{ width: '100%', height: '100%', overflow: 'hidden' }}>
                             <img
-                                src={selectedImage}
+                                src={
+                                    selectedImage.startsWith('uploads') ? `${HOST_BE}/${selectedImage}` : selectedImage
+                                }
                                 alt={product?.name}
                                 style={{
-                                    width: '100%',
-                                    height: 'auto',
-                                    maxHeight: '100%',
+                                    width: 'auto',
+                                    height: '510px',
+                                    maxHeight: '510px',
                                     objectFit: 'cover',
                                     borderRadius: '8px',
                                 }}
@@ -159,7 +170,12 @@ const ProductDetail: React.FC = () => {
                                 </Typography>
                                 <Typography
                                     variant="h6"
-                                    sx={{ color: 'rgb(172, 0, 207)', cursor: 'pointer', textDecoration: 'underline', fontWeight: 'bold' }}
+                                    sx={{
+                                        color: 'rgb(172, 0, 207)',
+                                        cursor: 'pointer',
+                                        textDecoration: 'underline',
+                                        fontWeight: 'bold',
+                                    }}
                                     onClick={handleOpenDialog}
                                 >
                                     Hướng dẫn chọn kích thước

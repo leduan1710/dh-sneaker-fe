@@ -150,32 +150,32 @@ const HomePage: React.FC<HomePageProps> = (props) => {
             <Container>
                 <Grid container spacing={2} justifyContent="center" style={{ padding: '39px 5px' }}>
                     <Grid item xs={6} sm={2} textAlign="center">
-                        <StyledButton variant="outlined" href="/collections/nu">
+                        <StyledButton variant="outlined" href="/collections?category=MLB?">
                             MLB
                         </StyledButton>
                     </Grid>
                     <Grid item xs={6} sm={2} textAlign="center">
-                        <StyledButton variant="outlined" href="/collections/nam">
+                        <StyledButton variant="outlined" href="/collections?category=Crocs">
                             CROCS
                         </StyledButton>
                     </Grid>
                     <Grid item xs={6} sm={2} textAlign="center">
-                        <StyledButton variant="outlined" href="/collections/tre-em">
+                        <StyledButton variant="outlined" href="/collections?category=Adidas">
                             ADIDAS
                         </StyledButton>
                     </Grid>
                     <Grid item xs={6} sm={2} textAlign="center">
-                        <StyledButton variant="outlined" href="/collections/phu-kien-jibbitz">
+                        <StyledButton variant="outlined" href="/collections?category=Trẻ em">
                             TRẺ EM
                         </StyledButton>
                     </Grid>
                     <Grid item xs={6} sm={2} textAlign="center">
-                        <StyledButton variant="outlined" href="/collections/phu-kien-jibbitz">
+                        <StyledButton variant="outlined" href="/collections?category=Jibbitz">
                             JIBBITZ
                         </StyledButton>
                     </Grid>
                     <Grid item xs={6} sm={2} textAlign="center">
-                        <StyledButton variant="outlined" href="/collections/phu-kien-jibbitz">
+                        <StyledButton variant="outlined" href="/collections?category=Sản phẩm khác">
                             SẢN PHẨM KHÁC
                         </StyledButton>
                     </Grid>

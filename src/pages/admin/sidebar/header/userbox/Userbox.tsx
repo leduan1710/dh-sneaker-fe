@@ -110,6 +110,7 @@ function HeaderUserbox() {
                                 : user.image
                             : user.image
                     }
+                    
                 />
                 <Hidden mdDown>
                     <UserBoxText>
