@@ -1148,37 +1148,7 @@ export const PureLightTheme = createTheme({
     fontFamily:
       // '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji"',
       '"Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif',
-    h1: {
-      fontWeight: 700,
-      fontSize: 35
-    },
-    h2: {
-      fontWeight: 700,
-      fontSize: 30
-    },
-    h3: {
-      fontWeight: 700,
-      fontSize: 25,
-      lineHeight: 1.4,
-      color: colors.alpha.black[100]
-    },
-    h4: {
-      fontWeight: 700,
-      fontSize: 16
-    },
-    h5: {
-      fontWeight: 700,
-      fontSize: 14
-    },
-    h6: {
-      fontSize: 15
-    },
-    body1: {
-      fontSize: 14
-    },
-    body2: {
-      fontSize: 14
-    },
+    
     button: {
       fontWeight: 600
     },
@@ -1192,7 +1162,7 @@ export const PureLightTheme = createTheme({
       color: colors.alpha.black[70]
     },
     subtitle2: {
-      fontWeight: 400,
+      fontWeight: 600,
       fontSize: 15,
       color: colors.alpha.black[70]
     },

@@ -2,8 +2,10 @@ import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { HOST_BE } from '../../../common/Common';
 import { formatPrice } from '../../../untils/Logic';
+import { Link } from 'react-router-dom';
 
 interface ProductCardProps {
+    productId: any;
     imageUrl: any;
     title: any;
     price: any;
@@ -12,8 +14,9 @@ interface ProductCardProps {
     color: any;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ imageUrl, title, price, rating, color, salePrice }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ imageUrl, title, price, rating, color, salePrice, productId }) => {
     return (
+        <Link to={`/product/${productId}`} style={{ textDecoration: 'none', color: 'inherit' }}>
         <Box
             sx={{
                 border: '1px solid #ddd',
@@ -36,7 +39,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ imageUrl, title, price, ratin
                     position: 'absolute',
                     top: 8,
                     right: 8,
-                    color: 'rgba(7, 110, 145, 0.89)',
+                    color: 'rgba(10, 70, 127, 0.89)',
                     padding: '4px 8px',
                     borderRadius: '4px',
                     fontWeight: 'bold',
@@ -91,6 +94,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ imageUrl, title, price, ratin
                 )}
             </Box>
         </Box>
+        </Link>
     );
 };
 

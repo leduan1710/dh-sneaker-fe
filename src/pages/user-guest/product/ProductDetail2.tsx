@@ -63,12 +63,13 @@ const ProductDetail: React.FC = () => {
     };
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         getData();
     }, [productId]);
 
     return (
         <>
-            <Container sx={{ marginTop: { xs: '0px', md: '160px' } }}>
+            <Container sx={{ marginTop: { xs: '200px', md: '160px' } }}>
                 <Box sx={{ paddingTop: { xs: '0px', md: '10px' } }}>
                     <Breadcrumbs separator="›" aria-label="breadcrumb">
                         <IconButton href="/">
@@ -82,26 +83,35 @@ const ProductDetail: React.FC = () => {
                         </Typography>
                     </Breadcrumbs>
                 </Box>
-                <Grid container spacing={2} mt={1} mb={2}>
+                <Grid container spacing={2} mt={0} mb={2}>
                     {/* Phần bên trái */}
-                    <Grid item xs={12} md={6} sx={{ display: 'flex' }}>
+                    <Grid
+                        item
+                        xs={12}
+                        md={6}
+                        sx={{ display: 'flex', flexDirection: { md: 'row', xs: 'column-reverse' } }}
+                    >
                         <Box
                             sx={{
                                 display: 'flex',
-                                flexDirection: 'column',
+                                flexDirection: { md: 'column', xs: 'row' },
                                 maxHeight: '510px',
-                                overflowY: 'auto',
-                                mr: 2,
+                                minHeight: '120px',
+                                overflowY: { md: 'auto', xs: 'hidden' },
+                                overflowX: { xs: 'auto' },
+                                mr: { md: 2, xs: 0 },
+                                mt: { md: 0, xs: 2 },
+                                flexGrow: 1,
                             }}
                         >
                             {product?.imageList?.map((image: any, index: number) => (
-                                <Box key={index} sx={{ mb: 1 }}>
+                                <Box key={index} sx={{ mb: { xs: 0, md: 1 }, mr: { xs: 1, md: 0 }, flex: '0 0 auto' }}>
                                     <img
                                         src={image.startsWith('uploads') ? `${HOST_BE}/${image}` : image}
                                         alt={product.name}
                                         onClick={() => setSelectedImage(image)}
                                         style={{
-                                            height: '100px',
+                                            height: 'auto',
                                             width: '100px',
                                             cursor: 'pointer',
                                             borderRadius: '4px',
@@ -114,7 +124,6 @@ const ProductDetail: React.FC = () => {
                                 </Box>
                             ))}
                         </Box>
-
                         <Box sx={{ width: '100%', height: '100%', overflow: 'hidden' }}>
                             <img
                                 src={
@@ -122,8 +131,8 @@ const ProductDetail: React.FC = () => {
                                 }
                                 alt={product?.name}
                                 style={{
-                                    width: 'auto',
-                                    height: '510px',
+                                    width: '100%',
+                                    height: 'auto',
                                     maxHeight: '510px',
                                     objectFit: 'cover',
                                     borderRadius: '8px',
@@ -134,15 +143,18 @@ const ProductDetail: React.FC = () => {
 
                     <Grid item xs={12} md={6}>
                         <Box sx={{ pl: '16px', pr: '16px', pt: '2px', height: '100%' }}>
-                            <Typography variant="h3" sx={{ mb: 2 }}>
+                            <Typography variant="h5" sx={{ mb: 0 }}>
                                 {product?.name}
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: 'rgb(17, 189, 72)' }}>
+                                {'★★★★★'}
                             </Typography>
                             <Box display="flex" alignItems="center" style={{ margin: '16px 0' }}>
                                 <Typography
-                                    variant="h5"
+                                    variant="body2"
                                     style={{
                                         color: 'red',
-                                        fontSize: '1.5rem',
+                                        fontSize: 16,
                                         marginRight: '16px',
                                     }}
                                 >
@@ -154,18 +166,19 @@ const ProductDetail: React.FC = () => {
                                         margin: '0',
                                         textDecoration: 'line-through',
                                         color: 'gray',
+                                        fontSize: 16,
                                     }}
                                 >
                                     {formatPrice(product?.virtualPrice)}
                                 </Typography>
                             </Box>
                             <Divider></Divider>
-                            <Typography variant="h5" sx={{ mt: 1, mb: 1 }}>
+                            <Typography variant="h5" sx={{ mt: 1, mb: 1, fontSize: 16, fontWeight: "bold" }}>
                                 Màu sắc: {product?.colorName}
                             </Typography>
                             <Divider></Divider>
                             <Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
-                                <Typography variant="h5" sx={{ mt: 1, mb: 1 }}>
+                                <Typography variant="h5" sx={{ mt: 1, mb: 1, fontSize: 16, fontWeight: "bold" }}>
                                     Kích thước:
                                 </Typography>
                                 <Typography
@@ -175,6 +188,7 @@ const ProductDetail: React.FC = () => {
                                         cursor: 'pointer',
                                         textDecoration: 'underline',
                                         fontWeight: 'bold',
+                                        fontSize: 16,
                                     }}
                                     onClick={handleOpenDialog}
                                 >
@@ -226,6 +240,7 @@ const ProductDetail: React.FC = () => {
                                         marginTop: '16px',
                                         color: selectedProductDetail.quantity < 10 ? 'orange' : 'green',
                                         fontWeight: 'bold',
+                                        fontSize: 17,
                                     }}
                                 >
                                     Còn lại: {selectedProductDetail.quantity} sản phẩm
@@ -233,7 +248,9 @@ const ProductDetail: React.FC = () => {
                             )}
                             <Box display="flex" alignItems="center" mt={2}>
                                 <LocalShippingOutlinedIcon style={{ marginRight: '8px' }} />
-                                <Typography variant="h4">Giao hàng tận nơi</Typography>
+                                <Typography variant="h4" sx={{ fontSize: 17, fontWeight: "bold" }}>
+                                    Giao hàng tận nơi
+                                </Typography>
                             </Box>
                             <Box mt={2}>
                                 <Box display="flex" alignItems="center">
@@ -348,10 +365,10 @@ const ProductDetail: React.FC = () => {
                             <Typography variant="h5">Thông số</Typography>
                             <Box sx={{ mt: 2 }}>
                                 {[
-                                    { label: 'Upper Material', value: 'Leather' },
-                                    { label: 'Sole Material', value: 'Rubber' },
-                                    { label: 'Closure Type', value: 'Lace-up' },
-                                    { label: 'Weight', value: '400g' },
+                                    { label: 'Chất liệu mặt trên', value: 'Da' },
+                                    { label: 'Chất liệu đế', value: 'Cao su' },
+                                    { label: 'Kiểu đóng', value: 'Dây buộc' },
+                                    { label: 'Trọng lượng', value: '400g' },
                                 ].map((spec, index) => (
                                     <Grid container key={index} sx={{ mb: 1 }}>
                                         <Grid item xs={4}>
@@ -395,7 +412,7 @@ const ProductDetail: React.FC = () => {
                     {/* Phần chính sách đổi trả */}
                     <Grid item xs={12} md={3}>
                         <Paper elevation={3} sx={{ padding: '16px', mt: 2 }}>
-                            <Typography variant="h5" fontWeight="bold">
+                            <Typography variant="h5">
                                 TỔNG ĐÀI HỖ TRỢ
                             </Typography>
                             <Typography variant="body2" sx={{ mt: 1 }}>
@@ -430,7 +447,7 @@ const ProductDetail: React.FC = () => {
                 </Grid>
             </Container>
             <Container sx={{ mt: 2, mb: 2 }}>
-                <Typography variant="h4" sx={{ mt: 2, mb: 2 }}>
+                <Typography variant="h5" sx={{ mt: 2, mb: 2 }}>
                     SẢN PHẨM LIÊN QUAN
                 </Typography>
                 <HotStyle />

@@ -75,16 +75,16 @@ const CartItem: React.FC<CartItemProps> = (props) => {
             existingCart[productIndex].quantity += 1;
             localStorage.setItem('listCart', JSON.stringify(existingCart));
         }
-    };
+    }
 
     const handleCheck = () => {
         setCheckInStore(productDetailInStore.productDetailId, !isCheck);
         //if check
         if (!isCheck) {
-            setTotalPrice((prev: any) => (prev += parseInt(productDetail.price) * quantity));
+            setTotalPrice((prev: any) => (prev += parseInt(productDetail.sellPrice) * quantity));
             setTotalItem((prev: any) => (prev = parseInt(prev) + quantity));
         } else {
-            setTotalPrice((prev: any) => (prev -= parseInt(productDetail.price) * quantity));
+            setTotalPrice((prev: any) => (prev -= parseInt(productDetail.sellPrice) * quantity));
             setTotalItem((prev: any) => (prev = parseInt(prev) - quantity));
         }
         setIsCheckAll(getIsCheck());
@@ -172,7 +172,7 @@ const CartItem: React.FC<CartItemProps> = (props) => {
                     </div>
                     <div className="mt-3 font-thin text-red-400 select-none flex items-center relative grid grid-cols-3">
                         {/* {formatPrice(parseInt(productDetail.price) * parseInt(productDetailInStore.quantity))} */}
-                        <> {formatPrice(productDetail.price)}</>
+                        <> {formatPrice(productDetail.sellPrice)}</>
 
                         <span className="ml-12 font-bold text-black col-span-3 lg:col-span-1">
                             x {productDetailInStore ? productDetailInStore.quantity : 0}

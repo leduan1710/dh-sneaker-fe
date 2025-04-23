@@ -326,7 +326,7 @@ function LoginRegister() {
                 <Container>
                     <RegisterContainer logIn={logIn}>
                         <Form>
-                            <Typography sx={{mb: 1}} variant="h3">{t('auth.Register')}</Typography>
+                            <Typography sx={{mb: 1, fontWeight: "600"}} variant="h5">{t('auth.Register')}</Typography>
                             <span className="w-full">
                                 <Input
                                     type={'text'}
@@ -377,7 +377,7 @@ function LoginRegister() {
 
                     <LogInContainer logIn={logIn}>
                         <Form>
-                            <Typography sx={{mb: 1}} variant="h3">{t('auth.Login')}</Typography>
+                            <Typography sx={{mb: 1, fontWeight: "600"}} variant="h5">{t('auth.Login')}</Typography>
                             <span className="w-full">
                                 <span className="w-full">
                                     <Input

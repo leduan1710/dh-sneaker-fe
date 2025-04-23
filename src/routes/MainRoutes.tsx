@@ -16,7 +16,7 @@ import Page404 from '../pages/default/page404';
 import Category from '../pages/user-guest/category/Category';
 import CategoryView from '../pages/user-guest/category/CategoryView';
 import CategoryManagement from '../pages/admin/scenes/Category';
-import Checkout from '../pages/user-guest/order/Checkout';
+import Checkout from '../pages/user-guest/order/Checkout2';
 import Order from '../pages/user-guest/order/Order';
 import { io } from 'socket.io-client';
 import { change_list_address, set_number_cart, set_socket_id_client } from '../reducers/Actions';
@@ -30,16 +30,12 @@ import ManagementShopProfile from '../pages/shop/scenes/Users/profile';
 import ShopProductManagement from '../pages/shop/scenes/Product';
 import Wallet from '../pages/user-guest/wallet/Wallet';
 import RegisterWallet from '../pages/user-guest/wallet/RegisterWallet';
-import OrderManagement from '../pages/shop/scenes/Order';
 import Voucher from '../pages/user-guest/voucher/voucher';
 import VoucherManagement from '../pages/shop/scenes/Voucher';
 import ReportProductManagement from '../pages/shop/scenes/ReportProduct';
 import DiscountManageMent from '../pages/shop/scenes/Discount';
 import BannerManagement from '../pages/shop/scenes/Banner';
 import DashboardShop from '../pages/shop/scenes/Dashboard';
-import ShopManagement from '../pages/admin/scenes/Shop';
-import RequestWithdrawManagement from '../pages/admin/scenes/RequestWithdraw';
-import ReportShopManagement from '../pages/admin/scenes/ReportShop';
 import DashboardAdmin from '../pages/admin/scenes/Dashboard';
 import UserManagement from '../pages/admin/scenes/User';
 import ReportOrderManagement from '../pages/shop/scenes/ReportOrderDetail';
@@ -52,13 +48,13 @@ import BrandManagement from '../pages/admin/scenes/Brand';
 import MaterialManagement from '../pages/admin/scenes/Material';
 import StylesManagement from '../pages/admin/scenes/Styles';
 import OrderRevenueManagement from '../pages/shop/scenes/Revenue';
-import ComplaintReport from '../pages/admin/scenes/ComplaintReportOrder';
-import ReportProductAdmin from '../pages/admin/scenes/ReportProduct';
 import HomeLayout from '../pages/user-guest/HomeLayout';
 import ProductDetail from '../pages/user-guest/product/ProductDetail2';
 import ProductCollection from '../pages/user-guest/category/Collection';
 import ProductManagement from '../pages/admin/scenes/Product';
 import Footer from '../components/admin-shop/footer/Footer';
+import NewOrder from '../pages/admin/scenes/NewOrder';
+import OrderManagement from '../pages/admin/scenes/OrderManament';
 
 //--------------------------------------------------------------
 //--------------------------------------------------------------
@@ -115,12 +111,7 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
             <Route path="/category-view/:categoryId" element={<CategoryView />}></Route>
         </>
     );
-    //return router suitable for role
-    // if (user.active != null) {
-    //     if (user.active == false) {
-    //         return <></>;
-    //     }
-    // }
+
     if (role === typeRole.GUEST) {
         return (
             <>
@@ -155,7 +146,6 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                         <Route path="/user/order" element={<Order />}></Route>
                     </Routes>
 
-                    <ChatUserShop />
                 </BrowserRouter>
             </>
         );
@@ -170,11 +160,8 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                         <Route path="dashboard" element={<DashboardAdmin />} />
                         <Route path="management/categories" element={<CategoryManagement />} />
                         <Route path="management/products" element={<ProductManagement />} />
-                        <Route path="management/shops" element={<ShopManagement />} />
-                        <Route path="management/request-withdraw" element={<RequestWithdrawManagement />} />
-                        <Route path="management/shop" element={<ReportShopManagement />} />
-                        <Route path="management/report-order" element={<ComplaintReport />} />
-                        <Route path="management/report-product" element={<ReportProductAdmin />} />
+                        <Route path="management/new-orders" element={<NewOrder />} />
+                        <Route path="management/orders" element={<OrderManagement />} />
                         <Route path="management/user" element={<UserManagement />} />
                         <Route path="management/origin" element={<OriginManagement />} />
                         <Route path="management/styles" element={<StylesManagement />} />

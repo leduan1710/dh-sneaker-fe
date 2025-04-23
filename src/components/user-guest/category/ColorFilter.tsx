@@ -23,7 +23,7 @@ const ColorFilterSection: React.FC<ColorFilterSectionProps> = ({
     return (
         <Box sx={{ mt: 2 }}>
             <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Typography variant="h4">{title}</Typography>
+                <Typography variant="h4" fontSize={18} fontWeight={600}>{title}</Typography>
                 <IconButton size="small" onClick={() => setExpand(!expand)}>
                     {expand ? <CloseIcon sx={{ fontSize: 'inherit' }} /> : <AddIcon sx={{ fontSize: 'inherit' }} />}{' '}
                 </IconButton>

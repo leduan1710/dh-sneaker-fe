@@ -112,9 +112,15 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
     useEffect(() => {
         if (localStorage.getItem('listCart')) getDataInCart();
     }, [numberCart]);
-    // useEffect(() => {
-    //     groupedByShopId();
-    // }, [listItemInCart]);
+    useEffect(() => {
+        getTotalPriceAndItem();
+    }, [listItemInCart]);
+
+    useEffect(() => {
+        if (open) {
+            getTotalPriceAndItem();
+        }
+    }, [open]);
     useEffect(() => {
         getTotalPriceAndItem();
     }, [numberCart]);

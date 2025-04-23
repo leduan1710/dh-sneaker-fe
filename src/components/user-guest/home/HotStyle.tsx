@@ -55,7 +55,7 @@ const HotStyle = () => {
     };
 
     return (
-        <Container>
+        <Container maxWidth="xl">
             <Carousel
                 swipeable={true}
                 draggable={false}
@@ -75,8 +75,8 @@ const HotStyle = () => {
                         <a href={item.href} style={{ textDecoration: 'none', color: 'inherit' }}>
                             <div
                                 style={{
-                                    height: '240px',
-                                    width: '240px',
+                                    height: '200px',
+                                    width: '200px',
                                     display: 'flex',
                                     justifyContent: 'center',
                                     alignItems: 'center',

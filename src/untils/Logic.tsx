@@ -2,6 +2,16 @@ import { toast } from 'react-toastify';
 import { passwordStrength } from 'check-password-strength';
 import { set_number_cart, set_number_cart_from_zero } from '../reducers/Actions';
 //format price
+export const formatTitle = (title: string) => {
+    if (!title) {
+        return '';
+    }
+    return title
+        .toLowerCase() 
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+};
 export const formatPrice = (amount: any) => {
     if (amount == 0) {
         return '0 đ';

@@ -15,6 +15,8 @@ import MultiCaroselCategory from '../../components/user-guest/category/MultiCaro
 import DrawMore from '../../components/user-guest/category/DrawMore';
 import ListProduct from '../../components/user-guest/product/ListProduct';
 import HotStyle from '../../components/user-guest/home/HotStyle';
+import NewProducts from '../../components/user-guest/home/NewProduct';
+import Jibbitz from '../../components/user-guest/home/Jibbitz';
 
 const StyledButton = styled(Button)(({ theme }) => ({
     width: '100%',
@@ -194,10 +196,8 @@ const HomePage: React.FC<HomePageProps> = (props) => {
                     src="https://www.crocs.com.vn/cdn/shop/files/BAE_PC_VN_1190x.webp?v=1737080006"
                 />
             </Container>
-            <Container sx={{ pb: 5, pt: 5, textAlign: 'center' }}>
-            <Typography variant="h2" mb={5} fontSize={35} color={'#000'}>🌻HÀNG MỚI🌻</Typography>
-            <HotStyle />
-        </Container>
+
+            <NewProducts />
             <Container>
                 <img
                     style={{ objectFit: 'cover', height: 'auto', width: '100%' }}
@@ -208,6 +208,7 @@ const HomePage: React.FC<HomePageProps> = (props) => {
                     src="https://www.crocs.com.vn/cdn/shop/files/FLORAL_PC_VN_e1db6f5b-44fb-4e1c-a2ba-06d3b914d3ad_1190x.webp?v=1737605505"
                 />
             </Container>
+            <Jibbitz></Jibbitz>
             {/* <div style={{ marginTop: 100 }} className="">
                 {!isGetStart ? (
                     <div className="container" style={{ width: '100%', overflow: 'hidden' }}>

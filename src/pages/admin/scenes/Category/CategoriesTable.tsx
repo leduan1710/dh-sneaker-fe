@@ -400,6 +400,7 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
             <Box p={2}>
                 <TablePagination
                     component="div"
+                    labelRowsPerPage="Số hãng mỗi trang"
                     count={categories.length}
                     onPageChange={handlePageChange}
                     onRowsPerPageChange={handleLimitChange}

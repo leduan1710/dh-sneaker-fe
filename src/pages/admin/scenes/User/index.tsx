@@ -46,23 +46,13 @@ function UserManagement() {
         <>
             <PageTitleWrapper>
                 <Grid container justifyContent="space-between" alignItems="center">
-                    <Grid item>
-                        <Typography sx={{ textTransform: 'capitalize' }} variant="h3" component="h3" gutterBottom>
-                            {t('category.Admin.UserManagement')}
-                        </Typography>
-                        
-                    </Grid>
-                </Grid>
-            </PageTitleWrapper>
-            <Container maxWidth="lg">
-                <Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
                     <Grid item xs={12}>
                         <Card>
-                            <UsersTable initialUsers={users}/>
+                            <UsersTable initialUsers={users} />
                         </Card>
                     </Grid>
                 </Grid>
-            </Container>
+            </PageTitleWrapper>
             <Footer />
         </>
     );

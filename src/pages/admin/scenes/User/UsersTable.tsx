@@ -28,6 +28,8 @@ import {
 import SwitchAccessShortcutAddIcon from '@mui/icons-material/SwitchAccessShortcutAdd';
 import NotInterestedIcon from '@mui/icons-material/NotInterested';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CheckIcon from '@mui/icons-material/Check';
+import ClearIcon from '@mui/icons-material/Clear';
 import { HOST_BE } from '../../../../common/Common';
 import { filterSpecialInput, toastSuccess } from '../../../../untils/Logic';
 import { change_is_loading } from '../../../../reducers/Actions';
@@ -44,13 +46,13 @@ const Input = styled('input')({
 interface AlertDeleteDialogProps {
     onClose: () => void;
     open: boolean;
-    shopId?: string;
+    userId?: string;
     onUpdate: () => void;
 }
 
 const AlertDeleteDialog: React.FC<AlertDeleteDialogProps> = (props) => {
     const { t } = useTranslation();
-    const { onClose, open, shopId, onUpdate } = props;
+    const { onClose, open, userId, onUpdate } = props;
     const store = useStore();
 
     const handleClose = () => {
@@ -60,15 +62,14 @@ const AlertDeleteDialog: React.FC<AlertDeleteDialogProps> = (props) => {
         onClose();
         store.dispatch(change_is_loading(true));
         try {
-            const res = await PostApi(`/admin/ban-user/${shopId}`, localStorage.getItem('token'), {});
+            const res = await PostApi(`/admin/ban-user/${userId}`, localStorage.getItem('token'), {});
 
             if (res.data.message === 'Success') {
                 toastSuccess(t('toast.Success'));
                 onUpdate();
             }
         } catch (error) {
-            console.error('Failed to delete category:', error);
-            // Xử lý lỗi nếu cần
+            console.error(error);
         }
         store.dispatch(change_is_loading(false));
     };
@@ -82,11 +83,11 @@ const AlertDeleteDialog: React.FC<AlertDeleteDialogProps> = (props) => {
                 aria-describedby="dialog-description"
             >
                 <DialogTitle sx={{ textTransform: 'capitalize' }} id="dialog-title">
-                    {t('category.Admin.BanUser')}
+                    Cấm người dùng
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText id="dialog-description">
-                        {t('category.Admin.ConfirmToBanUser')} ?
+                        Xác nhận cấm người dùng này ?
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
@@ -101,7 +102,7 @@ const AlertDeleteDialog: React.FC<AlertDeleteDialogProps> = (props) => {
 };
 const AlertUnBanDialog: React.FC<AlertDeleteDialogProps> = (props) => {
     const { t } = useTranslation();
-    const { onClose, open, shopId, onUpdate } = props;
+    const { onClose, open, userId, onUpdate } = props;
     const store = useStore();
     const handleClose = () => {
         onClose();
@@ -111,7 +112,7 @@ const AlertUnBanDialog: React.FC<AlertDeleteDialogProps> = (props) => {
         store.dispatch(change_is_loading(true));
 
         try {
-            const res = await PostApi(`/admin/unban-user/${shopId}`, localStorage.getItem('token'), {});
+            const res = await PostApi(`/admin/unban-user/${userId}`, localStorage.getItem('token'), {});
 
             if (res.data.message === 'Success') {
                 toastSuccess(t('toast.Success'));
@@ -132,11 +133,11 @@ const AlertUnBanDialog: React.FC<AlertDeleteDialogProps> = (props) => {
                 aria-describedby="dialog-description"
             >
                 <DialogTitle sx={{ textTransform: 'capitalize' }} id="dialog-title">
-                    {t('category.Admin.UnBanShop')}
+                    Gỡ cấm
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText id="dialog-description">
-                        {t('category.Admin.ConfirmToUnBanShop')} ?
+                        Xác nhận gỡ cấm người dùng này ?
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
@@ -195,7 +196,6 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
     };
 
     const handleClickOpenBanDialog = () => {
-        console.log('here');
         setOpenBan(true);
     };
     const handleClickOpenUnBanDialog = () => {
@@ -285,9 +285,12 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>ID</TableCell>
+                            <TableCell>Mã</TableCell>
+                            <TableCell>Họ và tên</TableCell>
+                            <TableCell>Số điện thoại</TableCell>
                             <TableCell>Email</TableCell>
-                            <TableCell>{t('orther.Role')}</TableCell>
+                            <TableCell>Vai trò</TableCell>
+                            <TableCell align='center'>Trạng thái</TableCell>
                             <TableCell align="right">{t('category.Admin.Actions')}</TableCell>
                         </TableRow>
                     </TableHead>
@@ -303,7 +306,7 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
                                             color="text.primary"
                                             gutterBottom
                                             noWrap
-                                            style={{ color: user.active == true ? 'charcoal' : 'red' }}
+                                            style={{ color: 'charcoal' }}
                                         >
                                             {user.id}
                                         </Typography>
@@ -316,7 +319,33 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
                                             color="text.primary"
                                             gutterBottom
                                             noWrap
-                                            style={{ color: user.active == false ? 'red' : 'charcoal' }}
+                                            style={{ color: 'charcoal' }}
+                                        >
+                                            {user.name}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography
+                                            key={user.active}
+                                            variant="body1"
+                                            fontWeight="bold"
+                                            color="text.primary"
+                                            gutterBottom
+                                            noWrap
+                                            style={{ color: 'charcoal' }}
+                                        >
+                                            {user.phone}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography
+                                            key={user.active}
+                                            variant="body1"
+                                            fontWeight="bold"
+                                            color="text.primary"
+                                            gutterBottom
+                                            noWrap
+                                            style={{ color: 'charcoal' }}
                                         >
                                             {user.email}
                                         </Typography>
@@ -330,9 +359,24 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
                                             color="text.primary"
                                             gutterBottom
                                             noWrap
-                                            style={{ color: user.active == false ? 'red' : 'charcoal' }}
+                                            style={{ color: 'charcoal' }}
                                         >
                                             {user.role}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <Typography
+                                            variant="body1"
+                                            fontWeight="bold"
+                                            color="text.primary"
+                                            gutterBottom
+                                            noWrap
+                                        >
+                                            {user.active ? (
+                                                <CheckIcon color="success" fontSize="small" />
+                                            ) : (
+                                                <ClearIcon color="error" fontSize="small" />
+                                            )}
                                         </Typography>
                                     </TableCell>
                                     <TableCell align="right">
@@ -403,19 +447,20 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
             <AlertDeleteDialog
                 open={openBan}
                 onClose={handleCloseBanDialog}
-                shopId={selectedUser?.id}
+                userId={selectedUser?.id}
                 onUpdate={getDatUser}
             />
             <AlertUnBanDialog
                 open={openUnBan}
                 onClose={handleCloseUnBanDialog}
-                shopId={selectedUser?.id}
+                userId={selectedUser?.id}
                 onUpdate={getDatUser}
             />
             <Box p={2}>
                 <TablePagination
                     component="div"
                     count={users.length}
+                    labelRowsPerPage="Số người dùng mỗi trang"
                     onPageChange={handlePageChange}
                     onRowsPerPageChange={handleLimitChange}
                     page={page}

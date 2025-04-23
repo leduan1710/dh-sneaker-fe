@@ -16,6 +16,7 @@ import StoreTwoToneIcon from '@mui/icons-material/StoreTwoTone';
 import AssignmentTurnedInTwoToneIcon from '@mui/icons-material/AssignmentTurnedInTwoTone';
 import LocalOfferTwoToneIcon from '@mui/icons-material/LocalOfferTwoTone';
 import CardGiftcardTwoToneIcon from '@mui/icons-material/CardGiftcardTwoTone';
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import BarChartTwoToneIcon from '@mui/icons-material/BarChartTwoTone';
 import CategoryIcon from '@mui/icons-material/Category';
 import AssessmentTwoToneIcon from '@mui/icons-material/AssessmentTwoTone';
@@ -195,7 +196,7 @@ function SidebarMenu() {
                     component="div"
                     subheader={
                         <ListSubheader component="div" disableSticky>
-                            Sản phẩm
+                            Quản lý
                         </ListSubheader>
                     }
                 >
@@ -230,7 +231,7 @@ function SidebarMenu() {
                                     component={RouterLink}
                                     onClick={closeSidebar}
                                     to="/admin/management/user"
-                                    startIcon={<TableChartTwoToneIcon />}
+                                    startIcon={<AccountCircleTwoToneIcon />}
                                 >
                                     {t('admin.User')}
                                 </Button>
@@ -251,10 +252,10 @@ function SidebarMenu() {
                                     disableRipple
                                     component={RouterLink}
                                     onClick={closeSidebar}
-                                    to="/admin/management/request-withdraw"
-                                    startIcon={<TableChartTwoToneIcon />}
+                                    to="/admin/management/new-orders"
+                                    startIcon={<AddShoppingCartIcon />}
                                 >
-                                    {t('admin.Withdraw')}
+                                    Đơn hàng mới
                                 </Button>
                             </ListItem>
                             <ListItem component="div">
@@ -262,10 +263,10 @@ function SidebarMenu() {
                                     disableRipple
                                     component={RouterLink}
                                     onClick={closeSidebar}
-                                    to="/admin/management/shop"
-                                    startIcon={<TableChartTwoToneIcon />}
+                                    to="/admin/management/orders"
+                                    startIcon={<AssignmentTurnedInTwoToneIcon />}
                                 >
-                                    {t('admin.ReportShop')}
+                                    Quản lý đơn hàng
                                 </Button>
                             </ListItem>
                             <ListItem component="div">
@@ -273,10 +274,10 @@ function SidebarMenu() {
                                     disableRipple
                                     component={RouterLink}
                                     onClick={closeSidebar}
-                                    to="/admin/management/report-order"
-                                    startIcon={<TableChartTwoToneIcon />}
+                                    to="/admin/management/detail-commission"
+                                    startIcon={<LocalOfferTwoToneIcon />}
                                 >
-                                    {t('admin.ReportOrder')}
+                                    Quản lý hoa hồng chi tiết
                                 </Button>
                             </ListItem>
                             <ListItem component="div">
@@ -284,21 +285,10 @@ function SidebarMenu() {
                                     disableRipple
                                     component={RouterLink}
                                     onClick={closeSidebar}
-                                    to="/admin/management/report-product"
-                                    startIcon={<TableChartTwoToneIcon />}
+                                    to="/admin/management/commission-statistics"
+                                    startIcon={<BarChartTwoToneIcon />}
                                 >
-                                    {t('admin.ReportProduct')}
-                                </Button>
-                            </ListItem>
-                            <ListItem component="div">
-                                <Button
-                                    disableRipple
-                                    component={RouterLink}
-                                    onClick={closeSidebar}
-                                    to="/admin/management/report-product"
-                                    startIcon={<TableChartTwoToneIcon />}
-                                >
-                                    {t('admin.ReportProduct')}
+                                    Thống kê hoa hồng
                                 </Button>
                             </ListItem>
                         </List>

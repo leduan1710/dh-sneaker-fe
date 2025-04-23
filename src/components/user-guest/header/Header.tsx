@@ -36,7 +36,6 @@ const Header: React.FC<HeaderProps> = (props) => {
     const { t } = useTranslation();
     const Logo = require('../../../static/dhsneaker-logo.png');
     const numberCart = useSelector((state: ReducerProps) => state.numberCart);
-    const numberFavorite = useSelector((state: ReducerProps) => state.numberFavorite);
 
     const store = useStore();
     const [openMenu, setOpenMenu] = useState<boolean>(false);
@@ -103,17 +102,7 @@ const Header: React.FC<HeaderProps> = (props) => {
             }
         }, 500);
     }, [search]);
-    const getNumberFavorite = async () => {
-        const res = await GetApi('/user/get-number-favorite', localStorage.getItem('token'));
-        if (res.data.message == 'Success') {
-            store.dispatch(set_number_favorite(res.data.number));
-        }
-    };
-    useEffect(() => {
-        if (user.id && numberFavorite == 0) {
-            getNumberFavorite();
-        }
-    }, [user]);
+
     return (
         <div
             className={`${
@@ -188,7 +177,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                     <Box flex={1} maxWidth="25%" textAlign="center" sx={{ display: { xs: 'none', sm: 'block' } }}></Box>
 
                     <Box flex={1} maxWidth="30%" textAlign="center" sx={{ display: { xs: 'none', sm: 'block' } }}>
-                        <Typography variant="h6" style={{ color: 'white', margin: 0, fontWeight: 'bold' }}>
+                        <Typography variant="h6" style={{ color: 'white', margin: 0, fontWeight: 'bold', fontSize: 16 }}>
                             Mua ngay để nhận nhiều ưu đãi hấp dẫn! 🤩
                         </Typography>
                     </Box>
@@ -289,7 +278,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                         spaceBetween={50}
                         slidesPerView={1}
                         loop={true}
-                        autoplay={{ delay: 2000, disableOnInteraction: false }}
+                        autoplay={{ delay: 1000, disableOnInteraction: true }}
                         style={{ padding: '10px 0' }}
                     >
                         <SwiperSlide>
@@ -353,7 +342,6 @@ const Header: React.FC<HeaderProps> = (props) => {
                 <DrawerMenu open={openMenu} toggleDrawer={toggleDrawerMenu} />
                 <DrawerSearch open={openSearch} toggleDrawer={toggleDrawerSearch} />
                 <DrawerCart open={openCart} toggleDrawer={setOpenCart} />
-                <DrawerFavorite open={openFavorite} toggleDrawer={toggleDrawerFavorite} />
             </div>
         </div>
     );

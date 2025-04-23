@@ -545,6 +545,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
                 <TablePagination
                     component="div"
                     count={products.length}
+                    labelRowsPerPage="Số sản phẩm mỗi trang"
                     onPageChange={handlePageChange}
                     onRowsPerPageChange={handleLimitChange}
                     page={page}
