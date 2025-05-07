@@ -226,17 +226,7 @@ function Row(props: RowProps) {
         </React.Fragment>
     );
 }
-interface ExportOrderData {
-    'Mã đơn hàng': string;
-    'Sản phẩm': string;
-    'Kích thước': string;
-    'Màu sắc': string;
-    'Số lượng': number;
-    'Thành tiền': string;
-    'Trạng thái': string;
-    'Thanh toán': string;
-    'Tổng tiền': string;
-}
+
 export default function OrderTable() {
     const { t } = useTranslation();
     const store = useStore();

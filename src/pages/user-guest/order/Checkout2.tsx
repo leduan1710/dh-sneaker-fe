@@ -102,7 +102,9 @@ const Checkout: React.FC = () => {
                 productDetailId: item.id,
                 productName: item.name,
                 image: item.image,
-                price: item.sellPrice,
+                sellPrice: item.sellPrice,
+                importPrice: item.importPrice,
+                ctvPrice: item.ctvPrice,
                 color: item.colorName,
                 size: item.sizeName,
                 quantity: listCart[index_quantity].quantity,
@@ -191,55 +193,7 @@ const Checkout: React.FC = () => {
             }
         }
     };
-    const handleBuy = async () => {
-        const listOrderDetail = listItemInCart.map((item: any) => {
-            const index_quantity = listCart.findIndex((item_inStore: any) => item_inStore.productDetailId == item.id);
-            return {
-                productDetailId: item.id,
-                productName: item.name,
-                image: item.image,
-                price: item.sellPrice,
-                color: item.colorName,
-                size: item.sizeName,
-                quantity: listCart[index_quantity].quantity,
-            };
-        });
-        const order = {
-            ctvName: user.name,
-            ctvNote: orderNote,
-            customerName: customerName,
-            customerPhone: customerPhone,
-            addressDetail: customerAddress,
-            address: {
-                province: province,
-                district: district,
-                ward: ward,
-            },
-            shipMethod: shippingMethod,
-            paid: true,
-            CODPrice: Number(totalCOD),
-            shipFee: Number(shippingFee),
-        };
-        const orderOffline = {
-            ctvName: user.name,
-            ctvNote: orderNote,
-            customerName: customerName,
-            shipMethod: shippingMethod,
-            paid: true,
-            CODPrice: Number(totalCOD),
-            shipFee: 0,
-        };
-
-        ////////////
-        const orders = await PostApi('/user/handle-order', localStorage.getItem('token'), {
-            order: shippingMethod === 'OFFLINE' ? orderOffline : order,
-            listOrderDetail: listOrderDetail,
-        });
-        if (orders.data.message == 'Success') {
-            toastSuccess('Đặt hàng thành công');
-        } else {
-        }
-    };
+    
     useEffect(() => {
         let total = 0;
 

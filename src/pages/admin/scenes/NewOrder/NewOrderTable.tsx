@@ -174,7 +174,7 @@ function Row(props: RowProps) {
                 </TableCell>
             </TableRow>
             <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
                     <Box sx={{ margin: 1, width: '100%', padding: 2, bgcolor: '#f9f9f9', borderRadius: '4px' }}>
                         <Collapse in={open} timeout="auto" unmountOnExit>
                             <Typography variant="body1" gutterBottom component="div">
@@ -231,7 +231,7 @@ function Row(props: RowProps) {
                             </TableHead>
                             <TableBody>
                                 {orderDetails.map((detail) => {
-                                    const totalAmount = detail.price * detail.quantity;
+                                    const totalAmount = detail.sellPrice * detail.quantity;
                                     return (
                                         <TableRow key={detail.id}>
                                             <TableCell>{detail.productDetailId}</TableCell>
@@ -282,17 +282,7 @@ function Row(props: RowProps) {
         </React.Fragment>
     );
 }
-interface ExportOrderData {
-    'Mã đơn hàng': string;
-    'Sản phẩm': string;
-    'Kích thước': string;
-    'Màu sắc': string;
-    'Số lượng': number;
-    'Thành tiền': string;
-    'Trạng thái': string;
-    'Thanh toán': string;
-    'Tổng tiền': string;
-}
+
 export default function NewOrderTable() {
     const { t } = useTranslation();
     const store = useStore();
@@ -305,7 +295,6 @@ export default function NewOrderTable() {
     // Pagination state
     const [page, setPage] = useState(0);
     const [limit, setLimit] = useState(5);
-    const [statusFilter, setStatusFilter] = useState<string>('all');
 
     const getDataOrder = async () => {
         store.dispatch(change_is_loading(true));
@@ -344,7 +333,6 @@ export default function NewOrderTable() {
     useEffect(() => {
         if (status) {
             getDataOrder();
-            setStatusFilter(status);
             setPage(0);
             location.state = null;
         }
@@ -358,81 +346,11 @@ export default function NewOrderTable() {
         setPage(0); // Reset to first page when changing limit
     };
 
-    const handleStatusChange = (event: SelectChangeEvent<string>) => {
-        setStatusFilter(event.target.value as string);
-        setPage(0); // Reset to first page when changing filter
-    };
-
-    const filteredOrders = statusFilter === 'all' ? orders : orders.filter((order) => order.status === statusFilter);
-
-    const paginatedOrders = filteredOrders.slice(page * limit, page * limit + limit);
-    // filter Id
-    const [filterId, setFilterId] = useState<string>('');
-    const typingTimeoutRef = useRef<any>(null);
-    if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-    }
-    const filterById = async (id: string) => {
-        if (id != '') {
-            store.dispatch(change_is_loading(true));
-            const res = await GetApi(`/shop/get/order/${id}`, localStorage.getItem('token'));
-
-            if (res.data.message == 'Success') {
-                setOrders(res.data.order);
-                await getOrderDetails(res.data.order);
-                setPage(0);
-            }
-            store.dispatch(change_is_loading(false));
-        } else {
-            store.dispatch(change_is_loading(true));
-            const resOrders = await GetApi(`/shop/get/order-by-shop/${user.shopId}`, localStorage.getItem('token'));
-            if (resOrders.data.message === 'Success') {
-                setOrders(resOrders.data.orders);
-                await getOrderDetails(resOrders.data.orders);
-            }
-            store.dispatch(change_is_loading(false));
-        }
-    };
-
-    useEffect(() => {
-        typingTimeoutRef.current = setTimeout(() => {
-            filterById(filterId);
-        }, 500);
-    }, [filterId]);
+    const paginatedOrders = orders.slice(page * limit, page * limit + limit);
+    
     return (
         <>
             <TableContainer className="relative" component={Paper}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
-                    <FormControl variant="outlined" sx={{ minWidth: 200 }}>
-                        <InputLabel>{t('order.Status')}</InputLabel>
-                        <Select value={statusFilter} onChange={handleStatusChange} label="Status">
-                            <MenuItem value="all">{t('orther.All')}</MenuItem>
-                            <MenuItem value="PROCESSING">{t('order.Processing')}</MenuItem>
-                            <MenuItem value="CONFIRMED">{t('order.Confirmed')}</MenuItem>
-                            <MenuItem value="DELIVERING">{t('order.Delivering')}</MenuItem>
-                            <MenuItem value="PROCESSED">{t('order.Processed')}</MenuItem>
-                            <MenuItem value="CANCEL">{t('order.Cancel')}</MenuItem>
-                        </Select>
-                    </FormControl>
-
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Input
-                            value={filterId}
-                            className="border border-gray-300 rounded-lg p-1"
-                            sx={{ display: 'block', width: 300, marginRight: 2 }} // Khoảng cách giữa input và biểu tượng tìm kiếm
-                            placeholder={t('action.EnterID')}
-                            onChange={(e) => {
-                                filterSpecialInput(e.target.value, setFilterId);
-                            }}
-                        />
-                        <IconButton color="primary">
-                            <SearchIcon />
-                        </IconButton>
-                        <Button variant="contained" color="primary" onClick={() => {}} sx={{ marginLeft: 2 }}>
-                            Xuất Đơn Hàng
-                        </Button>
-                    </Box>
-                </Box>
                 <Table aria-label="collapsible table">
                     <TableHead>
                         <TableRow>
@@ -465,7 +383,7 @@ export default function NewOrderTable() {
                     rowsPerPageOptions={[5, 10, 25]}
                     labelRowsPerPage="Số đơn mỗi trang"
                     component="div"
-                    count={filteredOrders.length}
+                    count={orders.length}
                     rowsPerPage={limit}
                     page={page}
                     onPageChange={handlePageChange}

@@ -11,37 +11,25 @@ import InfoUser from '../pages/user-guest/InfoUser';
 import AllAddress from '../pages/user-guest/address/AllAddress';
 import AddressCreate from '../pages/user-guest/address/AddressCreate';
 import AddressEdit from '../pages/user-guest/address/AddressEdit';
-import Product from '../pages/user-guest/Product';
 import Page404 from '../pages/default/page404';
 import Category from '../pages/user-guest/category/Category';
 import CategoryView from '../pages/user-guest/category/CategoryView';
 import CategoryManagement from '../pages/admin/scenes/Category';
 import Checkout from '../pages/user-guest/order/Checkout2';
-import Order from '../pages/user-guest/order/Order';
+import Order from '../pages/user-guest/order/Order2';
 import { io } from 'socket.io-client';
 import { change_list_address, set_number_cart, set_socket_id_client } from '../reducers/Actions';
 import Header from '../components/user-guest/header/Header';
 import { GetApi, PostGuestApi } from '../untils/Api';
-import ChatUserShop from '../components/user-guest/chat/ChatUserShop';
 import IndexAdmin from '../pages/admin';
 import ApplicationsMessenger from '../pages/admin/scenes/Messenger';
-import ShopChat from '../pages/shop/scenes/Messenger';
-import ManagementShopProfile from '../pages/shop/scenes/Users/profile';
-import ShopProductManagement from '../pages/shop/scenes/Product';
 import Wallet from '../pages/user-guest/wallet/Wallet';
 import RegisterWallet from '../pages/user-guest/wallet/RegisterWallet';
 import Voucher from '../pages/user-guest/voucher/voucher';
-import VoucherManagement from '../pages/shop/scenes/Voucher';
-import ReportProductManagement from '../pages/shop/scenes/ReportProduct';
-import DiscountManageMent from '../pages/shop/scenes/Discount';
-import BannerManagement from '../pages/shop/scenes/Banner';
-import DashboardShop from '../pages/shop/scenes/Dashboard';
 import DashboardAdmin from '../pages/admin/scenes/Dashboard';
 import UserManagement from '../pages/admin/scenes/User';
-import ReportOrderManagement from '../pages/shop/scenes/ReportOrderDetail';
 import { checkCart, getListProductIdInCart, toastWarning, totalQuantityInCart } from '../untils/Logic';
 import AdminSidebarLayout from '../pages/admin/sidebar/Index';
-import ShopSidebarLayout from '../pages/shop/sidebar/sidebar/Index';
 import { useTranslation } from 'react-i18next';
 import OriginManagement from '../pages/admin/scenes/Origin';
 import BrandManagement from '../pages/admin/scenes/Brand';
@@ -55,6 +43,8 @@ import ProductManagement from '../pages/admin/scenes/Product';
 import Footer from '../components/admin-shop/footer/Footer';
 import NewOrder from '../pages/admin/scenes/NewOrder';
 import OrderManagement from '../pages/admin/scenes/OrderManament';
+import DetailCommissionManagement from '../pages/admin/scenes/DetailCommission';
+import CommissionStatistic from '../pages/admin/scenes/CommissionStatistic';
 
 //--------------------------------------------------------------
 //--------------------------------------------------------------
@@ -162,6 +152,8 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                         <Route path="management/products" element={<ProductManagement />} />
                         <Route path="management/new-orders" element={<NewOrder />} />
                         <Route path="management/orders" element={<OrderManagement />} />
+                        <Route path="management/detail-commission" element={<DetailCommissionManagement />} />
+                        <Route path="management/commission-statistics" element={<CommissionStatistic />} />
                         <Route path="management/user" element={<UserManagement />} />
                         <Route path="management/origin" element={<OriginManagement />} />
                         <Route path="management/styles" element={<StylesManagement />} />

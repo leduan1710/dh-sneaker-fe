@@ -236,17 +236,7 @@ function SidebarMenu() {
                                     {t('admin.User')}
                                 </Button>
                             </ListItem>
-                            <ListItem component="div">
-                                <Button
-                                    disableRipple
-                                    component={RouterLink}
-                                    onClick={closeSidebar}
-                                    to="/admin/management/shops"
-                                    startIcon={<TableChartTwoToneIcon />}
-                                >
-                                    {t('admin.Shop')}
-                                </Button>
-                            </ListItem>
+                          
                             <ListItem component="div">
                                 <Button
                                     disableRipple
