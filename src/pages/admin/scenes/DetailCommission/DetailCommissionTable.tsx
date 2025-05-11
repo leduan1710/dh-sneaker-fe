@@ -138,7 +138,7 @@ function Row(props: RowProps) {
                         : formatPrice(order.CODPrice - order.shipFee - totalCtvPrice)}
                 </TableCell>
                 <TableCell align='center'>
-                    {order.status === 'SUCCESS'
+                    {order.status === 'SUCCESS'  && order.isJibbitz == false
                         ? orderDetails.reduce((total, detail) => {
                               return total + detail.quantity;
                           }, 0)
@@ -339,7 +339,7 @@ export default function DetailCommissionTable() {
         return total + order.commission;
     }, 0);
     const totalQuantity = orders
-    .filter((order) => order.status === 'SUCCESS')
+    .filter((order) => order.status === 'SUCCESS'  && order.isJibbitz == false)
     .reduce((total, order) => {
         const orderDetailsForOrder = orderDetails.filter(
             (detail) => detail.orderId === order.id,

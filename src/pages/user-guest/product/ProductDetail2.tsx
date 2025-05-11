@@ -143,7 +143,7 @@ const ProductDetail: React.FC = () => {
 
                     <Grid item xs={12} md={6}>
                         <Box sx={{ pl: '16px', pr: '16px', pt: '2px', height: '100%' }}>
-                            <Typography variant="h5" sx={{ mb: 0 }}>
+                            <Typography variant="h4" fontSize={28} sx={{ mb: 0 }}>
                                 {product?.name}
                             </Typography>
                             <Typography variant="body2" sx={{ color: 'rgb(17, 189, 72)' }}>

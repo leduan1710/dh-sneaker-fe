@@ -16,17 +16,17 @@ import {
 } from '@mui/material';
 import NotificationsActiveTwoToneIcon from '@mui/icons-material/NotificationsActiveTwoTone';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { styled } from '@mui/material/styles';
 import { formatDistanceToNow } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { ReducerProps } from '../../../../../../reducers/ReducersProps';
-import { GetApi } from '../../../../../../untils/Api';
-import { socket_IO_Client } from '../../../../../../routes/MainRoutes';
+
 import { enUS, vi } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
+import { socket_IO_Client } from '../../../routes/MainRoutes';
+import { ReducerProps } from '../../../reducers/ReducersProps';
+import { GetApi } from '../../../untils/Api';
 
 const NotificationsBadge = styled(Badge)(
     ({ theme }) => `
@@ -86,8 +86,8 @@ function HeaderNotifications() {
         if (notification.status != 'SEEN') handleReadNotification(notification.id);
 
         // Khi nhấp vào thông báo, điều hướng và truyền trạng thái
-        if (notification.link === '/orders/processing') {
-            navigate('/admin/management/new-orders', { state: { status: 'PROCESSING' } });
+        if (notification.link === '/orders/cancel') {
+            navigate('/user/order');
         }
     };
 
@@ -133,17 +133,19 @@ function HeaderNotifications() {
     return (
         <>
             <Tooltip arrow title={t('notification.Notifications')}>
-                <IconButton color="primary" ref={ref} onClick={handleOpen}>
+
+                {/* <IconButton color="primary" ref={ref} onClick={handleOpen}>
                     <NotificationsBadge
                         badgeContent={filteredNotifications.filter((notification) => notification.status !== 'SEEN').length}
-                        anchorOrigin={{
-                            vertical: 'top',
-                            horizontal: 'right',
-                        }}
                     >
-                        <NotificationsActiveTwoToneIcon />
+                        <NotificationsIcon sx={{color: "rgba(7, 110, 145, 0.89)"}}/>
                     </NotificationsBadge>
-                </IconButton>
+                </IconButton> */}
+                        <span onClick={handleOpen} className="mr-3 ml-3 cursor-pointer scale" ref={ref}>
+            <Badge badgeContent={filteredNotifications.filter((notification) => notification.status !== 'SEEN').length} color="error">
+                <NotificationsIcon sx={{ color: "rgba(7, 110, 145, 0.89)" }} />
+            </Badge>
+        </span>
             </Tooltip>
             <Popover
                 anchorEl={ref.current}
@@ -158,8 +160,8 @@ function HeaderNotifications() {
                     horizontal: 'right',
                 }}
             >
-                <Box sx={{ p: 2 }} display="flex" alignItems="center" justifyContent="space-between">
-                    <Typography variant="h5">{t('notification.Notifications')}</Typography>
+                <Box sx={{ p: 2, minWidth: 250 }} display="flex" alignItems="center" justifyContent="space-between">
+                    <Typography variant="h5">Thông báo</Typography>
                     <Button onClick={toggleOnlyUnread} color="primary">
                         {onlyUnread ? t('notification.All') : t('notification.UNREAD')}
                     </Button>
@@ -192,7 +194,7 @@ function HeaderNotifications() {
                                     sx={{ mr: 1 }}
                                     src={
                                         notification.image === 'NewOrder'
-                                            ? require('../../../../../../static/new-order.png')
+                                            ? require('../../../static/new-order.png')
                                             : 'https://media.istockphoto.com/id/1344512181/vi/vec-to/bi%E1%BB%83u-t%C6%B0%E1%BB%A3ng-loa-m%C3%A0u-%C4%91%E1%BB%8F.jpg?s=612x612&w=0&k=20&c=t8xmvCQKhdqmyG2ify0vXMIgK5ty7IpOyicWE-Rrpzg='
                                     }
                                 />

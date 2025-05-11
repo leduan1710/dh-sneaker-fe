@@ -26,19 +26,24 @@ import { formatPrice, formatTitle, removeItemFromCart, toastSuccess, toastWarnin
 import { useSelector, useStore } from 'react-redux';
 import { ReducerProps } from '../../../reducers/ReducersProps';
 import { HOST_BE } from '../../../common/Common';
-import { PostApi } from '../../../untils/Api';
-import { useNavigate } from 'react-router-dom';
+import { GetApi, PostApi } from '../../../untils/Api';
+import { change_is_loading } from '../../../reducers/Actions';
+import { useParams } from 'react-router-dom';
+import ShippingMethodDisplay from '../../../components/user-guest/order/ShippingMethodDisplay';
 
 const Input = styled('input')({
     display: 'none',
 });
 
-const Checkout: React.FC = () => {
+const OrderDetail: React.FC = () => {
     const store = useStore();
     const user = useSelector((state: ReducerProps) => state.user);
-    const navigate = useNavigate();
+    const { orderId } = useParams();
     const listItemInCart = useSelector((state: ReducerProps) => state.listItemInCart);
     const listCart = JSON.parse(localStorage.getItem('listCart') || '[]');
+    const [order, setOrder] = useState<any>();
+    const [orderDetails, setOrderDetails] = useState<any>();
+    const [isEdit, setIsEdit] = useState<boolean>(false);
 
     const [customerName, setCustomerName] = useState('');
     const [totalCOD, setTotalCOD] = useState('');
@@ -46,6 +51,7 @@ const Checkout: React.FC = () => {
 
     const [orderNote, setOrderNote] = useState('');
     const [selectImage, setSelectImage] = useState<File | null>(null);
+    const [noteImage, setNoteImage] = useState('');
     const [shippingMethod, setShippingMethod] = useState('');
     const [shippingFee, setShippingFee] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
@@ -63,7 +69,27 @@ const Checkout: React.FC = () => {
         else setShippingFee('0');
         setShippingMethod(event.target.value);
     };
+    const getDataOrder = async () => {
+        store.dispatch(change_is_loading(true));
+        const res = await GetApi(`/user/get/orderDetail/${orderId}`, localStorage.getItem('token'));
 
+        if (res.data.message == 'Success') {
+            setOrder(res.data.order);
+            setCustomerName(res.data.order.customerName);
+            setCustomerPhone(res.data.order.customerPhone);
+            setCustomerAddress(res.data.order.addressDetail);
+            setShippingMethod(res.data.order.shipMethod);
+            setOrderNote(res.data.order.ctvNote);
+            setShippingFee(res.data.order.shipFee);
+            setTotalCOD(res.data.order.CODPrice);
+            setProvince(res.data.order.address.province);
+            setDistrict(res.data.order.address.district);
+            setWard(res.data.order.address.ward);
+            setNoteImage(res.data.order.noteImage);
+            setOrderDetails(res.data.orderDetails);
+        }
+        store.dispatch(change_is_loading(false));
+    };
     const getDataProvince = async () => {
         const resProvince = await axios('https://partner.viettelpost.vn/v2/categories/listProvinceById?provinceId=-1');
         if (resProvince.data.status == 200) {
@@ -91,32 +117,31 @@ const Checkout: React.FC = () => {
             }
         }
     };
+
+    const handleEditClick = () => {
+        setIsEdit(true);
+    };
+
+    const handleSaveClick = () => {
+        handleEdit();
+        setIsEdit(false);
+    };
+
+    const handleCancelClick = () => {
+        setIsEdit(false);
+    };
+
     const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const address = e.target.value;
         setCustomerAddress(address);
     };
-    const handleBuy = async () => {
-        // Tạo danh sách chi tiết đơn hàng
-        const listOrderDetail = listItemInCart.map((item: any) => {
-            const index_quantity = listCart.findIndex((item_inStore: any) => item_inStore.productDetailId === item.id);
-            return {
-                productDetailId: item.id,
-                productName: item.name,
-                image: item.image,
-                sellPrice: item.sellPrice,
-                importPrice: item.importPrice,
-                ctvPrice: item.ctvPrice,
-                color: item.colorName,
-                size: item.sizeName,
-                quantity: listCart[index_quantity].quantity,
-            };
-        });
-
+    const handleEdit = async () => {
         if (shippingMethod === 'OFFLINE') {
             const formData = new FormData();
 
             // Thêm thông tin đơn hàng vào FormData
-            formData.append('userId', user.id)
+            formData.append('id', order.id)
+            formData.append('userId', user.id);
             formData.append('ctvName', user.name);
             formData.append('ctvNote', orderNote);
             formData.append('customerName', customerName);
@@ -124,7 +149,6 @@ const Checkout: React.FC = () => {
             formData.append('paid', 'true');
             formData.append('CODPrice', totalCOD.toString());
             formData.append('shipFee', '0');
-            formData.append('listOrderDetail', JSON.stringify(listOrderDetail));
 
             // Upload hình ảnh nếu có
             if (selectImage) {
@@ -134,7 +158,7 @@ const Checkout: React.FC = () => {
             }
 
             try {
-                const res = await axios.post(`${HOST_BE}/user/handle-order`, formData, {
+                const res = await axios.post(`${HOST_BE}/user/edit-order`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -142,18 +166,19 @@ const Checkout: React.FC = () => {
                 });
 
                 if (res.data.message === 'Success') {
-                    toastSuccess('Đặt hàng thành công');
-                    navigate("/user/order")
+                    setOrder(res.data.order);
+                    toastSuccess('Chỉnh sửa thành công');
                 }
             } catch (error) {
-                console.error('Failed to place order:', error);
+                console.error('Thất bại', error);
             }
         } else {
             // Đơn hàng online
             const formData = new FormData();
 
             // Thêm thông tin đơn hàng vào FormData
-            formData.append('userId', user.id)
+            formData.append('id', order.id)
+            formData.append('userId', user.id);
             formData.append('ctvName', user.name);
             formData.append('ctvNote', orderNote);
             formData.append('customerName', customerName);
@@ -171,7 +196,6 @@ const Checkout: React.FC = () => {
             formData.append('paid', 'true');
             formData.append('CODPrice', totalCOD.toString());
             formData.append('shipFee', shippingFee.toString());
-            formData.append('listOrderDetail', JSON.stringify(listOrderDetail));
 
             // Upload hình ảnh nếu có
             if (selectImage) {
@@ -180,7 +204,7 @@ const Checkout: React.FC = () => {
                 formData.append('file', imageBlob, uniqueFilename);
             }
             try {
-                const res = await axios.post(`${HOST_BE}/user/handle-order`, formData, {
+                const res = await axios.post(`${HOST_BE}/user/edit-order`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -189,29 +213,30 @@ const Checkout: React.FC = () => {
 
                 if (res.data.message === 'Success') {
                     toastSuccess('Đặt hàng thành công');
-                    navigate("/user/order")
                 }
             } catch (error) {
                 console.error('Failed to place order:', error);
             }
         }
     };
-    
+    const handleCancel = async () => {
+    }
     useEffect(() => {
         let total = 0;
 
-        listItemInCart.forEach((item: any) => {
-            const cartItem = listCart.find((cartItem: any) => cartItem.productDetailId === item.id);
-            const quantity = cartItem ? cartItem.quantity : 0;
-            total += item.sellPrice * quantity;
+        orderDetails?.map((item: any) => {
+            total += item.sellPrice * item.quantity;
         });
 
         setTotalAmount(total);
-    }, [listItemInCart, listCart]);
+    }, [orderDetails]);
 
     useEffect(() => {
         getDataProvince();
     }, []);
+    useEffect(() => {
+        if (orderId) getDataOrder();
+    }, [orderId]);
     useEffect(() => {
         getDataDistrict();
     }, [province]);
@@ -222,9 +247,25 @@ const Checkout: React.FC = () => {
     return (
         <Grid container spacing={3} sx={{ mt: { md: '160px', xs: '170px' }, mb: 4, px: { md: 16, xs: 2 } }}>
             <Grid item xs={12} md={6} sx={{ overflow: { md: 'auto' }, maxHeight: { md: '100vh' } }}>
-                <Typography variant="h4" gutterBottom sx={{ mb: 1, fontSize: 22 }}>
-                    Thông tin đơn hàng
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                    <Typography variant="h4" gutterBottom sx={{ mb: 1, fontSize: 22 }}>
+                        Thông tin đơn hàng
+                    </Typography>
+                    {isEdit ? (
+                        <Box>
+                            <Button variant="contained" color="primary" onClick={handleSaveClick} sx={{ mr: 1 }}>
+                                Lưu thay đổi
+                            </Button>
+                            <Button variant="outlined" color="error" onClick={handleCancelClick}>
+                                Hủy
+                            </Button>
+                        </Box>
+                    ) : order?.status === "PROCESSING" && (
+                        <Button variant="contained" color="secondary" onClick={handleEditClick}>
+                            Chỉnh sửa đơn hàng
+                        </Button>
+                    )}
+                </Box>
 
                 <TextField
                     label="Tên Khách Hàng"
@@ -238,6 +279,7 @@ const Checkout: React.FC = () => {
                         sx: {
                             borderRadius: '3px',
                         },
+                        readOnly: !isEdit,
                     }}
                 />
 
@@ -255,6 +297,7 @@ const Checkout: React.FC = () => {
                         sx: {
                             borderRadius: '3px',
                         },
+                        readOnly: !isEdit,
                     }}
                 />
 
@@ -271,35 +314,61 @@ const Checkout: React.FC = () => {
                         sx: {
                             borderRadius: '3px',
                         },
+                        readOnly: !isEdit,
                     }}
                 />
+                {order?.orderDescribe && <TextField
+                    label="Lý do đơn bị hủy"
+                    variant="outlined"
+                    fullWidth
+                    multiline
+                    minRows={2}
+                    value={order?.orderDescribe}
+                    sx={{ mb: 1 }}
+                    InputProps={{
+                        sx: {
+                            borderRadius: '3px',
+                        },
+                        readOnly: !isEdit,
+                    }}
+                />}
+                
 
                 <Typography variant="body2" sx={{ marginBottom: 1 }}>
-        {"Ảnh ghi chú (Nếu có)"}
-    </Typography>
+                    {'Ảnh ghi chú (Nếu có)'}
+                </Typography>
                 <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                
-                    {selectImage && (
+                    {selectImage ? (
                         <Avatar
                             variant="square"
-                            sx={{ height: {md: 200, xs: 250}, width: "auto" }}
+                            sx={{ height: { md: 200, xs: 250 }, width: 'auto' }}
                             src={selectImage ? URL.createObjectURL(selectImage) : undefined}
                         />
+                    ) : noteImage ? (
+                        <Avatar
+                            variant="square"
+                            sx={{ height: { md: 200, xs: 250 }, width: 'auto' }}
+                            src={noteImage.startsWith('uploads') ? `${HOST_BE}/${noteImage}` : noteImage}
+                        />
+                    ) : (
+                        isEdit && (
+                            <IconButton
+                                component="span"
+                                disabled
+                                sx={{ width: '100px', height: '100px', border: '1px dashed grey' }}
+                            >
+                                <AddPhotoAlternateIcon fontSize="large" />
+                            </IconButton>
+                        )
                     )}
-                    {!selectImage && (
-                        <IconButton
-                            component="span"
-                            disabled
-                            sx={{ width: '100px', height: '100px', border: '1px dashed grey' }}
-                        >
-                            <AddPhotoAlternateIcon fontSize="large" />
-                        </IconButton>
+                    {isEdit && (
+                        <label htmlFor="image" style={{ position: 'absolute', bottom: '8px', right: '8px' }}>
+                            <IconButton component="span" color="primary">
+                                <UploadTwoToneIcon />
+                            </IconButton>
+                        </label>
                     )}
-                    <label htmlFor="image" style={{ position: 'absolute', bottom: '8px', right: '8px' }}>
-                        <IconButton component="span" color="primary">
-                            <UploadTwoToneIcon />
-                        </IconButton>
-                    </label>
+
                     <Input
                         required
                         id="image"
@@ -307,6 +376,7 @@ const Checkout: React.FC = () => {
                         type="file"
                         accept="image/*"
                         style={{ display: 'none' }}
+                        disabled={!isEdit}
                         onChange={(e: any) => {
                             const file = e.target.files[0];
                             console.log(file);
@@ -325,88 +395,8 @@ const Checkout: React.FC = () => {
                 <Typography variant="h4" gutterBottom sx={{ mb: 1, fontSize: 22 }}>
                     Giao hàng
                 </Typography>
-                <FormControl fullWidth sx={{ mb: 2 }}>
-                    <RadioGroup value={shippingMethod} onChange={handleShippingMethodChange}>
-                        <FormControlLabel
-                            value="VIETTELPOST"
-                            control={<Radio sx={{ '&.Mui-checked': { color: 'red' } }} />}
-                            label={
-                                <div
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        border: '1px solid #ccc',
-                                        borderRadius: '4px',
-                                        padding: '10px',
-                                        margin: '5px 0',
-                                        width: '200px',
-                                        backgroundColor: shippingMethod === 'Viettelpost' ? '#f5f5f5' : 'transparent',
-                                        transition: 'background-color 0.3s',
-                                    }}
-                                >
-                                    <img
-                                        src={require('../../../static/Logo-Viettel-Post-Red.png')}
-                                        alt="Viettelpost"
-                                        style={{ width: 40, marginRight: 8 }}
-                                    />
-                                    Viettelpost
-                                </div>
-                            }
-                        />
-                        <FormControlLabel
-                            value="GRAB"
-                            control={<Radio sx={{ '&.Mui-checked': { color: 'green' } }} />}
-                            label={
-                                <div
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        border: '1px solid #ccc',
-                                        borderRadius: '4px',
-                                        padding: '10px',
-                                        margin: '5px 0',
-                                        width: '200px',
-                                        backgroundColor: shippingMethod === 'Grab/Kho khác' ? '#f5f5f5' : 'transparent',
-                                        transition: 'background-color 0.3s',
-                                    }}
-                                >
-                                    <img
-                                        src={require('../../../static/grab_logo_icon.png')}
-                                        alt="Grab"
-                                        style={{ width: 40, marginRight: 8 }}
-                                    />
-                                    Grab/Kho khác
-                                </div>
-                            }
-                        />
-                        <FormControlLabel
-                            value="OFFLINE"
-                            control={<Radio sx={{ '&.Mui-checked': { color: 'blue' } }} />}
-                            label={
-                                <div
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        border: '1px solid #ccc',
-                                        borderRadius: '4px',
-                                        padding: '10px',
-                                        margin: '5px 0',
-                                        width: '200px',
-                                        backgroundColor: shippingMethod === 'Offline' ? '#f5f5f5' : 'transparent',
-                                        transition: 'background-color 0.3s',
-                                    }}
-                                >
-                                    <img
-                                        src={require('../../../static/store-icon.png')}
-                                        alt="Offline"
-                                        style={{ width: 40, marginRight: 8 }}
-                                    />
-                                    Offline
-                                </div>
-                            }
-                        />
-                    </RadioGroup>
-                </FormControl>
+                <ShippingMethodDisplay shippingMethod={shippingMethod} />
+
                 {(shippingMethod === 'VIETTELPOST' || shippingMethod === 'GRAB') && (
                     <>
                         {shippingMethod === 'GRAB' && (
@@ -417,7 +407,7 @@ const Checkout: React.FC = () => {
                                 value={shippingFee}
                                 type="number"
                                 onChange={(e) => setShippingFee(e.target.value)}
-                                sx={{ mb: 1 }}
+                                sx={{ mt: 1 }}
                                 InputProps={{
                                     sx: {
                                         borderRadius: '3px',
@@ -432,11 +422,12 @@ const Checkout: React.FC = () => {
                             fullWidth
                             value={customerPhone}
                             onChange={(e) => setCustomerPhone(e.target.value)}
-                            sx={{ mb: 1 }}
+                            sx={{ mb: 1, mt: 1 }}
                             InputProps={{
                                 sx: {
                                     borderRadius: '3px',
                                 },
+                                readOnly: !isEdit,
                             }}
                         />
 
@@ -451,6 +442,7 @@ const Checkout: React.FC = () => {
                                 sx: {
                                     borderRadius: '3px',
                                 },
+                                readOnly: !isEdit,
                             }}
                         />
 
@@ -473,6 +465,7 @@ const Checkout: React.FC = () => {
                                         borderRadius: '3px',
                                     },
                                 }}
+                                readOnly={!isEdit}
                                 label={'Tỉnh/Thành Phố'}
                             >
                                 {provinceList.map((prov: any) => (
@@ -502,6 +495,7 @@ const Checkout: React.FC = () => {
                                                 borderRadius: '3px',
                                             },
                                         }}
+                                        readOnly={!isEdit}
                                         disabled={!province}
                                         label={'Quận/huyện'}
                                     >
@@ -530,6 +524,7 @@ const Checkout: React.FC = () => {
                                                 borderRadius: '3px',
                                             },
                                         }}
+                                        readOnly={!isEdit}
                                         disabled={!district}
                                         label={'Phường/Xã'}
                                     >
@@ -544,16 +539,18 @@ const Checkout: React.FC = () => {
                         </Grid>
                     </>
                 )}
-                <Button
-                    variant="contained"
-                    fullWidth
-                    sx={{ mt: 3, bgcolor: 'rgb(27, 191, 177)', display: { xs: 'none', sm: 'block' } }}
-                    onClick={() => {
-                        handleBuy();
-                    }}
-                >
-                    ĐẶT HÀNG NGAY
-                </Button>
+                {order?.status === 'PROCESSING' && (
+                    <Button
+                        variant="contained"
+                        fullWidth
+                        sx={{ mt: 3, bgcolor: 'rgb(27, 191, 177)', display: { xs: 'none', sm: 'block' } }}
+                        onClick={() => {
+                            handleCancel();
+                        }}
+                    >
+                        Hủy đặt hàng
+                    </Button>
+                )}
             </Grid>
 
             <Grid item xs={12} md={6} sx={{ position: 'sticky', top: '0', height: '100vh', overflow: 'hidden' }}>
@@ -569,12 +566,9 @@ const Checkout: React.FC = () => {
                     </Typography>
                     <Divider sx={{ my: 1 }}></Divider>
                     <Box sx={{ p: 3 }}>
-                        {listItemInCart.map((item: any, index: number) => {
-                            const cartItem = listCart.find((cartItem: any) => cartItem.productDetailId === item.id);
-                            const quantity = cartItem ? cartItem.quantity : 0;
-
+                        {orderDetails?.map((item: any, index: number) => {
                             return (
-                                <Box key={item.productDetailId}>
+                                <Box key={item.id}>
                                     <Box
                                         sx={{
                                             display: 'flex',
@@ -610,7 +604,7 @@ const Checkout: React.FC = () => {
                                                     fontSize: '0.8rem',
                                                 }}
                                             >
-                                                {quantity}
+                                                {item.quantity}
                                             </Box>
                                         </Box>
                                         <Box sx={{ flexGrow: 1 }}>
@@ -622,18 +616,18 @@ const Checkout: React.FC = () => {
                                                 }}
                                             >
                                                 <Typography variant="h6" sx={{ fontSize: 17 }}>
-                                                    {item.name}
+                                                    {item.productName}
                                                 </Typography>
                                                 <Typography variant="body1" sx={{ fontSize: 15 }} color="#111">
                                                     {formatPrice(item.sellPrice)}
                                                 </Typography>
                                             </Box>
                                             <Typography variant="body2" color="textSecondary">
-                                                Size: {item.sizeName}
+                                                Size: {item.size}
                                             </Typography>
                                         </Box>
                                     </Box>
-                                    {index < listItemInCart.length - 1 && <Divider sx={{ my: 2 }} />}
+                                    {index < orderDetails?.length - 1 && <Divider sx={{ my: 2 }} />}
                                 </Box>
                             );
                         })}
@@ -667,19 +661,21 @@ const Checkout: React.FC = () => {
                         </Box>
                     </Box>
                 </Box>
-                <Button
-                    variant="contained"
-                    fullWidth
-                    sx={{ mt: 3, bgcolor: 'rgb(27, 191, 177)', display: { xs: 'block', sm: 'none' } }}
-                    onClick={() => {
-                        handleBuy();
-                    }}
-                >
-                    ĐẶT HÀNG NGAY
-                </Button>
+                {order?.status === 'PROCESSING' && (
+                    <Button
+                        variant="contained"
+                        fullWidth
+                        sx={{ mt: 3, bgcolor: 'rgb(27, 191, 177)', display: { xs: 'block', sm: 'none' } }}
+                        onClick={() => {
+                            handleCancel();
+                        }}
+                    >
+                        Hủy đặt hàng
+                    </Button>
+                )}
             </Grid>
         </Grid>
     );
 };
 
-export default Checkout;
+export default OrderDetail;

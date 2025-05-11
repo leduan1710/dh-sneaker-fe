@@ -3,27 +3,21 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LocalMallIcon from '@mui/icons-material/LocalMall';
-import FavoriteIcon from '@mui/icons-material/Favorite';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
 import Badge from '@mui/material/Badge';
 import { useSelector, useStore } from 'react-redux';
 import { ReducerProps } from '../../../reducers/ReducersProps';
-import { set_number_cart, set_number_favorite } from '../../../reducers/Actions';
+import { set_number_cart } from '../../../reducers/Actions';
 import DrawerMenu from './DrawerMenu';
 import DrawerSearch from './DrawerSearch';
-import { Box, Divider, TextField, Typography } from '@mui/material';
-import { filterSpecialInput, unCheck } from '../../../untils/Logic';
-import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import { Box, Divider, Typography } from '@mui/material';
 import { FEMALE_ID, MALE_ID, typeRole } from '../../../common/Common';
 import MenuUser from './MenuUser';
 import DrawerCart from './DrawerCart';
-import DrawerFavorite from './DrawerFavorite';
-import { AlertLogin } from '../../alert/Alert';
-import MenuNotification from './MenuNotification';
-import { GetApi } from '../../../untils/Api';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/swiper-bundle.css';
+import HeaderNotifications from './Notification';
 
 interface HeaderProps {
     index?: number;
@@ -177,7 +171,10 @@ const Header: React.FC<HeaderProps> = (props) => {
                     <Box flex={1} maxWidth="25%" textAlign="center" sx={{ display: { xs: 'none', sm: 'block' } }}></Box>
 
                     <Box flex={1} maxWidth="30%" textAlign="center" sx={{ display: { xs: 'none', sm: 'block' } }}>
-                        <Typography variant="h6" style={{ color: 'white', margin: 0, fontWeight: 'bold', fontSize: 16 }}>
+                        <Typography
+                            variant="h6"
+                            style={{ color: 'white', margin: 0, fontWeight: 'bold', fontSize: 16 }}
+                        >
                             Mua ngay để nhận nhiều ưu đãi hấp dẫn! 🤩
                         </Typography>
                     </Box>
@@ -240,6 +237,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                     </div>
 
                     <div className="flex items-center justify-end flex-grow">
+                        <HeaderNotifications />
                         <span onClick={() => setOpenCart(true)} className="mr-3 cursor-pointer">
                             <Badge badgeContent={numberCart} color="error">
                                 <LocalMallIcon sx={{ color: 'rgba(7, 110, 145, 0.89)' }} />

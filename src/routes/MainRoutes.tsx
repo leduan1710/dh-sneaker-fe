@@ -45,6 +45,7 @@ import NewOrder from '../pages/admin/scenes/NewOrder';
 import OrderManagement from '../pages/admin/scenes/OrderManament';
 import DetailCommissionManagement from '../pages/admin/scenes/DetailCommission';
 import CommissionStatistic from '../pages/admin/scenes/CommissionStatistic';
+import OrderDetail from '../pages/user-guest/order/OrderDetail';
 
 //--------------------------------------------------------------
 //--------------------------------------------------------------
@@ -134,6 +135,8 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                         <Route path="/user/voucher" element={<Voucher />}></Route>
                         <Route path="/checkout" element={<Checkout />}></Route>
                         <Route path="/user/order" element={<Order />}></Route>
+                        <Route path="/user/order/:orderId" element={<OrderDetail />}></Route>
+
                     </Routes>
 
                 </BrowserRouter>

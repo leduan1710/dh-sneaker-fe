@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { AlertLogout } from '../../alert/Alert';
 import { PostApi, PostGuestApi } from '../../../untils/Api';
 import { Avatar } from '@mui/material';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { socket_IO_Client } from '../../../routes/MainRoutes';
 interface MenuUserProps {
     avatar: String;
@@ -58,7 +59,8 @@ const MenuUser: React.FC<MenuUserProps> = (props) => {
         <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                    <Avatar sx={{ width: 27, height: 27 }} src={`${HOST_BE}/${avatar}`} />
+                    {/* <Avatar sx={{ width: 27, height: 27 }} src={`${HOST_BE}/${avatar}`} /> */}
+                    <AccountCircleIcon sx={{ color: 'rgba(7, 110, 145, 0.89)' }} />
                 </IconButton>
             </Tooltip>
             <Menu

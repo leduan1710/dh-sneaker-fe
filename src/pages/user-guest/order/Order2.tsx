@@ -12,7 +12,7 @@ function Order() {
                 <PageTitleWrapper>
                     <Grid container justifyContent="space-between" alignItems="center">
                         <Grid item>
-                            <Typography sx={{ textTransform: 'capitalize' }} variant="h4" component="h3" gutterBottom>
+                            <Typography sx={{ textTransform: 'capitalize' }} variant="h4" fontSize={28} component="h3" gutterBottom>
                                 Hoa hồng và quản lý đơn hàng
                             </Typography>
                         </Grid>
