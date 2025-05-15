@@ -42,9 +42,9 @@ import {
 } from '@mui/material';
 import { filterSpecialInput, formatPrice, shortedString } from '../../../../untils/Logic';
 import TablePagination from '@mui/material/TablePagination';
-import StatusUpdateDialog from './StatusUpdateDialog';
 import { useLocation } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
+import StatusUpdateDialog from './StatusUpdateDialog';
 
 interface RowProps {
     order: any;
@@ -58,20 +58,16 @@ function Row(props: RowProps) {
     const { order, orderDetails, onUpdateOrder } = props;
     const [open, setOpen] = useState(true);
     const [openUpdateStatus, setOpenUpdateStatus] = useState(false);
-    const [openAddressDialog, setOpenAddressDialog] = useState(false);
+    const [newStatus, setNewStatus] = useState('');
 
     const handleClickOpenUpdateStatusDialog = () => {
         setOpenUpdateStatus(true);
     };
     const handleCloseUpdateStatusDialog = () => {
+        setNewStatus('')
         setOpenUpdateStatus(false);
     };
-    const handleClickOpenAddressDialog = () => {
-        setOpenAddressDialog(true);
-    };
-    const handleCloseAddressDialog = () => {
-        setOpenAddressDialog(false);
-    };
+
     const handleUpdateOrderList = () => {
         onUpdateOrder();
     };
@@ -91,6 +87,10 @@ function Row(props: RowProps) {
                 return {};
         }
     };
+    useEffect(()=>{
+        if (newStatus != '')
+            handleClickOpenUpdateStatusDialog();
+    }, [newStatus])
 
     return (
         <React.Fragment>
@@ -112,6 +112,7 @@ function Row(props: RowProps) {
                             borderRadius: '4px',
                             display: 'inline-block',
                             width: 150,
+                            textAlign: 'center',
                         }}
                     >
                         {order.status === 'SUCCESS' && 'Thành công'}
@@ -121,69 +122,45 @@ function Row(props: RowProps) {
                 </TableCell>
 
                 <TableCell>{formatPrice(order.CODPrice)}</TableCell>
-                <TableCell align="right">
-                    {order.status === 'DELIVERING' ? (
-                        <Tooltip title={t('order.Processed')} arrow>
-                            <IconButton
-                                sx={{
-                                    '&:hover': { background: theme.colors.success.lighter },
-                                    color: theme.palette.success.main,
-                                }}
-                                color="inherit"
-                                size="small"
-                                onClick={handleClickOpenUpdateStatusDialog}
-                            >
-                                <NoCrashIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
-                    ) : order.status === 'PROCESSING' ? (
-                        <Tooltip title={t('order.ConfirmAction')} arrow>
-                            <IconButton
-                                sx={{
-                                    '&:hover': {
-                                        background: theme.colors.primary.lighter,
-                                    },
-                                    color: theme.palette.primary.main,
-                                }}
-                                color="inherit"
-                                size="small"
-                                onClick={handleClickOpenUpdateStatusDialog}
-                            >
-                                <CheckCircleIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
-                    ) : order.status === 'CONFIRMED' ? (
-                        <Tooltip title={t('order.Delivering')} arrow>
-                            <IconButton
-                                sx={{
-                                    '&:hover': {
-                                        background: theme.colors.primary.lighter,
-                                    },
-                                    color: theme.palette.primary.main,
-                                }}
-                                color="inherit"
-                                size="small"
-                                onClick={handleClickOpenUpdateStatusDialog}
-                            >
-                                <TimeToLeaveIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
-                    ) : null}
-                    <Tooltip title={t('order.DeliveryAddress')} arrow>
-                        <IconButton
-                            sx={{
-                                '&:hover': {
-                                    background: theme.colors.primary.lighter,
-                                },
-                                color: theme.palette.primary.main,
-                            }}
-                            color="inherit"
-                            size="small"
-                            onClick={handleClickOpenAddressDialog}
-                        >
-                            <InfoOutlinedIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
+                
+                <TableCell align="center">
+                    <Select
+                        value={order.status}
+                        variant="standard"
+                        onChange={(e) => {
+                            setNewStatus(e.target.value);
+                        }}
+                        sx={{
+                            width: '150px',
+                            height: '30px',
+                            padding: '5px',
+                            backgroundColor:
+                                order.status === 'SUCCESS'
+                                    ? 'rgba(76, 175, 80, 0.1)'
+                                    : order.status === 'CANCEL'
+                                    ? 'rgba(244, 67, 54, 0.1)'
+                                    : order.status === 'BOOM'
+                                    ? 'rgba(255, 152, 0, 0.1)'
+                                    : 'rgba(33, 150, 243, 0.1)',
+                            color:
+                                order.status === 'SUCCESS'
+                                    ? '#43A047'
+                                    : order.status === 'CANCEL'
+                                    ? '#D32F2F'
+                                    : order.status === 'BOOM'
+                                    ? '#FF9800'
+                                    : '#1976D2',
+                            fontSize: 14,
+                            '& .MuiSelect-select': {
+                                paddingTop: '6px',
+                                paddingBottom: '6px',
+                            },
+                        }}
+                    >
+                        <MenuItem value="SUCCESS">Thành công</MenuItem>
+                        <MenuItem value="CANCEL">Đã hủy</MenuItem>
+                        <MenuItem value="BOOM">Boom</MenuItem>
+                    </Select>
                 </TableCell>
             </TableRow>
             <TableRow>
@@ -217,11 +194,12 @@ function Row(props: RowProps) {
                     </Collapse>
                 </TableCell>
             </TableRow>
-            <StatusUpdateDialog
+            <StatusUpdateDialog 
                 open={openUpdateStatus}
                 onClose={handleCloseUpdateStatusDialog}
                 order={order}
                 onUpdate={handleUpdateOrderList}
+                status={newStatus}
             />
         </React.Fragment>
     );
@@ -318,12 +296,11 @@ export default function OrderTable() {
         setPage(0);
     };
 
-
     const filteredOrders = orders.filter((order) => {
         const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
         const matchesCtv = ctvFilter === 'all' || order.ctvName === ctvFilter;
         const matchesShipMethod = shipMethodFilter === 'all' || order.shipMethod === shipMethodFilter;
-    
+
         return matchesStatus && matchesCtv && matchesShipMethod;
     });
 
@@ -421,7 +398,7 @@ export default function OrderTable() {
                             <TableCell>CTV</TableCell>
                             <TableCell>Trạng thái đơn</TableCell>
                             <TableCell>Tiền COD</TableCell>
-                            <TableCell align="right">Thao tác</TableCell>
+                            <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>

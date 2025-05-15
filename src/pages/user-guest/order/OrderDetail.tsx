@@ -140,7 +140,7 @@ const OrderDetail: React.FC = () => {
             const formData = new FormData();
 
             // Thêm thông tin đơn hàng vào FormData
-            formData.append('id', order.id)
+            formData.append('id', order.id);
             formData.append('userId', user.id);
             formData.append('ctvName', user.name);
             formData.append('ctvNote', orderNote);
@@ -177,7 +177,7 @@ const OrderDetail: React.FC = () => {
             const formData = new FormData();
 
             // Thêm thông tin đơn hàng vào FormData
-            formData.append('id', order.id)
+            formData.append('id', order.id);
             formData.append('userId', user.id);
             formData.append('ctvName', user.name);
             formData.append('ctvNote', orderNote);
@@ -219,8 +219,7 @@ const OrderDetail: React.FC = () => {
             }
         }
     };
-    const handleCancel = async () => {
-    }
+    const handleCancel = async () => {};
     useEffect(() => {
         let total = 0;
 
@@ -260,10 +259,12 @@ const OrderDetail: React.FC = () => {
                                 Hủy
                             </Button>
                         </Box>
-                    ) : order?.status === "PROCESSING" && (
-                        <Button variant="contained" color="secondary" onClick={handleEditClick}>
-                            Chỉnh sửa đơn hàng
-                        </Button>
+                    ) : (
+                        order?.status === 'PROCESSING' && (
+                            <Button variant="contained" color="secondary" onClick={handleEditClick}>
+                                Chỉnh sửa đơn hàng
+                            </Button>
+                        )
                     )}
                 </Box>
 
@@ -317,22 +318,23 @@ const OrderDetail: React.FC = () => {
                         readOnly: !isEdit,
                     }}
                 />
-                {order?.orderDescribe && <TextField
-                    label="Lý do đơn bị hủy"
-                    variant="outlined"
-                    fullWidth
-                    multiline
-                    minRows={2}
-                    value={order?.orderDescribe}
-                    sx={{ mb: 1 }}
-                    InputProps={{
-                        sx: {
-                            borderRadius: '3px',
-                        },
-                        readOnly: !isEdit,
-                    }}
-                />}
-                
+                {(order?.orderDescribe && order.status === "CANCEL") && (
+                    <TextField
+                        label="Lý do đơn bị hủy"
+                        variant="outlined"
+                        fullWidth
+                        multiline
+                        minRows={2}
+                        value={order?.orderDescribe}
+                        sx={{ mb: 1 }}
+                        InputProps={{
+                            sx: {
+                                borderRadius: '3px',
+                            },
+                            readOnly: !isEdit,
+                        }}
+                    />
+                )}
 
                 <Typography variant="body2" sx={{ marginBottom: 1 }}>
                     {'Ảnh ghi chú (Nếu có)'}
@@ -412,6 +414,23 @@ const OrderDetail: React.FC = () => {
                                     sx: {
                                         borderRadius: '3px',
                                     },
+                                    readOnly: !isEdit,
+                                }}
+                            />
+                        )}
+                        {(shippingMethod === 'VIETTELPOST' && order.deliveryCode) && (
+                            <TextField
+                                label="Mã vận đơn"
+                                variant="outlined"
+                                fullWidth
+                                value={order.deliveryCode}
+                                type="text"
+                                sx={{ mt: 1 }}
+                                InputProps={{
+                                    sx: {
+                                        borderRadius: '3px',
+                                    },
+                                    readOnly: true,
                                 }}
                             />
                         )}

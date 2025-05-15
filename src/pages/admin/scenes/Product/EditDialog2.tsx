@@ -39,12 +39,9 @@ import {
 
 import { useSelector, useStore } from 'react-redux';
 import { change_is_loading } from '../../../../reducers/Actions';
-import UploadTwoToneIcon from '@mui/icons-material/UploadTwoTone';
-import CloseIcon from '@mui/icons-material/Close';
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { HOST_BE } from '../../../../common/Common';
 import axios from 'axios';
-import { toastSuccess, toastWarning } from '../../../../untils/Logic';
+import { toastError, toastSuccess, toastWarning } from '../../../../untils/Logic';
 import { useTranslation } from 'react-i18next';
 import { ReducerProps } from '../../../../reducers/ReducersProps';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -75,10 +72,10 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
     const { onClose, open, categories, sizes, styles, colors, types, onUpdate, product } = props;
 
     const [productName, setProductName] = useState('');
-    const [importPrice, setImportPrice] = useState<number | string>('');
-    const [ctvPrice, setCtvPrice] = useState<number | string>('');
-    const [sellPrice, setSellPrice] = useState<number | string>('');
-    const [virtualPrice, setVirtualPrice] = useState<number | string>('');
+    const [importPrice, setImportPrice] = useState('');
+    const [ctvPrice, setCtvPrice] = useState('');
+    const [sellPrice, setSellPrice] = useState('');
+    const [virtualPrice, setVirtualPrice] = useState('');
 
     const [selectImage, setSelectImage] = useState<File | null>(null);
 
@@ -88,13 +85,24 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
 
     const [categoryIdSelect, setCategoryIdSelected] = useState('');
     const [sizeIdSelect, setSizeIdSelected] = useState('');
+    const [sizeByCategory, setSizeByCategory] = useState<any>([]);
+
     const [styleIdSelect, setStyleIdSelected] = useState('');
     const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
 
     const [colorIdSelect, setColorIdSelected] = useState('');
     const [typeIdSelect, setTypeIdSelected] = useState('');
-    
+    const [imageList, setImageList] = useState<any[]>([]);
+
     const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+
+    const [selectedSizes, setSelectedSizes] = useState<any[]>([]);
+    const [currentSize, setCurrentSize] = useState<string>('');
+    const [otherSizeName, setOtherSizeName] = useState('');
+
+    const [currentQuantity, setCurrentQuantity] = useState<string>('');
+    const [sizeError, setSizeError] = useState<string | null>(null);
+    const [quantityError, setQuantityError] = useState<string | null>(null);
 
     const handleClose = () => {
         onClose();
@@ -111,15 +119,18 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
         }
     };
 
-    const handleImageRemove = (index: number) => {
-        setUploadedImages((prevImages) => prevImages.filter((_, i) => i !== index));
+    // const handleImageRemove = (index: number) => {
+    //     setUploadedImages((prevImages) => prevImages.filter((_, i) => i !== index));
+    // };
+        const handleImageRemove = (index: number, isUploaded: boolean) => {
+        if (isUploaded) {
+            // Xóa ảnh từ uploadedImages
+            setUploadedImages((prevImages) => prevImages.filter((_, i) => i !== index));
+        } else {
+            // Xóa ảnh từ images
+            setImageList((prevImages) => prevImages.filter((_, i) => i !== index));
+        }
     };
-
-    const [selectedSizes, setSelectedSizes] = useState<{ sizeId: string; quantity: number }[]>([]);
-    const [currentSize, setCurrentSize] = useState<string>('');
-    const [currentQuantity, setCurrentQuantity] = useState<string>('');
-    const [sizeError, setSizeError] = useState<string | null>(null);
-    const [quantityError, setQuantityError] = useState<string | null>(null);
 
     const handleAddSize = () => {
         const quantity = parseInt(currentQuantity);
@@ -154,6 +165,9 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
     const handleDeleteSize = (sizeId: string) => {
         setSelectedSizes((prev) => prev.filter((item) => item.sizeId !== sizeId));
     };
+    const handleOtherSizeNameChange = (e: any) => {
+        setOtherSizeName(e.target.value);
+    };
 
     const handleQuantityChange = (sizeId: string, quantity: number) => {
         if (quantity > 0) {
@@ -173,9 +187,46 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
             }
         });
     };
+    const handleAddNewSize = async () => {
+        if (!otherSizeName) {
+            setSizeError('Vui lòng nhập tên kích cỡ');
+            return;
+        }
+
+        try {
+            // Gọi API để thêm kích cỡ mới
+            const res = await axios.post(
+                `${HOST_BE}/admin/add/size`,
+                {
+                    otherSizeName,
+                    categoryIdSelect,
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                },
+            );
+
+            if (res.data.message === 'Success') {
+                getSizeByCategory(categoryIdSelect);
+
+                setCurrentSize(res.data.size.id);
+
+                // Xóa tên kích cỡ mới
+                setOtherSizeName('');
+            } else {
+                toastError('Thêm thất bại');
+            }
+        } catch (error: any) {
+            toastError('Thêm thất bại');
+        }
+    };
     const handleCreateProduct = async () => {
         store.dispatch(change_is_loading(true));
         const formData = new FormData();
+        formData.append('id', product.id)
         formData.append('name', productName);
         formData.append('sellPrice', sellPrice.toString());
         formData.append('virtualPrice', virtualPrice.toString());
@@ -186,6 +237,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
         formData.append('sizeId', sizeIdSelect);
         formData.append('styleIds', JSON.stringify(selectedStyles));
         formData.append('selectedSizes', JSON.stringify(selectedSizes));
+        formData.append('oldImageList', JSON.stringify(imageList));
 
         formData.append('colorId', colorIdSelect);
         formData.append('typeId', typeIdSelect);
@@ -198,7 +250,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
             formData.append('files', imageBlob, uniqueFilename);
         }
         try {
-            const res = await axios.post(`${HOST_BE}/admin/add/product`, formData, {
+            const res = await axios.post(`${HOST_BE}/admin/edit/product`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -208,6 +260,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
             if (res.data.message === 'Success') {
                 toastSuccess(t('toast.CreateSuccess'));
                 store.dispatch(change_is_loading(false));
+                onUpdate();
             } else {
                 store.dispatch(change_is_loading(false));
             }
@@ -218,14 +271,22 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
             handleClose();
         }
     };
-    
-    const resetFields = () => {
-        setSelectImage(null);
-        setCategoryIdSelected('');
-        setSizeIdSelected('');
-        setStyleIdSelected('');
-        setColorIdSelected('');
-        setTypeIdSelected('');
+
+    const setField = () => {
+        setProductName(product.name);
+        setImportPrice(product.importPrice);
+        setCtvPrice(product.ctvPrice);
+        setSellPrice(product.sellPrice);
+        setVirtualPrice(product.virtualPrice);
+        setCategoryIdSelected(product.categoryId);
+        const selectedCategory = categories.find((category) => category.id === product.categoryId);
+        if (selectedCategory) {
+            setCategoryNameSelected(selectedCategory.name);
+        }
+        setTypeIdSelected(product.typeId);
+        setSelectedStyles(product.styleIds);
+        setColorIdSelected(product.colorId);
+        setImageList(product.imageList);
     };
     const getTypeByCategory = async (categoryId: string) => {
         try {
@@ -237,18 +298,47 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
             console.error('Error', error);
         }
     };
+    const getSizeByCategory = async (categoryId: string) => {
+        try {
+            const resTypes = await GetApi(`/api/size-by-category/${categoryId}`, null);
+            if (resTypes.data.message == 'Success') {
+                setSizeByCategory(resTypes.data.sizes);
+            }
+        } catch (error) {
+            console.error('Error', error);
+        }
+    };
+    const getProductDetail = async () => {
+        try {
+            const resTypes = await GetApi(`/api/product-detail-by-product/${product.id}`, null);
+            if (resTypes.data.message == 'Success') {
+                const sizes = resTypes.data.productDetails.map((product: any) => ({
+                    productDetailId: product.id,
+                    sizeId: product.sizeId,
+                    sizeName: product.sizeName,
+                    quantity: product.quantity,
+                }));
 
+                setSelectedSizes(sizes);
+            }
+        } catch (error) {
+            console.error('Error', error);
+        }
+    };
     useEffect(() => {
         if (categoryIdSelect) {
             getTypeByCategory(categoryIdSelect);
+            getSizeByCategory(categoryIdSelect);
         }
     }, [categoryIdSelect]);
 
     useEffect(() => {
-        if (open) {
-            // resetFields();
+        if (product) {
+            getProductDetail();
+            setField();
         }
-    }, [open]);
+    }, [product]);
+
     return (
         <React.Fragment>
             <Dialog onClose={handleClose} open={open}>
@@ -291,6 +381,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
                                                     id="select-parent-cate-lvl1"
                                                     value={categoryIdSelect}
                                                     onChange={(e) => {
+                                                        console.log('change');
                                                         const selectedCategory = categories.find(
                                                             (category) => category.id === e.target.value,
                                                         );
@@ -323,6 +414,23 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
                                         </Stack>
                                         <Typography variant="h5">{t('product.Image')}</Typography>
                                         <Stack direction="row" spacing={2} sx={{ mb: 2, mt: 2 }}>
+                                            {imageList.map((image, index) => (
+                                                <Box key={index} sx={{ position: 'relative' }}>
+                                                    <img
+                                                        src={
+                                                            image.startsWith('uploads') ? `${HOST_BE}/${image}` : image
+                                                        }
+                                                        alt={`image-${index}`}
+                                                        style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                                                    />
+                                                    <IconButton
+                                                        onClick={() => handleImageRemove(index, false)}
+                                                        sx={{ position: 'absolute', top: 0, right: 0 }}
+                                                    >
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </Box>
+                                            ))}
                                             {uploadedImages.map((file, index) => (
                                                 <Box key={index} sx={{ position: 'relative' }}>
                                                     <img
@@ -331,7 +439,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
                                                         style={{ width: '100px', height: '100px', objectFit: 'cover' }}
                                                     />
                                                     <IconButton
-                                                        onClick={() => handleImageRemove(index)}
+                                                        onClick={() => handleImageRemove(index, true)}
                                                         sx={{ position: 'absolute', top: 0, right: 0 }}
                                                     >
                                                         <DeleteIcon />
@@ -365,21 +473,43 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
                                                         value={currentSize}
                                                         onChange={(e) => setCurrentSize(e.target.value)}
                                                     >
-                                                        {sizes
+                                                        {sizeByCategory
                                                             .filter(
-                                                                (size) =>
+                                                                (size: any) =>
                                                                     !selectedSizes.some(
                                                                         (item) => item.sizeId === size.id,
                                                                     ),
                                                             )
-                                                            .map((size) => (
+                                                            .map((size: any) => (
                                                                 <MenuItem key={size.id} value={size.id}>
                                                                     {size.name}
                                                                 </MenuItem>
                                                             ))}
+                                                        {categoryNameSelect && <MenuItem value="other">Khác</MenuItem>}
                                                     </Select>
                                                     {sizeError && <FormHelperText>{sizeError}</FormHelperText>}
                                                 </FormControl>
+                                                {currentSize === 'other' && (
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            marginTop: '10px',
+                                                        }}
+                                                    >
+                                                        <TextField
+                                                            label="Nhập tên kích cỡ mới"
+                                                            value={otherSizeName}
+                                                            onChange={handleOtherSizeNameChange}
+                                                            error={!!sizeError}
+                                                            helperText={sizeError}
+                                                            sx={{ width: '150px', marginRight: '10px' }}
+                                                        />
+                                                        <Button variant="contained" onClick={handleAddNewSize}>
+                                                            Thêm
+                                                        </Button>
+                                                    </Box>
+                                                )}
                                                 <FormControl error={!!quantityError} sx={{ width: '100px' }}>
                                                     <TextField
                                                         type="number"
@@ -448,28 +578,28 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
                                                 type="number"
                                                 value={virtualPrice}
                                                 onChange={(e) => setVirtualPrice(e.target.value)}
-                                                InputProps={{ inputProps: { min: 0 } }} // Ràng buộc giá không âm
+                                                InputProps={{ inputProps: { min: 0 } }}
                                             />
                                             <TextField
                                                 label="Giá nhập"
                                                 type="number"
                                                 value={importPrice}
                                                 onChange={(e) => setImportPrice(e.target.value)}
-                                                InputProps={{ inputProps: { min: 0 } }} // Ràng buộc giá nhập không âm
+                                                InputProps={{ inputProps: { min: 0 } }}
                                             />
                                             <TextField
                                                 label="Giá CTV"
                                                 type="number"
                                                 value={ctvPrice}
                                                 onChange={(e) => setCtvPrice(e.target.value)}
-                                                InputProps={{ inputProps: { min: 0 } }} // Ràng buộc giá không âm
+                                                InputProps={{ inputProps: { min: 0 } }}
                                             />
                                             <TextField
                                                 label="Giá bán"
                                                 type="number"
                                                 value={sellPrice}
                                                 onChange={(e) => setSellPrice(e.target.value)}
-                                                InputProps={{ inputProps: { min: 0 } }} // Ràng buộc giá không âm
+                                                InputProps={{ inputProps: { min: 0 } }}
                                             />
                                         </Stack>
                                         <FormControl component="fieldset" sx={{ mt: 1 }}>

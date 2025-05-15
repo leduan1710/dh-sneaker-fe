@@ -36,6 +36,7 @@ const StatusUpdateDialog: React.FC<StatusUpdateDialogProps> = ({ open, onClose, 
             USERNAME: '0773450028',
             PASSWORD: '01629014135Aa.',
         });
+        console.log(response.data)
         const { token, expired } = response.data.data;
         saveTokenToLocalStorage(token, expired);
         return token;

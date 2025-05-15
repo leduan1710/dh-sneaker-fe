@@ -17,57 +17,62 @@ interface StatusUpdateDialogProps {
     onClose: () => void;
     onUpdate: () => void;
     order: OrderModel;
+    status: string;
 }
 
-const StatusUpdateDialog: React.FC<StatusUpdateDialogProps> = ({ open, onClose, order, onUpdate }) => {
+const StatusUpdateDialog: React.FC<StatusUpdateDialogProps> = ({ open, onClose, order, onUpdate, status }) => {
     const { t } = useTranslation();
     const store = useStore();
     const handleStatusOrder = async () => {
         if (order) {
             onClose();
             store.dispatch(change_is_loading(true));
-            if (order.status == 'PROCESSING') {
-                const resOrder = await GetApi(`/shop/update/order-confirmed/${order.id}`, localStorage.getItem('token'));
+            if (status == 'SUCCESS') {
+                const resOrder = await GetApi(
+                    `/admin/update/order-success/${order.id}`,
+                    localStorage.getItem('token'),
+                );
                 if (resOrder.data.message == 'Success') {
-                    toastSuccess(t('toast.Success'))
+                    toastSuccess(t('toast.Success'));
                     onUpdate();
                 }
                 store.dispatch(change_is_loading(false));
-            };
-            if (order.status == 'CONFIRMED') {
-                const resOrder = await GetApi(`/shop/update/order-delivering/${order.id}`, localStorage.getItem('token'));
+            }
+            if (status == 'CANCEL') {
+                const resOrder = await GetApi(
+                    `/admin/update/order-cancel/${order.id}`,
+                    localStorage.getItem('token'),
+                );
                 if (resOrder.data.message == 'Success') {
-                    toastSuccess(t('toast.Success'))
+                    toastSuccess(t('toast.Success'));
                     onUpdate();
                 }
                 store.dispatch(change_is_loading(false));
-            };
-            if (order.status == 'DELIVERING')
-            {
-                const resOrder = await GetApi(`/shop/update/order-processed/${order.id}`, localStorage.getItem('token'));
-                
-                if (resOrder.data.message == 'Success') {
-                    toastSuccess(t('toast.Success'))
-                    onUpdate();
-                }
-                store.dispatch(change_is_loading(false));
-                if (resOrder.data.message == 'Success') {
-                    await GetApi(`/shop/send-order-email/${order.id}`, localStorage.getItem('token'));
-                }
-            };
-            
+            }
+            if (status == 'BOOM') {
+                const resOrder = await GetApi(
+                    `/admin/update/order-boom/${order.id}`,
+                    localStorage.getItem('token'),
+                );
 
+                if (resOrder.data.message == 'Success') {
+                    toastSuccess(t('toast.Success'));
+                    onUpdate();
+                }
+                store.dispatch(change_is_loading(false));
+            }
         }
     };
     return (
         <React.Fragment>
             <Dialog open={open} onClose={onClose}>
-                <DialogTitle>{t('order.ConfirmAction')}</DialogTitle>
+                <DialogTitle>Cập nhật trạng thái đơn hàng</DialogTitle>
                 <DialogContent>
                     <Typography>
-                        {order.status === 'PROCESSING' && t('order.ConfirmOrder')}
-                        {order.status === 'CONFIRMED' && t('order.ConfirmDelivering')}
-                        {order.status === 'DELIVERING' && t('order.ConfirmDelivered')} ?
+                        Xác nhận cập nhật trạng thái đơn hàng là "
+                        {status === 'SUCCESS' && "THÀNH CÔNG"}
+                        {status === 'CANCEL' && "ĐÃ HỦY"}
+                        {status === 'BOOM' && "BOOM"}" ?
                     </Typography>
                 </DialogContent>
                 <DialogActions>

@@ -184,9 +184,8 @@ export default function OrderTable() {
                         <CardContent>
                             <Grid container spacing={0}>
                                 <Grid
-                                    xs={12}
+                                    xs={4}
                                     sm={4}
-                                    md={3}
                                     item
                                     display="flex"
                                     justifyContent="center"
@@ -196,11 +195,8 @@ export default function OrderTable() {
                                         <img alt="commission" src={require('../../../static/order-commission.png')} />
                                     </AvatarWrapper>
                                 </Grid>
-                                <Grid xs={12} sm={8} md={6} item display="flex" alignItems="center">
+                                <Grid xs={8} sm={8} item display="flex" alignItems="center">
                                     <Box
-                                        sx={{
-                                            pt: 2,
-                                        }}
                                     >
                                         <Typography variant="h6" gutterBottom noWrap>
                                             Hoa hồng
@@ -218,16 +214,13 @@ export default function OrderTable() {
                     <Card>
                         <CardContent>
                             <Grid container spacing={0}>
-                                <Grid xs={12} sm={4} item display="flex" justifyContent="center" alignItems="center">
+                                <Grid xs={4} sm={4} item display="flex" justifyContent="center" alignItems="center">
                                     <AvatarWrapper>
                                         <img alt="order-count" src={require('../../../static/order-count.png')} />
                                     </AvatarWrapper>
                                 </Grid>
-                                <Grid xs={12} sm={8} item display="flex" alignItems="center">
+                                <Grid xs={8} sm={8} item display="flex" alignItems="center">
                                     <Box
-                                        sx={{
-                                            pt: 2,
-                                        }}
                                     >
                                         <Typography variant="h6" gutterBottom noWrap>
                                             Số lượng
@@ -245,16 +238,14 @@ export default function OrderTable() {
                     <Card>
                         <CardContent>
                             <Grid container spacing={0}>
-                                <Grid xs={12} sm={4} item display="flex" justifyContent="center" alignItems="center">
+                                <Grid xs={4} sm={4} item display="flex" justifyContent="center" alignItems="center">
                                     <AvatarWrapper>
                                         <img alt="revenue" src={require('../../../static/bonus.png')} />
                                     </AvatarWrapper>
                                 </Grid>
-                                <Grid xs={12} sm={8} item display="flex" alignItems="center">
+                                <Grid xs={8} sm={8} item display="flex" alignItems="center">
                                     <Box
-                                        sx={{
-                                            pt: 2,
-                                        }}
+
                                     >
                                         <Typography variant="h6" gutterBottom noWrap>
                                             Thưởng
@@ -272,16 +263,13 @@ export default function OrderTable() {
                     <Card>
                         <CardContent>
                             <Grid container spacing={0}>
-                                <Grid xs={12} sm={4} item display="flex" justifyContent="center" alignItems="center">
+                                <Grid xs={4} sm={4} item display="flex" justifyContent="center" alignItems="center">
                                     <AvatarWrapper>
                                         <img alt="revenue" src={require('../../../static/budget.png')} />
                                     </AvatarWrapper>
                                 </Grid>
-                                <Grid xs={12} sm={8} item display="flex" alignItems="center">
+                                <Grid xs={8} sm={8} item display="flex" alignItems="center">
                                     <Box
-                                        sx={{
-                                            pt: 2,
-                                        }}
                                     >
                                         <Typography variant="h6" gutterBottom noWrap>
                                             Tổng

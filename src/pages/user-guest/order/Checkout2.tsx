@@ -113,6 +113,10 @@ const Checkout: React.FC = () => {
         });
 
         if (shippingMethod === 'OFFLINE') {
+            if(!(orderNote && customerName && shippingMethod && totalCOD)){
+                toastWarning('Vui lòng nhập đủ thông tin');
+                return;
+            }
             const formData = new FormData();
 
             // Thêm thông tin đơn hàng vào FormData

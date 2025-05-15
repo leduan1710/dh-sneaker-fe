@@ -44,7 +44,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { HOST_BE } from '../../../../common/Common';
 import axios from 'axios';
-import { toastSuccess, toastWarning } from '../../../../untils/Logic';
+import { toastError, toastSuccess, toastWarning } from '../../../../untils/Logic';
 import { useTranslation } from 'react-i18next';
 import { ReducerProps } from '../../../../reducers/ReducersProps';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -82,6 +82,8 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
     const [selectImage, setSelectImage] = useState<File | null>(null);
 
     const [typeByCategories, setTypeByCategory] = useState(types);
+    const [sizeByCategory, setSizeByCategory] = useState<any>([]);
+
     //select
     const [categoryNameSelect, setCategoryNameSelected] = useState('');
 
@@ -92,7 +94,7 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
 
     const [colorIdSelect, setColorIdSelected] = useState('');
     const [typeIdSelect, setTypeIdSelected] = useState('');
-    
+
     const [uploadedImages, setUploadedImages] = useState<File[]>([]);
 
     const handleClose = () => {
@@ -116,6 +118,8 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
 
     const [selectedSizes, setSelectedSizes] = useState<{ sizeId: string; quantity: number }[]>([]);
     const [currentSize, setCurrentSize] = useState<string>('');
+    const [otherSizeName, setOtherSizeName] = useState('');
+
     const [currentQuantity, setCurrentQuantity] = useState<string>('');
     const [sizeError, setSizeError] = useState<string | null>(null);
     const [quantityError, setQuantityError] = useState<string | null>(null);
@@ -154,6 +158,10 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
         setSelectedSizes((prev) => prev.filter((item) => item.sizeId !== sizeId));
     };
 
+    const handleOtherSizeNameChange = (e: any) => {
+        setOtherSizeName(e.target.value);
+    };
+
     const handleQuantityChange = (sizeId: string, quantity: number) => {
         if (quantity > 0) {
             setSelectedSizes((prev) => prev.map((item) => (item.sizeId === sizeId ? { ...item, quantity } : item)));
@@ -171,6 +179,42 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
                 return [...prev, styleId];
             }
         });
+    };
+    const handleAddNewSize = async () => {
+        if (!otherSizeName) {
+            setSizeError('Vui lòng nhập tên kích cỡ');
+            return;
+        }
+
+        try {
+            // Gọi API để thêm kích cỡ mới
+            const res = await axios.post(
+                `${HOST_BE}/admin/add/size`,
+                {
+                    otherSizeName,
+                    categoryIdSelect,
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                },
+            );
+
+            if (res.data.message === 'Success') {
+                getSizeByCategory(categoryIdSelect);
+
+                setCurrentSize(res.data.size.id);
+
+                // Xóa tên kích cỡ mới
+                setOtherSizeName('');
+            } else {
+                toastError('Thêm thất bại');
+            }
+        } catch (error: any) {
+            toastError('Thêm thất bại');
+        }
     };
     const handleCreateProduct = async () => {
         store.dispatch(change_is_loading(true));
@@ -217,7 +261,7 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
             handleClose();
         }
     };
-    
+
     const resetFields = () => {
         setSelectImage(null);
         setCategoryIdSelected('');
@@ -236,16 +280,27 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
             console.error('Error', error);
         }
     };
+    const getSizeByCategory = async (categoryId: string) => {
+        try {
+            const resTypes = await GetApi(`/api/size-by-category/${categoryId}`, null);
+            if (resTypes.data.message == 'Success') {
+                setSizeByCategory(resTypes.data.sizes);
+            }
+        } catch (error) {
+            console.error('Error', error);
+        }
+    };
 
     useEffect(() => {
         if (categoryIdSelect) {
             getTypeByCategory(categoryIdSelect);
+            getSizeByCategory(categoryIdSelect);
         }
     }, [categoryIdSelect]);
 
     useEffect(() => {
         if (open) {
-            // resetFields();
+            resetFields();
         }
     }, [open]);
     return (
@@ -263,14 +318,11 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
                             const formData = new FormData(event.currentTarget);
                             const formJson = Object.fromEntries((formData as any).entries());
 
-                            // if (colors.length === 0 || sizes.length === 0) {
-                            //     toastWarning(t('toast.CreateProductCondition'));
-                            //     return;
-                            // }
-                            // if (!selectImage) {
-                            //     toastWarning(t('toast.NeedProductImage'));
-                            //     return;
-                            // }
+                            if (currentSize === 'other' && !otherSizeName) {
+                                setSizeError('Vui lòng nhập tên kích cỡ');
+                                return;
+                            }
+
                             await handleCreateProduct();
                         },
                     }}
@@ -364,21 +416,43 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
                                                         value={currentSize}
                                                         onChange={(e) => setCurrentSize(e.target.value)}
                                                     >
-                                                        {sizes
+                                                        {sizeByCategory
                                                             .filter(
-                                                                (size) =>
+                                                                (size: any) =>
                                                                     !selectedSizes.some(
                                                                         (item) => item.sizeId === size.id,
                                                                     ),
                                                             )
-                                                            .map((size) => (
+                                                            .map((size: any) => (
                                                                 <MenuItem key={size.id} value={size.id}>
                                                                     {size.name}
                                                                 </MenuItem>
                                                             ))}
+                                                        {categoryNameSelect && <MenuItem value="other">Khác</MenuItem>}
                                                     </Select>
                                                     {sizeError && <FormHelperText>{sizeError}</FormHelperText>}
                                                 </FormControl>
+                                                {currentSize === 'other' && (
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            marginTop: '10px',
+                                                        }}
+                                                    >
+                                                        <TextField
+                                                            label="Nhập tên kích cỡ mới"
+                                                            value={otherSizeName}
+                                                            onChange={handleOtherSizeNameChange}
+                                                            error={!!sizeError}
+                                                            helperText={sizeError}
+                                                            sx={{ width: '150px', marginRight: '10px' }}
+                                                        />
+                                                        <Button variant="contained" onClick={handleAddNewSize}>
+                                                            Thêm
+                                                        </Button>
+                                                    </Box>
+                                                )}
                                                 <FormControl error={!!quantityError} sx={{ width: '100px' }}>
                                                     <TextField
                                                         type="number"
@@ -471,24 +545,26 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
                                                 InputProps={{ inputProps: { min: 0 } }} // Ràng buộc giá không âm
                                             />
                                         </Stack>
-                                        <FormControl component="fieldset" sx={{ mt: 1 }}>
-                                            <Typography variant="h5">Chọn kiểu dáng cho sản phẩm</Typography>
-                                            <FormGroup>
-                                                {styles.map((style) => (
-                                                    <FormControlLabel
-                                                        key={style.id}
-                                                        control={
-                                                            <Checkbox
-                                                                value={style.id}
-                                                                checked={selectedStyles.includes(style.id)}
-                                                                onChange={handleStyleChange}
-                                                            />
-                                                        }
-                                                        label={style.name}
-                                                    />
-                                                ))}
-                                            </FormGroup>
-                                        </FormControl>
+                                        {categoryNameSelect === 'Crocs' && (
+                                            <FormControl component="fieldset" sx={{ mt: 1 }}>
+                                                <Typography variant="h5">Chọn kiểu dáng cho sản phẩm</Typography>
+                                                <FormGroup>
+                                                    {styles.map((style) => (
+                                                        <FormControlLabel
+                                                            key={style.id}
+                                                            control={
+                                                                <Checkbox
+                                                                    value={style.id}
+                                                                    checked={selectedStyles.includes(style.id)}
+                                                                    onChange={handleStyleChange}
+                                                                />
+                                                            }
+                                                            label={style.name}
+                                                        />
+                                                    ))}
+                                                </FormGroup>
+                                            </FormControl>
+                                        )}
                                         <Stack direction="row" spacing={1} sx={{ mb: 1, mt: 2 }}>
                                             <FormControl variant="outlined" sx={{ m: 1, minWidth: 150 }}>
                                                 <FormHelperText>Chọn màu sắc</FormHelperText>
