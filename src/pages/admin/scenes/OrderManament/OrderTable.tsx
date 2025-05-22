@@ -45,6 +45,7 @@ import TablePagination from '@mui/material/TablePagination';
 import { useLocation } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
 import StatusUpdateDialog from './StatusUpdateDialog';
+import DetailOrder from './DetailDialog';
 
 interface RowProps {
     order: any;
@@ -58,14 +59,22 @@ function Row(props: RowProps) {
     const { order, orderDetails, onUpdateOrder } = props;
     const [open, setOpen] = useState(true);
     const [openUpdateStatus, setOpenUpdateStatus] = useState(false);
+    const [openDetailOrder, setOpenDetailOrder] = useState(false);
+
     const [newStatus, setNewStatus] = useState('');
 
     const handleClickOpenUpdateStatusDialog = () => {
         setOpenUpdateStatus(true);
     };
     const handleCloseUpdateStatusDialog = () => {
-        setNewStatus('')
+        setNewStatus('');
         setOpenUpdateStatus(false);
+    };
+    const handleClickOpenDetailOrder = () => {
+        setOpenDetailOrder(true);
+    };
+    const handleCloseDetailOrder = () => {
+        setOpenDetailOrder(false);
     };
 
     const handleUpdateOrderList = () => {
@@ -87,17 +96,16 @@ function Row(props: RowProps) {
                 return {};
         }
     };
-    useEffect(()=>{
-        if (newStatus != '')
-            handleClickOpenUpdateStatusDialog();
-    }, [newStatus])
+    useEffect(() => {
+        if (newStatus != '') handleClickOpenUpdateStatusDialog();
+    }, [newStatus]);
 
     return (
         <React.Fragment>
             <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
                 <TableCell>{order.orderCode}</TableCell>
                 <TableCell>
-                    {new Date(order.updateDate).toLocaleDateString('vi-VN', {
+                    {new Date(order.createDate).toLocaleDateString('vi-VN', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
@@ -122,7 +130,7 @@ function Row(props: RowProps) {
                 </TableCell>
 
                 <TableCell>{formatPrice(order.CODPrice)}</TableCell>
-                
+
                 <TableCell align="center">
                     <Select
                         value={order.status}
@@ -162,6 +170,21 @@ function Row(props: RowProps) {
                         <MenuItem value="BOOM">Boom</MenuItem>
                     </Select>
                 </TableCell>
+                <TableCell align="right">
+                    <Tooltip title={'Thông tin đơn hàng'} arrow>
+                        <IconButton
+                            sx={{
+                                '&:hover': { background: theme.colors.primary.lighter },
+                                color: theme.palette.primary.main,
+                            }}
+                            color="primary"
+                            size="small"
+                            onClick={handleClickOpenDetailOrder}
+                        >
+                            <InfoOutlinedIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </TableCell>
             </TableRow>
             <TableRow>
                 <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
@@ -194,12 +217,18 @@ function Row(props: RowProps) {
                     </Collapse>
                 </TableCell>
             </TableRow>
-            <StatusUpdateDialog 
+            <StatusUpdateDialog
                 open={openUpdateStatus}
                 onClose={handleCloseUpdateStatusDialog}
                 order={order}
                 onUpdate={handleUpdateOrderList}
                 status={newStatus}
+            />
+             <DetailOrder
+                open={openDetailOrder}
+                onClose={handleCloseDetailOrder}
+                order={order}
+                orderDetails={orderDetails}
             />
         </React.Fragment>
     );
@@ -260,7 +289,6 @@ export default function OrderTable() {
         if (status) {
             getDataOrder();
             setStatusFilter(status);
-            setShipMethodFilter(status);
             setPage(0);
             location.state = null;
         }
@@ -399,6 +427,7 @@ export default function OrderTable() {
                             <TableCell>Trạng thái đơn</TableCell>
                             <TableCell>Tiền COD</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
+                            <TableCell align="right">Chi tiết</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>

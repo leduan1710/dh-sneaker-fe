@@ -15,6 +15,7 @@ import {
 import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
 import { formatPrice } from '../../../../untils/Logic';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 const AvatarWrapper = styled(Avatar)(
     ({ theme }) => `
@@ -43,21 +44,35 @@ const AvatarWrapper = styled(Avatar)(
 );
 
 interface InfoCardByMonthProps {
-    totalOrderCommission: number;
-    totalBannerCommission: number;
-    totalNewShops: number;
-    totalNewUsers: number;
-    totalOrders: number;
+    orderCounts: any;
+    revenue: any;
+    commission: any;
+    bonus: any;
 }
 function InfoCardByMonth(props: InfoCardByMonthProps) {
     const { t } = useTranslation();
+    const navigate = useNavigate();
 
-    const { totalOrderCommission, totalBannerCommission, totalNewShops, totalNewUsers, totalOrders } = props;
+    const { orderCounts, revenue, commission, bonus } = props;
     return (
         <>
             <Grid container spacing={3}>
-                <Grid xs={12} sm={6} md={3} item>
-                    <Card>
+                <Grid xs={12} sm={6} md={4} item>
+                    <Card
+                        onClick={() => {
+                            navigate('/admin/management/detail-commission', { state: { status: 'ALL' } });
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                        }}
+                        style={{
+                            transition: 'transform 0.2s, box-shadow 0.2s',
+                            cursor: 'pointer',
+                        }}
+                    >
                         <CardContent>
                             <Grid container spacing={0}>
                                 <Grid xs={12} sm={4} item display="flex" justifyContent="center" alignItems="center">
@@ -71,11 +86,11 @@ function InfoCardByMonth(props: InfoCardByMonthProps) {
                                             pt: 2,
                                         }}
                                     >
-                                        <Typography variant="h4" gutterBottom noWrap>
-                                            {t('adminDashboard.OrderCommission')}
+                                        <Typography variant="h5" fontSize={17} gutterBottom noWrap>
+                                            Doanh thu tháng
                                         </Typography>
                                         <Typography variant="body2" noWrap>
-                                            {totalOrderCommission ? formatPrice(totalOrderCommission) : formatPrice(0)}
+                                            {formatPrice(revenue)}
                                         </Typography>
                                     </Box>
                                 </Grid>
@@ -83,13 +98,25 @@ function InfoCardByMonth(props: InfoCardByMonthProps) {
                         </CardContent>
                     </Card>
                 </Grid>
-                <Grid xs={12} sm={6} md={3} item>
-                    <Card>
+                <Grid xs={12} sm={6} md={4} item>
+                    <Card onClick={() => {
+                            navigate('/admin/management/new-orders');
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                        }}
+                        style={{
+                            transition: 'transform 0.2s, box-shadow 0.2s',
+                            cursor: 'pointer',
+                        }}>
                         <CardContent>
                             <Grid container spacing={0}>
                                 <Grid xs={12} sm={4} item display="flex" justifyContent="center" alignItems="center">
                                     <AvatarWrapper>
-                                        <img alt="Ripple" src={require('../../../../static/banner-commission.png')} />
+                                        <img alt="Ripple" src={require('../../../../static/new-order.png')} />
                                     </AvatarWrapper>
                                 </Grid>
                                 <Grid xs={12} sm={8} item display="flex" alignItems="center">
@@ -98,13 +125,11 @@ function InfoCardByMonth(props: InfoCardByMonthProps) {
                                             pt: 2,
                                         }}
                                     >
-                                        <Typography variant="h4" gutterBottom noWrap>
-                                            {t('adminDashboard.BannerCommission')}
+                                        <Typography variant="h5" fontSize={17} gutterBottom noWrap>
+                                            Đơn hàng mới
                                         </Typography>
                                         <Typography variant="body2" noWrap>
-                                            {totalBannerCommission
-                                                ? formatPrice(totalBannerCommission)
-                                                : formatPrice(0)}
+                                            {orderCounts ? orderCounts.newOrderCount : 0}
                                         </Typography>
                                     </Box>
                                 </Grid>
@@ -112,13 +137,25 @@ function InfoCardByMonth(props: InfoCardByMonthProps) {
                         </CardContent>
                     </Card>
                 </Grid>
-                <Grid xs={12} sm={6} md={3} item>
-                    <Card>
+                <Grid xs={12} sm={6} md={4} item>
+                    <Card onClick={() => {
+                            navigate('/admin/management/detail-commission', { state: { status: 'ALL' } });
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                        }}
+                        style={{
+                            transition: 'transform 0.2s, box-shadow 0.2s',
+                            cursor: 'pointer',
+                        }}>
                         <CardContent>
                             <Grid container spacing={0}>
                                 <Grid xs={12} sm={4} item display="flex" justifyContent="center" alignItems="center">
                                     <AvatarWrapper>
-                                        <img alt="Ripple" src={require('../../../../static/new-shop.png')} />
+                                        <img alt="Ripple" src={require('../../../../static/bonus.png')} />
                                     </AvatarWrapper>
                                 </Grid>
                                 <Grid xs={12} sm={8} item display="flex" alignItems="center">
@@ -127,11 +164,11 @@ function InfoCardByMonth(props: InfoCardByMonthProps) {
                                             pt: 2,
                                         }}
                                     >
-                                        <Typography variant="h4" gutterBottom noWrap>
-                                            {t('adminDashboard.TotalNewShops')}
+                                        <Typography variant="h5" fontSize={17} gutterBottom noWrap>
+                                            Hoa hồng & thưởng CTV
                                         </Typography>
                                         <Typography variant="body2" noWrap>
-                                            {totalNewShops ? totalNewShops : 0}
+                                            {formatPrice(commission + bonus)}
                                         </Typography>
                                     </Box>
                                 </Grid>
@@ -139,35 +176,20 @@ function InfoCardByMonth(props: InfoCardByMonthProps) {
                         </CardContent>
                     </Card>
                 </Grid>
-                <Grid xs={12} sm={6} md={3} item>
-                    <Card>
-                        <CardContent>
-                            <Grid container spacing={0}>
-                                <Grid xs={12} sm={4} item display="flex" justifyContent="center" alignItems="center">
-                                    <AvatarWrapper>
-                                        <img alt="Ripple" src={require('../../../../static/new-user.png')} />
-                                    </AvatarWrapper>
-                                </Grid>
-                                <Grid xs={12} sm={8} item display="flex" alignItems="center">
-                                    <Box
-                                        sx={{
-                                            pt: 2,
-                                        }}
-                                    >
-                                        <Typography variant="h4" gutterBottom noWrap>
-                                            {t('adminDashboard.TotalNewUsers')}
-                                        </Typography>
-                                        <Typography variant="body2" noWrap>
-                                            {totalNewUsers ? totalNewUsers : 0}
-                                        </Typography>
-                                    </Box>
-                                </Grid>
-                            </Grid>
-                        </CardContent>
-                    </Card>
-                </Grid>
-                <Grid xs={12} sm={6} md={3} item>
-                    <Card>
+                <Grid xs={12} sm={6} md={4} item>
+                    <Card onClick={() => {
+                            navigate('/admin/management/orders', { state: { status: 'SUCCESS' } });
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                        }}
+                        style={{
+                            transition: 'transform 0.2s, box-shadow 0.2s',
+                            cursor: 'pointer',
+                        }}>
                         <CardContent>
                             <Grid container spacing={0}>
                                 <Grid xs={12} sm={4} item display="flex" justifyContent="center" alignItems="center">
@@ -181,11 +203,89 @@ function InfoCardByMonth(props: InfoCardByMonthProps) {
                                             pt: 2,
                                         }}
                                     >
-                                        <Typography variant="h4" gutterBottom noWrap>
-                                            {t('adminDashboard.TotalOrders')}
+                                        <Typography variant="h5" fontSize={17} gutterBottom noWrap>
+                                            Số đơn thành công
                                         </Typography>
                                         <Typography variant="body2" noWrap>
-                                            {totalOrders ? totalOrders : 0}
+                                            {orderCounts ? orderCounts.successOrderCount : 0}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid xs={12} sm={6} md={4} item>
+                    <Card onClick={() => {
+                            navigate('/admin/management/orders', { state: { status: 'CANCEL' } });
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                        }}
+                        style={{
+                            transition: 'transform 0.2s, box-shadow 0.2s',
+                            cursor: 'pointer',
+                        }}>
+                        <CardContent>
+                            <Grid container spacing={0}>
+                                <Grid xs={12} sm={4} item display="flex" justifyContent="center" alignItems="center">
+                                    <AvatarWrapper>
+                                        <img alt="Ripple" src={require('../../../../static/cancel-order.png')} />
+                                    </AvatarWrapper>
+                                </Grid>
+                                <Grid xs={12} sm={8} item display="flex" alignItems="center">
+                                    <Box
+                                        sx={{
+                                            pt: 2,
+                                        }}
+                                    >
+                                        <Typography variant="h5" fontSize={17} gutterBottom noWrap>
+                                            Số đơn hủy
+                                        </Typography>
+                                        <Typography variant="body2" noWrap>
+                                            {orderCounts ? orderCounts.cancelOrderCount : 0}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid xs={12} sm={6} md={4} item>
+                    <Card onClick={() => {
+                            navigate('/admin/management/orders', { state: { status: 'BOOM' } });
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                        }}
+                        style={{
+                            transition: 'transform 0.2s, box-shadow 0.2s',
+                            cursor: 'pointer',
+                        }}>
+                        <CardContent>
+                            <Grid container spacing={0}>
+                                <Grid xs={12} sm={4} item display="flex" justifyContent="center" alignItems="center">
+                                    <AvatarWrapper>
+                                        <img alt="Ripple" src={require('../../../../static/boom-order.png')} />
+                                    </AvatarWrapper>
+                                </Grid>
+                                <Grid xs={12} sm={8} item display="flex" alignItems="center">
+                                    <Box
+                                        sx={{
+                                            pt: 2,
+                                        }}
+                                    >
+                                        <Typography variant="h5" fontSize={17} gutterBottom noWrap>
+                                            Số đơn boom
+                                        </Typography>
+                                        <Typography variant="body2" noWrap>
+                                            {orderCounts ? orderCounts.boomOrderCount : 0}
                                         </Typography>
                                     </Box>
                                 </Grid>

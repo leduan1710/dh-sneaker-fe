@@ -5,30 +5,23 @@ import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { useTranslation } from 'react-i18next';
 
-interface DailyData {
-    day: number;
-    commission: number;
+interface RevenueData {
+    month: number;
     revenue: number;
-    count: number;
 }
 
 interface AdminLineChartProps {
-    dailyBannerCommission: DailyData[];
-    dailyOrderCommission: DailyData[];
-    dailyOrderCount: DailyData[];
+    monthlyRevenue: RevenueData[];
 }
 
 function AdminLineChart(props: AdminLineChartProps) {
     const theme = useTheme();
     const { t } = useTranslation();
 
-    const { dailyBannerCommission, dailyOrderCommission, dailyOrderCount } = props;
+    const { monthlyRevenue } = props;
 
-    const orderCommissionData = dailyOrderCommission.map((item: DailyData) => item.revenue);
-    const bannerCommissionData = dailyBannerCommission.map((item: DailyData) => item.commission);
-    const orderCountData = dailyOrderCount.map((item: DailyData) => item.count);
-
-    const xLabels = dailyBannerCommission.map((item: DailyData) => item.day);
+    const monthlyRevenueData = monthlyRevenue.map((item: RevenueData) => item.revenue);
+    const xLabels = monthlyRevenue.map((item: RevenueData) => item.month);
 
     const commonChartOptions: ApexOptions = {
         chart: {
@@ -91,7 +84,7 @@ function AdminLineChart(props: AdminLineChartProps) {
         ...commonChartOptions,
         yaxis: {
             title: {
-                text: t('adminDashboard.OrderCommission'),
+                text: "Doanh thu",
                 style: {
                     fontSize: '12px',
                     fontWeight: 700,
@@ -108,7 +101,7 @@ function AdminLineChart(props: AdminLineChartProps) {
             },
         },
         title: {
-            text: t('adminDashboard.OrderCommissionByDay'),
+            text: "Doanh thu theo tháng",
             align: 'center',
             style: {
                 fontSize: '16px',
@@ -120,98 +113,13 @@ function AdminLineChart(props: AdminLineChartProps) {
         colors: [theme.palette.primary.main],
     };
 
-    const bannerChartOptions: ApexOptions = {
-        ...commonChartOptions,
-        yaxis: {
-            title: {
-                text: t('adminDashboard.BannerCommission'),
-                style: {
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    color: theme.palette.text.primary,
-                    fontFamily: theme.typography.fontFamily,
-                },
-            },
-            tickAmount: 5,
-            labels: {
-                show: true,
-                style: {
-                    colors: theme.palette.text.secondary,
-                },
-            },
-        },
-        title: {
-            text: t('adminDashboard.BannerCommissionByDay'),
-            align: 'center',
-            style: {
-                fontSize: '16px',
-                fontWeight: 700,
-                color: theme.palette.text.primary,
-                fontFamily: theme.typography.fontFamily,
-            },
-        },
-        colors: [theme.palette.primary.main],
-    };
-    const orderCountChartOptions: ApexOptions = {
-        ...commonChartOptions,
-        yaxis: {
-            title: {
-                text: t('adminDashboard.OrderCount'),
-                style: {
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    color: theme.palette.text.primary,
-                    fontFamily: theme.typography.fontFamily,
-                },
-            },
-            tickAmount: 5,
-            labels: {
-                show: true,
-                style: {
-                    colors: theme.palette.text.secondary,
-                },
-            },
-        },
-        title: {
-            text: t('adminDashboard.OrderCountByDay'),
-            align: 'center',
-            style: {
-                fontSize: '16px',
-                fontWeight: 700,
-                color: theme.palette.text.primary,
-                fontFamily: theme.typography.fontFamily,
-            },
-        },
-        colors: [theme.palette.primary.main],
-    };
     return (
         <Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
             <Grid item md={12} xs={12}>
                 <Card>
                     <Chart
                         options={orderChartOptions}
-                        series={[{ name: t('adminDashboard.OrderCommission'), data: orderCommissionData }]}
-                        type="line"
-                        height={300}
-                    />
-                </Card>
-            </Grid>
-
-            <Grid item md={6} xs={12}>
-                <Card>
-                    <Chart
-                        options={bannerChartOptions}
-                        series={[{ name: t('adminDashboard.BannerCommission'), data: bannerCommissionData }]}
-                        type="line"
-                        height={300}
-                    />
-                </Card>
-            </Grid>
-            <Grid item md={6} xs={12}>
-                <Card>
-                    <Chart
-                        options={orderCountChartOptions}
-                        series={[{ name: t('adminDashboard.OrderCount'), data: orderCountData }]}
+                        series={[{ name: "Doanh thu theo tháng", data: monthlyRevenueData }]}
                         type="line"
                         height={300}
                     />

@@ -7,12 +7,10 @@ import AdminLineChart from './AdminLineChart';
 import { useTranslation } from 'react-i18next';
 
 interface AdminChartProps {
-    dailyBannerCommission: any;
-    dailyOrderCommission: any;
-    dailyOrderCount: any;
+    monthlyRevenue: any;
 }
 function AdminChart(props: AdminChartProps) {
-    const { dailyBannerCommission, dailyOrderCommission, dailyOrderCount } = props;
+    const { monthlyRevenue } = props;
     const {t} = useTranslation();
 
     const [tabs, setTab] = useState<string | null>('line_chart');
@@ -32,7 +30,7 @@ function AdminChart(props: AdminChartProps) {
                 }}
             >
                 <Typography variant="h3" fontSize={20}>
-                    {t('shopDashboard.CommissionAndOrderStatistics')}
+                    Thống kê doanh thu theo tháng trong năm
                 </Typography>
                 <ToggleButtonGroup value={tabs} exclusive onChange={handleViewOrientation}>
                     <ToggleButton disableRipple value="line_chart">
@@ -46,17 +44,13 @@ function AdminChart(props: AdminChartProps) {
 
             {tabs === 'line_chart' && (
                 <AdminLineChart
-                    dailyBannerCommission={dailyBannerCommission}
-                    dailyOrderCommission={dailyOrderCommission}
-                    dailyOrderCount={dailyOrderCount}
+                    monthlyRevenue={monthlyRevenue}
                 />
             )}
 
             {tabs === 'bar_chart' && (
                 <AdminBarChart
-                    dailyBannerCommission={dailyBannerCommission}
-                    dailyOrderCommission={dailyOrderCommission}
-                    dailyOrderCount={dailyOrderCount}
+                    monthlyRevenue={monthlyRevenue}
                 />
             )}
         </>

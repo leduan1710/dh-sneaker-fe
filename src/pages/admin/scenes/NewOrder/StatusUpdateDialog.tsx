@@ -25,19 +25,16 @@ interface StatusUpdateDialogProps {
 const StatusUpdateDialog: React.FC<StatusUpdateDialogProps> = ({ open, onClose, order, onUpdate, selection }) => {
     const { t } = useTranslation();
     const store = useStore();
-    const [cancelReason, setCancelReason] = useState('')
+    const [cancelReason, setCancelReason] = useState('');
     const checkTokenExpiration = () => {
         const expiration = localStorage.getItem('VIETTELPOST_TOKEN_EXPIRATION');
         return expiration && Date.now() < Number(expiration);
     };
 
     const fetchNewToken = async () => {
-        const response = await axios.post('https://partner.viettelpost.vn/v2/user/Login', {
-            USERNAME: '0773450028',
-            PASSWORD: '01629014135Aa.',
-        });
-        console.log(response.data)
-        const { token, expired } = response.data.data;
+        const response = await GetApi(`/admin/get/tokenVTP`, localStorage.getItem('token'));
+        console.log(response.data);
+        const { token, expired } = response.data;
         saveTokenToLocalStorage(token, expired);
         return token;
     };
@@ -46,36 +43,39 @@ const StatusUpdateDialog: React.FC<StatusUpdateDialogProps> = ({ open, onClose, 
         localStorage.setItem('VIETTELPOST_TOKEN', token);
         localStorage.setItem('VIETTELPOST_TOKEN_EXPIRATION', expirationTime);
     };
-console.log(order)
+
     const handleStatusOrder = async () => {
         if (order) {
             onClose();
             let tokenVTP;
             store.dispatch(change_is_loading(true));
             if (selection == 'SUCCESS') {
-                if(order.shipMethod === 'VIETTELPOST')
-                {
+                if (order.shipMethod === 'VIETTELPOST') {
                     if (!checkTokenExpiration()) {
                         tokenVTP = await fetchNewToken();
                     }
+                    else {
+                        tokenVTP = localStorage.getItem('VIETTELPOST_TOKEN')
+                    }
+                    const resOrder = await PostApi(`/admin/createVTPOrder`, localStorage.getItem('token'), {
+                        VTPToken: tokenVTP,
+                        orderId: order.id,
+                    });
+                    if (resOrder.data.message == 'Success') {
+                        toastSuccess(t('toast.Success'));
+                        onUpdate();
+                    }
                 }
-                console.log(tokenVTP)
-                // const resOrder = await GetApi(
-                //     `/admin/update/order-confirmed/${order.id}`,
-                //     localStorage.getItem('token'),
-                // );
-                // if (resOrder.data.message == 'Success') {
-                //     toastSuccess(t('toast.Success'));
-                //     onUpdate();
-                // }
+
                 store.dispatch(change_is_loading(false));
             }
             if (selection == 'CANCEL') {
                 const resOrder = await PostApi(
                     `/admin/update/order-cancelled/${order.id}`,
-                    localStorage.getItem('token'), {
-                        cancelReason: cancelReason
-                    }
+                    localStorage.getItem('token'),
+                    {
+                        cancelReason: cancelReason,
+                    },
                 );
                 if (resOrder.data.message == 'Success') {
                     toastSuccess(t('toast.Success'));

@@ -30,7 +30,9 @@ function DashboardAdmin() {
     const { t } = useTranslation();
     const store = useStore();
     const user = useSelector((state: ReducerProps) => state.user);
-    const [age, setAge] = React.useState('');
+
+    const [dailyOrderCommission, setDailyOrderCommissionCommission] = useState<any>([]);
+    const [dailyBannerCommission, setDailyBannerCommissionCommission] = useState<any>([]);
 
     const currentMonth = new Date().getMonth() + 1;
     const currentYear = new Date().getFullYear();
@@ -38,89 +40,72 @@ function DashboardAdmin() {
     const [month, setMonth] = useState(currentMonth);
     const [year, setYear] = useState(currentYear);
 
-    const [dailyOrderCommission, setDailyOrderCommissionCommission] = useState<any>([]);
-    const [dailyBannerCommission, setDailyBannerCommissionCommission] = useState<any>([]);
-    const [totalOrderCommission, setTotalOrderCommission] = useState<number>(0);
-    const [totalBannerCommission, setTotalBannerCommission] = useState<number>(0);
+    const [revenue, setRevenue] = useState(0);
+    const [commission, setCommission] = useState(0);
+    const [bonus, setBonus] = useState(0);
 
-    const [totalOrders, setTotalOrders] = useState<number>(0);
+    const [orderCounts, setOrderCounts] = useState({
+        newOrderCount: 0,
+        successOrderCount: 0,
+        cancelOrderCount: 0,
+        boomOrderCount: 0,
+    });
+
+    const [monthlyRevenue, setMonthlyRevenue] = useState<any[]>([]);
+
     const [dailyOrderCount, setDailyOrderCount] = useState<any>([]);
 
-    const [totalUsers, setTotalUsers] = useState<number>(0);
-    const [totalShops, setTotalShops] = useState<number>(0);
-    const [totalNewShops, setTotalNewShops] = useState<number>(0);
-    const [totalNewUsers, setTotalNewUsers] = useState<number>(0);
-
-    const getDataBannerCommission = async () => {
-        const res = await GetApi(`/admin/get/banner-commission/${month}/${year}`, localStorage.getItem('token'));
-        if (res.data.message === 'Success') {
-            setDailyBannerCommissionCommission(res.data.dailyBannerCommission);
-            setTotalBannerCommission(res.data.totalBannerCommission);
-        }
-    };
-    const getDataOrderCommission = async () => {
-        const res = await GetApi(`/admin/get/order-commission/${month}/${year}`, localStorage.getItem('token'));
-        if (res.data.message === 'Success') {
-            setDailyOrderCommissionCommission(res.data.dailyOrderCommission);
-            setTotalOrderCommission(res.data.totalOrderCommission);
-        }
-    };
-    const getDataNewUserAndNewShop = async () => {
-        const res = await GetApi(`/admin/get/new-shop-user/${month}/${year}`, localStorage.getItem('token'));
-        if (res.data.message === 'Success') {
-            setTotalNewShops(res.data.totalNewShops);
-            setTotalNewUsers(res.data.totalNewUsers);
-        }
-    };
-    const getDataTotalUserAndTotalShop = async () => {
-        const res = await GetApi(`/admin/get/total-shop-user`, localStorage.getItem('token'));
-        if (res.data.message === 'Success') {
-            setTotalShops(res.data.totalShops);
-            setTotalUsers(res.data.totalUsers);
-        }
-    };
     const getDataOrderCount = async () => {
         const res = await GetApi(`/admin/get/order-count/${month}/${year}`, localStorage.getItem('token'));
         if (res.data.message === 'Success') {
-            setTotalOrders(res.data.totalOrders);
-            setDailyOrderCount(res.data.dailyOrders);
+            setOrderCounts({
+                newOrderCount: res.data.orderCounts.PROCESSING,
+                successOrderCount: res.data.orderCounts.SUCCESS,
+                cancelOrderCount: res.data.orderCounts.CANCEL,
+                boomOrderCount: res.data.orderCounts.BOOM,
+            });
         }
     };
+    const getDataRevenueCommissionAndBonus = async () => {
+        const res = await GetApi(`/admin/get/revenue-commission/${month}/${year}`, localStorage.getItem('token'));
+        if (res.data.message === 'Success') {
+            setRevenue(res.data.data.revenue);
+            setCommission(res.data.data.commission);
+            setBonus(res.data.data.bonus);
+        }
+    };
+
+    const getAnnualRevenue = async () => {
+        const res = await GetApi(`/admin/get/annual-revenue/${year}`, localStorage.getItem('token'));
+        if (res.data.message === 'Success') {
+            setMonthlyRevenue(res.data.data);
+        }
+    };
+
     const handleChangeMonth = (event: SelectChangeEvent) => {
         setMonth(Number(event.target.value));
     };
     const handleYearChange = (event: SelectChangeEvent) => {
         setYear(Number(event.target.value));
     };
-    useEffect(() => {
-        if (user) {
-            getDataBannerCommission();
-            getDataOrderCommission();
-            getDataNewUserAndNewShop();
-            getDataTotalUserAndTotalShop();
-            getDataOrderCount();
-        }
-    }, [user]);
+
     useEffect(() => {
         handleGetData();
     }, [month, year]);
     const handleGetData = () => {
         if (user) {
-            getDataBannerCommission();
-            getDataOrderCommission();
-            getDataNewUserAndNewShop();
-            getDataTotalUserAndTotalShop();
             getDataOrderCount();
+            getDataRevenueCommissionAndBonus();
+            getAnnualRevenue();
         }
     };
     return (
         <>
-    
             <PageTitleWrapper>
                 <Grid container spacing={1}>
                     <Grid xs={12} sm={6} item>
-                        <Typography variant="h3" component="h3" gutterBottom>
-                            {t('adminDashboard.AdminOverview')}
+                        <Typography variant="h4" component="h3" gutterBottom>
+                            Tổng quan
                         </Typography>
                     </Grid>
                     <Grid xs={12} sm={3} item display="flex" justifyContent="center" alignItems="center">
@@ -163,12 +148,12 @@ function DashboardAdmin() {
             </PageTitleWrapper>
             <Container maxWidth="lg">
                 <Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
-                    <Grid item xs={12}>
+                    {/* <Grid item xs={12}>
                         <InfoCard
                             totalUsers={totalUsers}
                             totalShops={totalShops}
                         />
-                    </Grid>
+                    </Grid> */}
                     <Grid item xs={12}>
                         <Box
                             display="flex"
@@ -183,25 +168,16 @@ function DashboardAdmin() {
                             </Typography>
                         </Box>
                         <InfoCardByMonth
-                            totalBannerCommission={totalBannerCommission}
-                            totalNewShops={totalNewShops}
-                            totalNewUsers={totalNewUsers}
-                            totalOrderCommission={totalOrderCommission}
-                            totalOrders={totalOrders}
+                            orderCounts={orderCounts}
+                            revenue={revenue}
+                            commission={commission}
+                            bonus={bonus}
                         />
                     </Grid>
-                    <Grid item xs={12}>
-                        {/* <RevenuePieChar
-                            totalRevenue={totalRevenue}
-                            topSellProductData={topSellProduct}
-                            totalRevenueUnPaid={totalRevenueUnpaid}
-                        /> */}
-                    </Grid>
+
                     <Grid item xs={12}>
                         <AdminChart
-                            dailyBannerCommission={dailyBannerCommission}
-                            dailyOrderCommission={dailyOrderCommission}
-                            dailyOrderCount={dailyOrderCount}
+                            monthlyRevenue={monthlyRevenue}
                         />
                     </Grid>
                 </Grid>

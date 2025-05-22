@@ -43,6 +43,9 @@ function LoginRegister() {
     const [logIn, toggle] = React.useState(true);
     const { t } = useTranslation();
     const [email, setEmail] = useState<string>('');
+    const [phone, setPhone] = useState<string>('');
+    const [name, setName] = useState<string>('');
+
     const [errPhone, setErrPhone] = useState<boolean>(false);
     const [password, setPassword] = useState<string>('');
     const [rePassword, setRePassword] = useState<string>('');
@@ -52,12 +55,8 @@ function LoginRegister() {
     //
     const [strength, setStrength] = useState(0);
     //time
-    const [time, setTime] = useState(300);
     const [isRunning, setIsRunning] = useState(false);
     const intervalRef = useRef<any>(null);
-    //
-    const [comfirm, setComfirm] = useState<any>([]);
-    const [otp, setOtp] = useState<string>('');
     //
     const [openOtp, setOpenOtp] = useState<boolean>(false);
     //
@@ -85,10 +84,6 @@ function LoginRegister() {
             if (res.data.message == 'Account is inActive') {
                 localStorage.setItem('email', email);
                 toastWarning(t('auth.Account is inActive'));
-                setIsRunning(true);
-                handleResendOtpRegister();
-                openDialog();
-                store.dispatch(change_is_loading(false));
             }
             if (res.data.message == 'Login success') {
                 store.dispatch(change_is_loading(true));
@@ -117,26 +112,6 @@ function LoginRegister() {
             }
         }
     };
-    const handleVerifyOTP = async (otp: string, comfirm: any) => {
-        try {
-            const res = await PostGuestApi('/auth/register-2fa', { code: otp, email: localStorage.getItem('email') });
-            if (res.data.message == 'Code expery') {
-                return toastWarning(t('toast.OTPExpired'));
-            }
-            if (res.data.message == 'Success') {
-                localStorage.setItem('token', res.data.accessToken);
-                localStorage.setItem('refreshToken', res.data.refreshToken);
-                localStorage.removeItem('email');
-                //
-                const res_role = await GetApi(`/user/get-role`, res.data.accessToken);
-                store.dispatch(change_role(res_role.data.role));
-                const res_user = await GetApi('/user/get-user', res.data.accessToken);
-                store.dispatch(change_user(res_user.data.user));
-
-                nav('/');
-            }
-        } catch {}
-    };
 
     const handleClickRegister = async (e: any) => {
         e.preventDefault();
@@ -146,9 +121,15 @@ function LoginRegister() {
         if (email && password && rePassword) {
             if (rePassword === password) {
                 if (passwordStrength(password).id === 3) {
-                    const res = await PostGuestApi('/auth/register', { email: email, password: password });
+                    const res = await PostGuestApi('/auth/register', {
+                        email: email,
+                        phone: phone,
+                        name: name,
+                        password: password,
+                    });
                     if (res.data.message == 'Account have already exist') {
                         setEmail('');
+                        setPhone('');
                         setPassword('');
                         setRePassword('');
                         toastError(t('auth.Account have already exist'));
@@ -156,6 +137,7 @@ function LoginRegister() {
                     }
                     if (res.data.message == 'Account creation fail') {
                         setEmail('');
+                        setPhone('');
                         setPassword('');
                         setRePassword('');
                         return null;
@@ -163,6 +145,7 @@ function LoginRegister() {
                     if (res.data.message == 'Email sent successfully') {
                         localStorage.setItem('email', email);
                         setEmail('');
+                        setPhone('');
                         setPassword('');
                         setIsRunning(true);
                         openDialog();
@@ -196,45 +179,6 @@ function LoginRegister() {
     //
     const changeIsHidePassword = () => {
         setIsHidePassword((prev) => !prev);
-    };
-    //
-    const handleOtpChange = (otpValue: string) => {
-        const otpNumber = parseInt(otpValue, 10);
-        setOtp(otpValue);
-    };
-    const handlePaste: React.ClipboardEventHandler = (event) => {
-        const data = event.clipboardData.getData('text');
-        if (!isNaN(parseInt(data, 10))) {
-            setOtp(data);
-        }
-    };
-    //time otp
-    const handleResendOtpRegister = async () => {
-        try {
-            const resResend = await PostGuestApi('/auth/require-otp', { email: localStorage.getItem('email') });
-            if (resResend.data.message == 'More require') {
-                toastWarning(t('toast.PleaseWait'));
-            }
-        } catch (e) {}
-    };
-    const handleStart = () => {
-        intervalRef.current = setInterval(() => {
-            setTime((prevTime) => {
-                if (prevTime == 1) {
-                    setIsRunning(false);
-                }
-                return prevTime - 1;
-            });
-        }, 1000);
-    };
-    const handleReset = () => {
-        setTime(300);
-        setIsRunning(true);
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-        }
-        handleResendOtpRegister();
     };
 
     const handleClickSignWithGoogle = (e: any) => {
@@ -304,16 +248,7 @@ function LoginRegister() {
             }
         }
     }, []);
-    useEffect(() => {
-        if (isRunning) {
-            handleStart();
-        }
-        return () => {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-            }
-        };
-    }, [isRunning]);
+
     useEffect(() => {
         getGmail();
     }, []);
@@ -326,13 +261,31 @@ function LoginRegister() {
                 <Container>
                     <RegisterContainer logIn={logIn}>
                         <Form>
-                            <Typography sx={{mb: 1, fontWeight: "600"}} variant="h5">{t('auth.Register')}</Typography>
+                            <Typography sx={{ mb: 1, fontWeight: '600' }} variant="h5">
+                                {t('auth.Register')}
+                            </Typography>
                             <span className="w-full">
                                 <Input
                                     type={'text'}
                                     placeholder="Email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
+                                />
+                            </span>
+                            <span className="w-full">
+                                <Input
+                                    type={'text'}
+                                    placeholder="Họ và tên"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                />
+                            </span>
+                            <span className="w-full">
+                                <Input
+                                    type={'text'}
+                                    placeholder="Số điện thoại"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
                                 />
                             </span>
                             <span className="w-full relative">
@@ -377,7 +330,9 @@ function LoginRegister() {
 
                     <LogInContainer logIn={logIn}>
                         <Form>
-                            <Typography sx={{mb: 1, fontWeight: "600"}} variant="h5">{t('auth.Login')}</Typography>
+                            <Typography sx={{ mb: 1, fontWeight: '600' }} variant="h5">
+                                {t('auth.Login')}
+                            </Typography>
                             <span className="w-full">
                                 <span className="w-full">
                                     <Input
@@ -388,6 +343,7 @@ function LoginRegister() {
                                     />
                                 </span>
                             </span>
+
                             <span className="w-full relative">
                                 <Input
                                     type={isHidePassword ? 'password' : 'text'}
@@ -418,9 +374,8 @@ function LoginRegister() {
                     <OverlayContainer logIn={logIn}>
                         <Overlay logIn={logIn}>
                             <LeftOverlayPanel logIn={logIn}>
-                            <Avatar
+                                <Avatar
                                     sx={{ height: 356, width: 350 }}
-                                    
                                     variant="rounded"
                                     src="https://savani.vn/images/config/frame_1643271037.svg"
                                 ></Avatar>
@@ -437,7 +392,6 @@ function LoginRegister() {
                             <RightOverlayPanel logIn={logIn}>
                                 <Avatar
                                     sx={{ height: 356, width: 350 }}
-                                    
                                     variant="rounded"
                                     src="https://savani.vn/images/config/frame_1643271037.svg"
                                 ></Avatar>
@@ -448,39 +402,6 @@ function LoginRegister() {
                     </OverlayContainer>
                 </Container>
             </div>
-
-            <Dialog onClose={() => {}} open={openOtp}>
-                <Button className="mt-2 ml-2 w-2 mb-10 flex items-center justify-center" onClick={handleCloseDialog}>
-                    <ArrowBackIcon />
-                </Button>
-                <h1 className="text-center text-2xl font-bold">OTP</h1>
-                <OtpInput
-                    containerStyle={{ padding: 20 }}
-                    inputStyle={{
-                        backgroundColor: '#CAF5FF',
-                        borderRadius: 4,
-                        width: 50,
-                        height: 50,
-                        marginBottom: 10,
-                        color: 'black',
-                        outline: 'none',
-                        margin: 5,
-                    }}
-                    value={otp}
-                    onChange={handleOtpChange}
-                    onPaste={handlePaste}
-                    numInputs={6}
-                    renderInput={(props) => <input {...props} />}
-                />
-                <Button className="mt-10 ml-12 mr-12 mb-10" onClick={() => handleVerifyOTP(otp, comfirm)}>
-                    {t('Submit')}
-                </Button>
-                <div className="text-[16px] font-[700] flex justify-center items-center mt-12 mb-3">
-                    <Button disabled={time > 0 ? true : false} onClick={handleReset}>
-                        {time > 0 ? `${time} s` : 'Reset'}
-                    </Button>
-                </div>
-            </Dialog>
         </div>
     );
 }

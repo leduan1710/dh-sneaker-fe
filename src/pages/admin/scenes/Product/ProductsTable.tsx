@@ -33,6 +33,8 @@ import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import TuneIcon from '@mui/icons-material/Tune';
+import SwitchAccessShortcutAddIcon from '@mui/icons-material/SwitchAccessShortcutAdd';
+import NotInterestedIcon from '@mui/icons-material/NotInterested';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
 import AddIcon from '@mui/icons-material/Add';
 import { HOST_BE } from '../../../../common/Common';
@@ -287,7 +289,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
                 >
                     <TuneIcon fontSize="small" />
                 </IconButton>
-                <IconButton
+                {/* <IconButton
                     sx={{
                         backgroundColor: '#fff9c4',
                         borderRadius: '50%',
@@ -299,11 +301,10 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
                         },
                     }}
                     onClick={() => {
-                        /* Thêm hành động cho biểu tượng SwapVert */
                     }}
                 >
                     <SwapVertIcon fontSize="small" />
-                </IconButton>
+                </IconButton> */}
                 <IconButton
                     sx={{
                         backgroundColor: '#fff9c4',
@@ -504,7 +505,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
                                                     setSelectedProduct(product);
                                                 }}
                                             >
-                                                <DeleteTwoToneIcon fontSize="small" />
+                                                <NotInterestedIcon fontSize="small" />
                                             </IconButton>
                                         </Tooltip>
                                     </TableCell>

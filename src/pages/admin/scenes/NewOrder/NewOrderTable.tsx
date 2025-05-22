@@ -92,7 +92,7 @@ function Row(props: RowProps) {
                 </TableCell>
                 <TableCell>{order.orderCode}</TableCell>
                 <TableCell>
-                    {new Date(order.updateDate).toLocaleDateString('vi-VN', {
+                    {new Date(order.createDate).toLocaleDateString('vi-VN', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
@@ -109,21 +109,7 @@ function Row(props: RowProps) {
                 <TableCell>{formatPrice(order.shipFee)}</TableCell>
                 <TableCell>{formatPrice(order.CODPrice)}</TableCell>
                 <TableCell align="right">
-                    {order.status === 'DELIVERING' ? (
-                        <Tooltip title={t('order.Processed')} arrow>
-                            <IconButton
-                                sx={{
-                                    '&:hover': { background: theme.colors.success.lighter },
-                                    color: theme.palette.success.main,
-                                }}
-                                color="inherit"
-                                size="small"
-                                onClick={handleClickOpenUpdateStatusDialog}
-                            >
-                                <NoCrashIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
-                    ) : order.status === 'PROCESSING' ? (
+                    { order.status === 'PROCESSING' ? (
                         <Tooltip title={t('order.ConfirmAction')} arrow>
                             <IconButton
                                 sx={{
@@ -137,22 +123,6 @@ function Row(props: RowProps) {
                                 onClick={handleClickOpenUpdateStatusDialog}
                             >
                                 <CheckCircleIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
-                    ) : order.status === 'CONFIRMED' ? (
-                        <Tooltip title={t('order.Delivering')} arrow>
-                            <IconButton
-                                sx={{
-                                    '&:hover': {
-                                        background: theme.colors.primary.lighter,
-                                    },
-                                    color: theme.palette.primary.main,
-                                }}
-                                color="inherit"
-                                size="small"
-                                onClick={handleClickOpenUpdateStatusDialog}
-                            >
-                                <TimeToLeaveIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>
                     ) : null}

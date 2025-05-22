@@ -106,7 +106,7 @@ function Row(props: RowProps) {
                 <TableCell align="center">{index + 1}</TableCell>
                 <TableCell>{order.orderCode}</TableCell>
                 <TableCell>
-                    {new Date(order.updateDate).toLocaleDateString('vi-VN', {
+                    {new Date(order.createDate).toLocaleDateString('vi-VN', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',

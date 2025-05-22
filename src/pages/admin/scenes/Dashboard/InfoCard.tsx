@@ -68,7 +68,7 @@ function InfoCard(props: InfoCardProps) {
                                             pt: 2,
                                         }}
                                     >
-                                        <Typography variant="h4" gutterBottom noWrap>
+                                        <Typography variant="h5" fontSize={17} gutterBottom noWrap>
                                             {t('adminDashboard.TotalUsers')}
                                         </Typography>
                                         <Typography variant="body2" noWrap>
@@ -95,7 +95,7 @@ function InfoCard(props: InfoCardProps) {
                                             pt: 2,
                                         }}
                                     >
-                                        <Typography variant="h4" gutterBottom noWrap>
+                                        <Typography variant="h5" fontSize={17} gutterBottom noWrap>
                                             {t('adminDashboard.TotalShops')}
                                         </Typography>
                                         <Typography variant="body2" noWrap>

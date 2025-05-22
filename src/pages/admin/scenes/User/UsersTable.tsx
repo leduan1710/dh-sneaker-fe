@@ -24,12 +24,16 @@ import {
     DialogContentText,
     styled,
     DialogActions,
+    TextField,
+    InputAdornment,
 } from '@mui/material';
 import SwitchAccessShortcutAddIcon from '@mui/icons-material/SwitchAccessShortcutAdd';
 import NotInterestedIcon from '@mui/icons-material/NotInterested';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
+import AddIcon from '@mui/icons-material/Add';
 import { HOST_BE } from '../../../../common/Common';
 import { filterSpecialInput, toastSuccess } from '../../../../untils/Logic';
 import { change_is_loading } from '../../../../reducers/Actions';
@@ -39,18 +43,15 @@ import { GetApi, PostApi } from '../../../../untils/Api';
 import DetailDialog from './DetailDialog';
 import { useTranslation } from 'react-i18next';
 import SearchIcon from '@mui/icons-material/Search';
-const Input = styled('input')({
-    display: 'none',
-});
 
-interface AlertDeleteDialogProps {
+interface AlertConfirmDialogProps {
     onClose: () => void;
     open: boolean;
     userId?: string;
     onUpdate: () => void;
 }
 
-const AlertDeleteDialog: React.FC<AlertDeleteDialogProps> = (props) => {
+const AlertConfirmDialog: React.FC<AlertConfirmDialogProps> = (props) => {
     const { t } = useTranslation();
     const { onClose, open, userId, onUpdate } = props;
     const store = useStore();
@@ -58,11 +59,67 @@ const AlertDeleteDialog: React.FC<AlertDeleteDialogProps> = (props) => {
     const handleClose = () => {
         onClose();
     };
-    const handleDelete = async () => {
+    const handleConfirm = async () => {
         onClose();
         store.dispatch(change_is_loading(true));
         try {
-            const res = await PostApi(`/admin/ban-user/${userId}`, localStorage.getItem('token'), {});
+            const res = await GetApi(`/admin/confirm-user/${userId}`, localStorage.getItem('token'));
+
+            if (res.data.message === 'Success') {
+                toastSuccess(t('toast.Success'));
+                onUpdate();
+            }
+        } catch (error) {
+            console.error(error);
+        }
+        store.dispatch(change_is_loading(false));
+    };
+
+    return (
+        <React.Fragment>
+            <Dialog
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="dialog-title"
+                aria-describedby="dialog-description"
+            >
+                <DialogTitle sx={{ textTransform: 'capitalize' }} id="dialog-title">
+                    Xác nhận CTV mới
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="dialog-description"> Xác nhận duyệt CTV này ?</DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose}>{t('action.Cancel')}</Button>
+                    <Button onClick={handleConfirm} autoFocus>
+                        {t('action.Confirm')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </React.Fragment>
+    );
+};
+
+interface AlertBanDialogProps {
+    onClose: () => void;
+    open: boolean;
+    userId?: string;
+    onUpdate: () => void;
+}
+
+const AlertBanDialog: React.FC<AlertBanDialogProps> = (props) => {
+    const { t } = useTranslation();
+    const { onClose, open, userId, onUpdate } = props;
+    const store = useStore();
+
+    const handleClose = () => {
+        onClose();
+    };
+    const handleBan = async () => {
+        onClose();
+        store.dispatch(change_is_loading(true));
+        try {
+            const res = await GetApi(`/admin/ban-user/${userId}`, localStorage.getItem('token'));
 
             if (res.data.message === 'Success') {
                 toastSuccess(t('toast.Success'));
@@ -86,13 +143,11 @@ const AlertDeleteDialog: React.FC<AlertDeleteDialogProps> = (props) => {
                     Cấm người dùng
                 </DialogTitle>
                 <DialogContent>
-                    <DialogContentText id="dialog-description">
-                        Xác nhận cấm người dùng này ?
-                    </DialogContentText>
+                    <DialogContentText id="dialog-description">Xác nhận cấm người dùng này ?</DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>{t('action.Cancel')}</Button>
-                    <Button onClick={handleDelete} autoFocus>
+                    <Button onClick={handleBan} autoFocus>
                         {t('action.Confirm')}
                     </Button>
                 </DialogActions>
@@ -100,19 +155,19 @@ const AlertDeleteDialog: React.FC<AlertDeleteDialogProps> = (props) => {
         </React.Fragment>
     );
 };
-const AlertUnBanDialog: React.FC<AlertDeleteDialogProps> = (props) => {
+const AlertUnBanDialog: React.FC<AlertBanDialogProps> = (props) => {
     const { t } = useTranslation();
     const { onClose, open, userId, onUpdate } = props;
     const store = useStore();
     const handleClose = () => {
         onClose();
     };
-    const handleDelete = async () => {
+    const handleUnBan = async () => {
         onClose();
         store.dispatch(change_is_loading(true));
 
         try {
-            const res = await PostApi(`/admin/unban-user/${userId}`, localStorage.getItem('token'), {});
+            const res = await GetApi(`/admin/unban-user/${userId}`, localStorage.getItem('token'));
 
             if (res.data.message === 'Success') {
                 toastSuccess(t('toast.Success'));
@@ -136,13 +191,11 @@ const AlertUnBanDialog: React.FC<AlertDeleteDialogProps> = (props) => {
                     Gỡ cấm
                 </DialogTitle>
                 <DialogContent>
-                    <DialogContentText id="dialog-description">
-                        Xác nhận gỡ cấm người dùng này ?
-                    </DialogContentText>
+                    <DialogContentText id="dialog-description">Xác nhận gỡ cấm người dùng này ?</DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>{t('action.Cancel')}</Button>
-                    <Button onClick={handleDelete} autoFocus>
+                    <Button onClick={handleUnBan} autoFocus>
                         {t('action.Confirm')}
                     </Button>
                 </DialogActions>
@@ -166,6 +219,8 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
     const [openDetail, setOpenDetail] = useState(false);
     const [openBan, setOpenBan] = useState(false);
     const [openUnBan, setOpenUnBan] = useState(false);
+    const [openConfirm, setOpenConfirm] = useState(false);
+
     const [users, setUsers] = useState<any[]>(initialUsers);
     const [selectedUser, setSelectedUser] = useState<any>();
     const [page, setPage] = useState<number>(0);
@@ -190,23 +245,32 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
         setSelectedUser(undefined);
         setOpenDetail(false);
     };
-    const handleCloseUnBanDialog = () => {
-        setSelectedUser(undefined);
-        setOpenUnBan(false);
-    };
 
     const handleClickOpenBanDialog = () => {
         setOpenBan(true);
-    };
-    const handleClickOpenUnBanDialog = () => {
-        setOpenUnBan(true);
     };
     const handleCloseBanDialog = () => {
         setSelectedUser(undefined);
         setOpenBan(false);
     };
 
-    const getDatUser = async () => {
+    const handleClickOpenUnBanDialog = () => {
+        setOpenUnBan(true);
+    };
+        const handleCloseUnBanDialog = () => {
+        setSelectedUser(undefined);
+        setOpenUnBan(false);
+    };
+
+    const handleClickOpenConfirmDialog = () => {
+        setOpenConfirm(true);
+    };
+    const handleCloseConfirmDialog = () => {
+        setSelectedUser(undefined);
+        setOpenConfirm(false);
+    };
+
+    const getDataUser = async () => {
         if (email != '') {
             store.dispatch(change_is_loading(true));
             const res = await PostApi(`/admin/get/user-by-email`, localStorage.getItem('token'), { email: email });
@@ -266,7 +330,49 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
                 action={<Box width={150}></Box>}
                 title={t('category.Admin.UserList')}
             />
-            <div className="absolute top-2 right-5">
+            <div className="absolute top-2 right-5 flex items-center">
+                <TextField
+                    value={email}
+                    variant="outlined"
+                    className="border-gray-300"
+                    style={{
+                        width: 280,
+                        borderRadius: '30px',
+                        padding: '0 10px',
+                    }}
+                    placeholder={'Nhập vào email'}
+                    onChange={(e) => {
+                        filterSpecialInput(e.target.value, setEmail);
+                    }}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        ),
+                        sx: {
+                            height: '35px', // Chiều cao của thanh tìm kiếm
+                        },
+                    }}
+                />
+                <IconButton
+                    sx={{
+                        backgroundColor: '#fff9c4',
+                        borderRadius: '50%',
+                        width: 36,
+                        height: 36,
+                        marginLeft: 1,
+                        '&:hover': {
+                            backgroundColor: '#fff59d',
+                        },
+                    }}
+                    onClick={handleClickOpenDetailDialog}
+                >
+                    <AddIcon fontSize="small" />
+                </IconButton>
+
+            </div>
+            {/* <div className="absolute top-2 right-5">
                 <Input
                     value={email}
                     className="border border-gray-300 rounded-lg p-1"
@@ -279,7 +385,7 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
             </div>
             <div className="absolute top-3 right-6">
                 <SearchIcon />
-            </div>
+            </div> */}
             <Divider />
             <TableContainer>
                 <Table>
@@ -290,7 +396,7 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
                             <TableCell>Số điện thoại</TableCell>
                             <TableCell>Email</TableCell>
                             <TableCell>Vai trò</TableCell>
-                            <TableCell align='center'>Trạng thái</TableCell>
+                            <TableCell align="center">Trạng thái</TableCell>
                             <TableCell align="right">{t('category.Admin.Actions')}</TableCell>
                         </TableRow>
                     </TableHead>
@@ -301,7 +407,7 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
                                     <TableCell>
                                         <Typography
                                             key={user.active}
-                                            variant="body1"
+                                            variant="body2"
                                             fontWeight="bold"
                                             color="text.primary"
                                             gutterBottom
@@ -314,7 +420,7 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
                                     <TableCell>
                                         <Typography
                                             key={user.active}
-                                            variant="body1"
+                                            variant="body2"
                                             fontWeight="bold"
                                             color="text.primary"
                                             gutterBottom
@@ -327,7 +433,7 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
                                     <TableCell>
                                         <Typography
                                             key={user.active}
-                                            variant="body1"
+                                            variant="body2"
                                             fontWeight="bold"
                                             color="text.primary"
                                             gutterBottom
@@ -340,7 +446,7 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
                                     <TableCell>
                                         <Typography
                                             key={user.active}
-                                            variant="body1"
+                                            variant="body2"
                                             fontWeight="bold"
                                             color="text.primary"
                                             gutterBottom
@@ -354,7 +460,7 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
                                     <TableCell>
                                         <Typography
                                             key={user.active}
-                                            variant="body1"
+                                            variant="body2"
                                             fontWeight="bold"
                                             color="text.primary"
                                             gutterBottom
@@ -366,13 +472,15 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
                                     </TableCell>
                                     <TableCell align="center">
                                         <Typography
-                                            variant="body1"
+                                            variant="body2"
                                             fontWeight="bold"
                                             color="text.primary"
                                             gutterBottom
                                             noWrap
                                         >
-                                            {user.active ? (
+                                            {user.status === 'PENDING' ? (
+                                                'Đang chờ'
+                                            ) : user.active ? (
                                                 <CheckIcon color="success" fontSize="small" />
                                             ) : (
                                                 <ClearIcon color="error" fontSize="small" />
@@ -403,6 +511,26 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
 
                                         {user.role == 'ADMIN' ? null : (
                                             <>
+                                                {user.status === 'PENDING' ? (
+                                                    <Tooltip title="Xác nhận người dùng" arrow>
+                                                        <IconButton
+                                                            sx={{
+                                                                '&:hover': {
+                                                                    background: theme.colors.primary.lighter,
+                                                                },
+                                                                color: theme.palette.primary.main,
+                                                            }}
+                                                            color="inherit"
+                                                            size="small"
+                                                            onClick={() => {
+                                                                handleClickOpenConfirmDialog();
+                                                                setSelectedUser(user);
+                                                            }}
+                                                        >
+                                                            <CheckCircleIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                ) : null}
                                                 {user.active ? (
                                                     <Tooltip title={t('action.Ban')} arrow>
                                                         <IconButton
@@ -444,17 +572,23 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
                 </Table>
             </TableContainer>
             <DetailDialog open={openDetail} onClose={handleCloseDetailDialog} users={users} user={selectedUser} />
-            <AlertDeleteDialog
+            <AlertConfirmDialog
+                open={openConfirm}
+                onClose={handleCloseConfirmDialog}
+                userId={selectedUser?.id}
+                onUpdate={getDataUser}
+            />
+            <AlertBanDialog
                 open={openBan}
                 onClose={handleCloseBanDialog}
                 userId={selectedUser?.id}
-                onUpdate={getDatUser}
+                onUpdate={getDataUser}
             />
             <AlertUnBanDialog
                 open={openUnBan}
                 onClose={handleCloseUnBanDialog}
                 userId={selectedUser?.id}
-                onUpdate={getDatUser}
+                onUpdate={getDataUser}
             />
             <Box p={2}>
                 <TablePagination
