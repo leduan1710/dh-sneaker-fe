@@ -137,10 +137,10 @@ function Row(props: RowProps) {
                         ? formatPrice(-60000)
                         : formatPrice(order.CODPrice - order.shipFee - totalCtvPrice)}
                 </TableCell>
-                <TableCell align='center'>
-                    {order.status === 'SUCCESS'  && order.isJibbitz == false
+                <TableCell align="center">
+                    {order.status === 'SUCCESS'
                         ? orderDetails.reduce((total, detail) => {
-                              return total + detail.quantity;
+                              return !detail.isJibbitz ? total + detail.quantity : total;
                           }, 0)
                         : 0}
                 </TableCell>
@@ -201,7 +201,7 @@ export default function DetailCommissionTable() {
     const { t } = useTranslation();
     const store = useStore();
     const location = useLocation();
-    const { status } = location.state ? location.state : 'all';
+    const { status } = location.state ? location.state : 'ALL';
     const user = useSelector((state: ReducerProps) => state.user);
     const [orders, setOrders] = useState<any[]>([]);
     const [orderDetails, setOrderDetails] = useState<any[]>([]);
@@ -209,9 +209,9 @@ export default function DetailCommissionTable() {
     // Pagination state
     const [page, setPage] = useState(0);
     const [limit, setLimit] = useState(5);
-    const [statusFilter, setStatusFilter] = useState<string>('all');
-    const [shipMethodFilter, setShipMethodFilter] = useState<string>('all');
-    const [ctvFilter, setCtvFilter] = useState('all');
+    const [statusFilter, setStatusFilter] = useState<string>('ALL');
+    const [shipMethodFilter, setShipMethodFilter] = useState<string>('ALL');
+    const [ctvFilter, setCtvFilter] = useState('ALL');
     const [ctvNames, setCtvNames] = useState<string[]>([]);
 
     const getDataCTVName = async () => {
@@ -226,12 +226,22 @@ export default function DetailCommissionTable() {
 
     const getDataOrder = async (ctvName: string) => {
         store.dispatch(change_is_loading(true));
-        const res = await GetApi(`/admin/get-orders-by-ctv/${ctvName}`, localStorage.getItem('token'));
+        if (ctvName === 'ALL') {
+            const res = await GetApi(`/admin/get-orders-this-month`, localStorage.getItem('token'));
 
-        if (res.data.message == 'Success') {
-            setOrders(res.data.orders);
-            await getOrderDetails(res.data.orders);
-            setPage(0);
+            if (res.data.message == 'Success') {
+                setOrders(res.data.orders);
+                await getOrderDetails(res.data.orders);
+                setPage(0);
+            }
+        } else {
+            const res = await GetApi(`/admin/get-orders-by-ctv/${ctvName}`, localStorage.getItem('token'));
+
+            if (res.data.message == 'Success') {
+                setOrders(res.data.orders);
+                await getOrderDetails(res.data.orders);
+                setPage(0);
+            }
         }
         store.dispatch(change_is_loading(false));
     };
@@ -254,15 +264,24 @@ export default function DetailCommissionTable() {
         setOrderDetails(fetchedOrderDetails);
     };
 
+    const resetFilter = () => {
+        setCtvFilter('ALL');
+        setShipMethodFilter('ALL');
+        setStatusFilter('ALL');
+    };
+
     useEffect(() => {
-        if (user) getDataCTVName();
+        if (user) {
+            getDataOrder('ALL');
+            getDataCTVName();
+        }
     }, [user]);
 
     useEffect(() => {
         if (status) {
+            getDataOrder('ALL');
             getDataCTVName();
             setStatusFilter(status);
-            setShipMethodFilter(status);
             setPage(0);
             location.state = null;
         }
@@ -294,9 +313,9 @@ export default function DetailCommissionTable() {
     };
 
     const filteredOrders = orders.filter((order) => {
-        const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-        const matchesCtv = order.ctvName === ctvFilter;
-        const matchesShipMethod = shipMethodFilter === 'all' || order.shipMethod === shipMethodFilter;
+        const matchesStatus = statusFilter === 'ALL' || order.status === statusFilter;
+        const matchesCtv = ctvFilter === 'ALL' || order.ctvName === ctvFilter;
+        const matchesShipMethod = shipMethodFilter === 'ALL' || order.shipMethod === shipMethodFilter;
 
         return matchesStatus && matchesCtv && matchesShipMethod;
     });
@@ -308,49 +327,39 @@ export default function DetailCommissionTable() {
     if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
     }
-    const filterById = async (id: string) => {
-        if (id != '') {
+    const filterByPhoneOrDeliveringCode = async (searchTerm: string) => {
+        if (searchTerm != '') {
             store.dispatch(change_is_loading(true));
-            const res = await GetApi(`/shop/get/order/${id}`, localStorage.getItem('token'));
+            const res = await PostApi(
+                `/admin/search/order-by-phone-or-delivering-code`,
+                localStorage.getItem('token'),
+                { searchTerm: searchTerm },
+            );
 
             if (res.data.message == 'Success') {
+                resetFilter();
                 setOrders(res.data.order);
                 await getOrderDetails(res.data.order);
                 setPage(0);
             }
             store.dispatch(change_is_loading(false));
-        } else {
-            store.dispatch(change_is_loading(true));
-            const resOrders = await GetApi(`/shop/get/order-by-shop/${user.shopId}`, localStorage.getItem('token'));
-            if (resOrders.data.message === 'Success') {
-                setOrders(resOrders.data.orders);
-                await getOrderDetails(resOrders.data.orders);
-            }
-            store.dispatch(change_is_loading(false));
-        }
+        } else getDataOrder('ALL');
     };
 
     useEffect(() => {
         typingTimeoutRef.current = setTimeout(() => {
-            filterById(filterId);
+            filterByPhoneOrDeliveringCode(filterId);
         }, 500);
     }, [filterId]);
     const totalCommission = orders.reduce((total, order) => {
         return total + order.commission;
     }, 0);
-    const totalQuantity = orders
-    .filter((order) => order.status === 'SUCCESS'  && order.isJibbitz == false)
+const totalQuantity = orders
+    .filter((order) => order.status === 'SUCCESS')
     .reduce((total, order) => {
-        const orderDetailsForOrder = orderDetails.filter(
-            (detail) => detail.orderId === order.id,
-        );
-        return (
-            total +
-            orderDetailsForOrder.reduce(
-                (sum, detail) => sum + detail.quantity,
-                0,
-            )
-        );
+        const orderDetailsForOrder = orderDetails.filter((detail) => detail.orderId === order.id);
+        const filteredDetails = orderDetailsForOrder.filter((detail) => !detail.isJibbitz);
+        return total + filteredDetails.reduce((sum, detail) => sum + detail.quantity, 0);
     }, 0);
     const calculateBonus = (totalQuantity: number) => {
         if (totalQuantity >= 300) return 700000;
@@ -363,22 +372,20 @@ export default function DetailCommissionTable() {
     };
 
     const totalRevenue = orders
-    .filter((order) => order.status === 'SUCCESS')
-    .reduce((total, order) => {
-        const orderDetailsForOrder = orderDetails.filter(
-            (detail) => detail.orderId === order.id,
-        );
-        return (
-            total +
-            orderDetailsForOrder.reduce(
-                (sum, detail) => sum + (detail.ctvPrice - detail.importPrice)* detail.quantity,
-                0,
-            )
-        );
-    }, 0);
+        .filter((order) => order.status === 'SUCCESS')
+        .reduce((total, order) => {
+            const orderDetailsForOrder = orderDetails.filter((detail) => detail.orderId === order.id);
+            return (
+                total +
+                orderDetailsForOrder.reduce(
+                    (sum, detail) => sum + (detail.ctvPrice - detail.importPrice) * detail.quantity,
+                    0,
+                )
+            );
+        }, 0);
 
     const bonus = calculateBonus(totalQuantity);
-    
+
     return (
         <>
             <TableContainer className="relative" component={Paper}>
@@ -564,6 +571,7 @@ export default function DetailCommissionTable() {
                     <FormControl variant="outlined" sx={{ minWidth: 200 }}>
                         <InputLabel>Tên CTV</InputLabel>
                         <Select value={ctvFilter} onChange={handleCtvChange} label="Tên CTV">
+                            <MenuItem value="ALL">{t('orther.All')}</MenuItem>
                             {ctvNames.map((ctvName, index) => (
                                 <MenuItem key={index} value={ctvName}>
                                     {ctvName}
@@ -574,7 +582,7 @@ export default function DetailCommissionTable() {
                     <FormControl variant="outlined" sx={{ minWidth: 200 }}>
                         <InputLabel>Trạng thái</InputLabel>
                         <Select value={statusFilter} onChange={handleStatusChange} label="Trạng thái">
-                            <MenuItem value="all">{t('orther.All')}</MenuItem>
+                            <MenuItem value="ALL">{t('orther.All')}</MenuItem>
                             <MenuItem value="PROCESSING">Đang chờ</MenuItem>
                             <MenuItem value="SUCCESS">Thành công</MenuItem>
                             <MenuItem value="BOOM">Boom</MenuItem>
@@ -585,7 +593,7 @@ export default function DetailCommissionTable() {
                     <FormControl variant="outlined" sx={{ minWidth: 200 }}>
                         <InputLabel>Hình thức ship</InputLabel>
                         <Select value={shipMethodFilter} onChange={handleShipMethodChange} label="Hình thức ship">
-                            <MenuItem value="all">{t('orther.All')}</MenuItem>
+                            <MenuItem value="ALL">{t('orther.All')}</MenuItem>
                             <MenuItem value="VIETTELPOST">Viettelpost</MenuItem>
                             <MenuItem value="GRAB">Grab/Kho khác</MenuItem>
                             <MenuItem value="OFFLINE">Offline</MenuItem>

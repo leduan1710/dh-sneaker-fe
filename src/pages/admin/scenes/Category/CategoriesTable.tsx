@@ -194,36 +194,6 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
                 />
                 <IconButton
                     sx={{
-                        backgroundColor: '#fff9c4', // Màu vàng nhạt
-                        borderRadius: '50%',
-                        width: 36,
-                        height: 36,
-                        marginLeft: 1,
-                        '&:hover': {
-                            backgroundColor: '#fff59d' // Màu vàng nhạt khi hover
-                        }
-                    }}
-                    onClick={() => { /* Thêm hành động cho biểu tượng Tune */ }}
-                >
-                    <TuneIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                    sx={{
-                        backgroundColor: '#fff9c4',
-                        borderRadius: '50%',
-                        width: 36,
-                        height: 36,
-                        marginLeft: 1,
-                        '&:hover': {
-                            backgroundColor: '#fff59d'
-                        }
-                    }}
-                    onClick={() => { /* Thêm hành động cho biểu tượng SwapVert */ }}
-                >
-                    <SwapVertIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                    sx={{
                         backgroundColor: '#fff9c4',
                         borderRadius: '50%',
                         width: 36,
@@ -252,8 +222,6 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
                         <TableRow>
                             <TableCell>ID</TableCell>
                             <TableCell>{t('category.CategoryName')}</TableCell>
-                            <TableCell>{t('category.ParentCategoryId')}</TableCell>
-                            <TableCell>{t('category.CategoryImage')}</TableCell>
                             <TableCell align="right">{t('category.Admin.Actions')}</TableCell>
                         </TableRow>
                     </TableHead>
@@ -282,40 +250,6 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
                                         >
                                             {category.name}
                                         </Typography>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Typography
-                                            variant="body1"
-                                            fontWeight="bold"
-                                            color="text.primary"
-                                            gutterBottom
-                                            noWrap
-                                        >
-                                            {category.previousId}
-                                        </Typography>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Avatar
-                                            variant="square"
-                                            sx={{
-                                                width: 100,
-                                                height: 100,
-                                                border: '4px solid transparent',
-                                                borderRadius: 1,
-                                                background:
-                                                    'linear-gradient(white, white), linear-gradient(to right, #3f51b5, #000)',
-                                                backgroundClip: 'content-box, border-box',
-                                                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-                                            }}
-                                            alt=""
-                                            src={
-                                                category.image
-                                                    ? category.image.startsWith('uploads')
-                                                        ? `${HOST_BE}/${category.image}`
-                                                        : category.image
-                                                    : category.image
-                                            }
-                                        />
                                     </TableCell>
                                     <TableCell align="right">
                                         <Tooltip title={t('action.Detail')} arrow>

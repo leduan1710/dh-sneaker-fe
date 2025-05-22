@@ -140,7 +140,7 @@ export const toastWarning = (text: string) => {
     toast.warning(text, { position: 'top-right', autoClose: 3000, pauseOnHover: false, closeOnClick: true });
 };
 
-export const addToListCartStore = (productDetailId: string, quantity: number, productDetail: any) => {
+export const addToListCartStore = (productDetailId: string, quantity: number, productDetail: any, isJibbitz: boolean) => {
     const existingCart = JSON.parse(localStorage.getItem('listCart') || '[]');
     const productIndex = existingCart.findIndex(
         (productDetail: any) => productDetail.productDetailId === productDetailId,
@@ -155,7 +155,7 @@ export const addToListCartStore = (productDetailId: string, quantity: number, pr
     } else {
         localStorage.setItem(
             'listCart',
-            JSON.stringify([...existingCart, { productDetailId: productDetailId, quantity: quantity, isCheck: false }]),
+            JSON.stringify([...existingCart, { productDetailId: productDetailId, quantity: quantity, isCheck: false, isJibbitz: isJibbitz }]),
         );
     }
 };

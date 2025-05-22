@@ -93,9 +93,10 @@ function LoginRegister() {
                 // const res_user = await GetApi('/user/get-user', res.data.accessToken);
                 store.dispatch(change_is_loading(false));
                 localStorage.setItem('oauth2', 'false');
-                if (res_role.data.role == 'ADMIN') {
+                if (res_role.data.role == 'ADMIN' || res_role.data.role == 'SUB_ADMIN') {
                     window.location.href = '/admin';
-                } else {
+                }
+                else {
                     window.location.href = '/';
                 }
             }
@@ -142,13 +143,12 @@ function LoginRegister() {
                         setRePassword('');
                         return null;
                     }
-                    if (res.data.message == 'Email sent successfully') {
-                        localStorage.setItem('email', email);
+                    if (res.data.message == 'Success') {
                         setEmail('');
                         setPhone('');
                         setPassword('');
-                        setIsRunning(true);
-                        openDialog();
+                        setRePassword('');
+                        toastSuccess('Đăng ký thành công')
                     }
                 } else {
                     toastWarning(t('auth.Password is no strong'));

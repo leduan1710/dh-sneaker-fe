@@ -21,7 +21,7 @@ interface MenuUserProps {
 
 const MenuUser: React.FC<MenuUserProps> = (props) => {
     const { t } = useTranslation();
-    const settings = [t('user.Profile'), t('user.Orders'), t('Voucher'), t('user.Logout'), t('user.Wallet')];
+    const settings = [t('user.Profile'), t('user.Orders'), t('user.Logout')];
     const store = useStore();
     const { avatar } = props;
     const nav = useNavigate();
@@ -32,9 +32,7 @@ const MenuUser: React.FC<MenuUserProps> = (props) => {
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
     };
-    const handleClickWallet = () => {
-        window.location.href = '/user/wallet';
-    };
+
     const handleClickLogout = async (e: any) => {
         const logOut = async () => {
             const resLogout = await PostApi('/user/logout', localStorage.getItem('token'), {});
@@ -91,20 +89,8 @@ const MenuUser: React.FC<MenuUserProps> = (props) => {
                 >
                     <Typography sx={{ textAlign: 'center' }}>{settings[1]}</Typography>
                 </MenuItem>
-                <MenuItem key={settings[4]} onClick={handleClickWallet}>
-                    <Typography sx={{ textAlign: 'center' }}>{settings[4]}</Typography>
-                </MenuItem>
-                <MenuItem
-                    key={settings[2]}
-                    onClick={() => {
-                        handleCloseUserMenu();
-                        nav('/user/voucher');
-                    }}
-                >
-                    <Typography sx={{ textAlign: 'center' }}>{settings[2]}</Typography>
-                </MenuItem>
                 <MenuItem key={settings[3]} onClick={handleClickLogout}>
-                    <Typography sx={{ textAlign: 'center' }}>{settings[3]}</Typography>
+                    <Typography sx={{ textAlign: 'center' }}>{settings[2]}</Typography>
                 </MenuItem>
             </Menu>
         </Box>

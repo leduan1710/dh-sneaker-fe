@@ -11,6 +11,8 @@ export const typeRole = {
     GUEST: 'GUEST',
     CTV: 'CTV',
     ADMIN: 'ADMIN',
+    SUB_ADMIN: 'SUB_ADMIN',
+    ADMIN_CTV: 'ADMIN_CTV',
     SHOP: 'SHOP',
 };
 export const typeLng = {
@@ -24,14 +26,13 @@ export const typeRank = {
     GOLD: 'GOLD',
     DIAMONDS: 'DIAMONDS',
 };
-// export const HOST_BE = 'https://fashion-ecommerce-api.online';
-// export const SOCKET_HOST = 'https://fashion-ecommerce-api.online';
-// export const HOST_FE = 'https://fashion-ecommerce-kltn-ute-phatduan.click';
-// export const REDIRECT_URL_GMAIL = 'https://fashion-ecommerce-kltn-ute-phatduan.click/login-register';
+export const HOST_BE = 'https://dhsneaker-api.io.vn';
+export const SOCKET_HOST = 'https://dhsneaker-api.io.vn';
+export const HOST_FE = 'https://dhsneaker.com';
+export const REDIRECT_URL_GMAIL = 'https://dhsneaker.com/login-register';
 
-
-export const HOST_BE = 'http://localhost:3035';
-export const HOST_FE = 'http://localhost:3000';
-export const SOCKET_HOST = 'http://localhost:3051';
-export const REDIRECT_URL_GMAIL = 'http://localhost:3000/login-register';
+// export const HOST_BE = 'http://localhost:3035';
+// export const HOST_FE = 'http://localhost:3000';
+// export const SOCKET_HOST = 'http://localhost:3051';
+// export const REDIRECT_URL_GMAIL = 'http://localhost:3000/login-register';
 export const USD = 25800;

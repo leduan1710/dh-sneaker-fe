@@ -53,14 +53,22 @@ const StatusUpdateDialog: React.FC<StatusUpdateDialogProps> = ({ open, onClose, 
                 if (order.shipMethod === 'VIETTELPOST') {
                     if (!checkTokenExpiration()) {
                         tokenVTP = await fetchNewToken();
-                    }
-                    else {
-                        tokenVTP = localStorage.getItem('VIETTELPOST_TOKEN')
+                    } else {
+                        tokenVTP = localStorage.getItem('VIETTELPOST_TOKEN');
                     }
                     const resOrder = await PostApi(`/admin/createVTPOrder`, localStorage.getItem('token'), {
                         VTPToken: tokenVTP,
                         orderId: order.id,
                     });
+                    if (resOrder.data.message == 'Success') {
+                        toastSuccess(t('toast.Success'));
+                        onUpdate();
+                    }
+                } else {
+                    const resOrder = await GetApi(
+                        `/admin/update/order-confirmed/${order.id}`,
+                        localStorage.getItem('token'),
+                    );
                     if (resOrder.data.message == 'Success') {
                         toastSuccess(t('toast.Success'));
                         onUpdate();

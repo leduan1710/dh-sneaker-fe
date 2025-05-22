@@ -300,7 +300,7 @@ const InfoUser: React.FC<InfoUserProps> = (props) => {
 
     return (
         <>
-            <div className="container marginTop">
+            <div className="container marginTop" style={{marginTop: "180px"}}>
                 <div className="grid grid-cols-4 gap-4">
                     <div className="hidden lg:block col-span-1 bg-white box-shadow rounded-xl">
                         <LeftNav index={0} />
@@ -444,34 +444,7 @@ const InfoUser: React.FC<InfoUserProps> = (props) => {
                                         </h1>
                                         <h1 className="p-2 font-bold flex  items-center overload-hidden"> {email}</h1>
                                     </div>
-                                    <span className="grid grid-cols-3 mt-6">
-                                        <h1 className="p-2 font-normal flex justify-start  items-center text-sm xl:text-lg">
-                                            {t('user.Sex')}
-                                        </h1>
-                                        {user.id ? (
-                                            <RadioGroup
-                                                className="col-span-2 sm:col-span-1"
-                                                row
-                                                value={sex}
-                                                onChange={toggleSex}
-                                            >
-                                                <FormControlLabel
-                                                    disabled={isNotEdit}
-                                                    value="male"
-                                                    control={<Radio />}
-                                                    label={t('user.Male')}
-                                                />
-                                                <FormControlLabel
-                                                    disabled={isNotEdit}
-                                                    value="female"
-                                                    control={<Radio />}
-                                                    label={t('user.Female')}
-                                                />
-                                            </RadioGroup>
-                                        ) : (
-                                            <></>
-                                        )}
-                                    </span>
+                                
                                     <span className="grid grid-cols-3 mt-6">
                                         <h1 className="p-2 font-normal flex justify-start  items-center text-sm xl:text-lg">
                                             {t('user.Birthday')}
@@ -660,36 +633,6 @@ const InfoUser: React.FC<InfoUserProps> = (props) => {
                                         className="absolute right-6 top-3 cursor-pointer hover:opacity-40 transition-all duration-500"
                                     >
                                         <KeyboardTabIcon />
-                                    </div>
-                                </div>
-                                <div className=" mt-6 box-shadow rounded pt-12 pb-12 p-6 mt-6">
-                                    <div className="flex justify-center">
-                                        {user.id ? (
-                                            user.point >= 3000 ? (
-                                                <img
-                                                    style={{ objectFit: 'cover', height: 187 }}
-                                                    src={require('../../static/diamond-medal.png')}
-                                                />
-                                            ) : user.point >= 2000 ? (
-                                                <img
-                                                    style={{ objectFit: 'cover', height: 187 }}
-                                                    src={require('../../static/gold-medal.png')}
-                                                />
-                                            ) : user.point >= 1000 ? (
-                                                <img
-                                                    style={{ objectFit: 'cover', height: 187 }}
-                                                    src={require('../../static/silver-medal.png')}
-                                                />
-                                            ) : (
-                                                <img
-                                                    style={{ objectFit: 'cover', height: 187 }}
-                                                    src={require('../../static/bronze-medal.png')}
-                                                />
-                                            )
-                                        ) : null}
-                                    </div>
-                                    <div className="flex justify-center mt-6 text-3xl">
-                                        {user.id ? user.point : null}
                                     </div>
                                 </div>
                             </div>

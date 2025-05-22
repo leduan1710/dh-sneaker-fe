@@ -36,7 +36,6 @@ const DetailDialog: React.FC<DetailDialogProps> = (props) => {
     const [numberOrder, setNumberOrder] = useState<number>(0);
     const [numberProduct, setNumberProduct] = useState<number>(0);
     const isLoading = useSelector((state: ReducerProps) => state.isLoading);
-    const categoryLvl1s = users.filter((cate) => !cate.previousId);
 
     const getData = async () => {
         if (user) {

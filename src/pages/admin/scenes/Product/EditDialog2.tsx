@@ -122,7 +122,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
     // const handleImageRemove = (index: number) => {
     //     setUploadedImages((prevImages) => prevImages.filter((_, i) => i !== index));
     // };
-        const handleImageRemove = (index: number, isUploaded: boolean) => {
+    const handleImageRemove = (index: number, isUploaded: boolean) => {
         if (isUploaded) {
             // Xóa ảnh từ uploadedImages
             setUploadedImages((prevImages) => prevImages.filter((_, i) => i !== index));
@@ -226,7 +226,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
     const handleCreateProduct = async () => {
         store.dispatch(change_is_loading(true));
         const formData = new FormData();
-        formData.append('id', product.id)
+        formData.append('id', product.id);
         formData.append('name', productName);
         formData.append('sellPrice', sellPrice.toString());
         formData.append('virtualPrice', virtualPrice.toString());
@@ -602,24 +602,27 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
                                                 InputProps={{ inputProps: { min: 0 } }}
                                             />
                                         </Stack>
-                                        <FormControl component="fieldset" sx={{ mt: 1 }}>
-                                            <Typography variant="h5">Chọn kiểu dáng cho sản phẩm</Typography>
-                                            <FormGroup>
-                                                {styles.map((style) => (
-                                                    <FormControlLabel
-                                                        key={style.id}
-                                                        control={
-                                                            <Checkbox
-                                                                value={style.id}
-                                                                checked={selectedStyles.includes(style.id)}
-                                                                onChange={handleStyleChange}
-                                                            />
-                                                        }
-                                                        label={style.name}
-                                                    />
-                                                ))}
-                                            </FormGroup>
-                                        </FormControl>
+                                        {categoryNameSelect === 'Crocs' && (
+                                            <FormControl component="fieldset" sx={{ mt: 1 }}>
+                                                <Typography variant="h5">Chọn kiểu dáng cho sản phẩm</Typography>
+                                                <FormGroup>
+                                                    {styles.map((style) => (
+                                                        <FormControlLabel
+                                                            key={style.id}
+                                                            control={
+                                                                <Checkbox
+                                                                    value={style.id}
+                                                                    checked={selectedStyles.includes(style.id)}
+                                                                    onChange={handleStyleChange}
+                                                                />
+                                                            }
+                                                            label={style.name}
+                                                        />
+                                                    ))}
+                                                </FormGroup>
+                                            </FormControl>
+                                        )}
+
                                         <Stack direction="row" spacing={1} sx={{ mb: 1, mt: 2 }}>
                                             <FormControl variant="outlined" sx={{ m: 1, minWidth: 150 }}>
                                                 <FormHelperText>Chọn màu sắc</FormHelperText>

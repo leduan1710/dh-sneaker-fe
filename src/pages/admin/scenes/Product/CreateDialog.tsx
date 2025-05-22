@@ -250,6 +250,7 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
 
             if (res.data.message === 'Success') {
                 toastSuccess(t('toast.CreateSuccess'));
+                onUpdate();
                 store.dispatch(change_is_loading(false));
             } else {
                 store.dispatch(change_is_loading(false));
@@ -264,11 +265,20 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
 
     const resetFields = () => {
         setSelectImage(null);
+        setUploadedImages([]);
         setCategoryIdSelected('');
         setSizeIdSelected('');
+        setCurrentQuantity('');
         setStyleIdSelected('');
         setColorIdSelected('');
         setTypeIdSelected('');
+        setVirtualPrice('');
+        setImportPrice('');
+        setCtvPrice('');
+        setSellPrice('');
+        setProductName('');
+        setSelectedSizes([]);
+        setSizeByCategory([]);
     };
     const getTypeByCategory = async (categoryId: string) => {
         try {
@@ -299,7 +309,7 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
     }, [categoryIdSelect]);
 
     useEffect(() => {
-        if (open) {
+        if (!open) {
             resetFields();
         }
     }, [open]);
@@ -320,6 +330,11 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
 
                             if (currentSize === 'other' && !otherSizeName) {
                                 setSizeError('Vui lòng nhập tên kích cỡ');
+                                return;
+                            }
+                            if (selectedSizes.length < 1)
+                            {
+                                toastWarning("Vui lòng thêm kích cỡ và số lượng")
                                 return;
                             }
 
@@ -484,7 +499,11 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
                                                         <Typography sx={{ flexGrow: 1, width: 100 }}>
                                                             Kích cỡ:{' '}
                                                             <strong>
-                                                                {sizes.find((size) => size.id === item.sizeId)?.name}
+                                                                {
+                                                                    sizeByCategory.find(
+                                                                        (size: any) => size.id === item.sizeId,
+                                                                    )?.name
+                                                                }
                                                             </strong>
                                                         </Typography>
                                                         <Typography sx={{ flexGrow: 1 }}>Số lượng:</Typography>

@@ -90,7 +90,7 @@ export default function OrderTable() {
     const getDataOrder = async () => {
         store.dispatch(change_is_loading(true));
         const res = await GetApi(
-            `/user/get-orders-by-ctv/${selectedMonth}/${selectedYear}`,
+            `/user/get-orders-by-ctv/${user.id}/${selectedMonth}/${selectedYear}`,
             localStorage.getItem('token'),
         );
 
@@ -122,7 +122,7 @@ export default function OrderTable() {
 
     useEffect(() => {
         if (user) getDataOrder();
-    }, [selectedMonth]);
+    }, [selectedMonth, user]);
 
     const handlePageChange = (event: unknown, newPage: number) => {
         setPage(newPage);
@@ -158,12 +158,15 @@ export default function OrderTable() {
     const totalCommission = orders.reduce((total, order) => {
         return total + order.commission;
     }, 0);
+
     const totalQuantity = orders
-        .filter((order) => order.status === 'SUCCESS' && order.isJibbitz == false)
+        .filter((order) => order.status === 'SUCCESS')
         .reduce((total, order) => {
             const orderDetailsForOrder = orderDetails.filter((detail) => detail.orderId === order.id);
-            return total + orderDetailsForOrder.reduce((sum, detail) => sum + detail.quantity, 0);
+            const filteredDetails = orderDetailsForOrder.filter((detail) => !detail.isJibbitz);
+            return total + filteredDetails.reduce((sum, detail) => sum + detail.quantity, 0);
         }, 0);
+
     const calculateBonus = (totalQuantity: number) => {
         if (totalQuantity >= 300) return 700000;
         if (totalQuantity >= 200) return 400000;
@@ -171,7 +174,7 @@ export default function OrderTable() {
         if (totalQuantity >= 100) return 150000;
         if (totalQuantity >= 50) return 60000;
         if (totalQuantity >= 30) return 300000;
-        return 0; // Không có thưởng
+        return 0;
     };
     const bonus = calculateBonus(totalQuantity);
     const paginatedOrders = filteredOrders.slice(page * limit, page * limit + limit);
@@ -183,21 +186,13 @@ export default function OrderTable() {
                     <Card>
                         <CardContent>
                             <Grid container spacing={0}>
-                                <Grid
-                                    xs={4}
-                                    sm={4}
-                                    item
-                                    display="flex"
-                                    justifyContent="center"
-                                    alignItems="center"
-                                >
+                                <Grid xs={4} sm={4} item display="flex" justifyContent="center" alignItems="center">
                                     <AvatarWrapper>
                                         <img alt="commission" src={require('../../../static/order-commission.png')} />
                                     </AvatarWrapper>
                                 </Grid>
                                 <Grid xs={8} sm={8} item display="flex" alignItems="center">
-                                    <Box
-                                    >
+                                    <Box>
                                         <Typography variant="h6" gutterBottom noWrap>
                                             Hoa hồng
                                         </Typography>
@@ -220,8 +215,7 @@ export default function OrderTable() {
                                     </AvatarWrapper>
                                 </Grid>
                                 <Grid xs={8} sm={8} item display="flex" alignItems="center">
-                                    <Box
-                                    >
+                                    <Box>
                                         <Typography variant="h6" gutterBottom noWrap>
                                             Số lượng
                                         </Typography>
@@ -244,9 +238,7 @@ export default function OrderTable() {
                                     </AvatarWrapper>
                                 </Grid>
                                 <Grid xs={8} sm={8} item display="flex" alignItems="center">
-                                    <Box
-
-                                    >
+                                    <Box>
                                         <Typography variant="h6" gutterBottom noWrap>
                                             Thưởng
                                         </Typography>
@@ -269,8 +261,7 @@ export default function OrderTable() {
                                     </AvatarWrapper>
                                 </Grid>
                                 <Grid xs={8} sm={8} item display="flex" alignItems="center">
-                                    <Box
-                                    >
+                                    <Box>
                                         <Typography variant="h6" gutterBottom noWrap>
                                             Tổng
                                         </Typography>
@@ -384,10 +375,12 @@ export default function OrderTable() {
                                             : formatPrice(order.CODPrice - order.shipFee - totalCtvPrice)}
                                     </TableCell>
                                     <TableCell align="center">
-                                        {order.status === 'SUCCESS' && order.isJibbitz == false
-                                            ? orderDetails.reduce((total, detail) => {
-                                                  return total + detail.quantity;
-                                              }, 0)
+                                        {order.status === 'SUCCESS'
+                                            ? orderDetails
+                                                  .filter((detail) => detail.orderId === order.id)
+                                                  .reduce((total, detail) => {
+                                                      return detail.isJibbitz ? total : total + detail.quantity;
+                                                  }, 0)
                                             : 0}
                                     </TableCell>
                                     <TableCell>

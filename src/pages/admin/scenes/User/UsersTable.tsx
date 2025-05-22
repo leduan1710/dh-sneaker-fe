@@ -43,6 +43,7 @@ import { GetApi, PostApi } from '../../../../untils/Api';
 import DetailDialog from './DetailDialog';
 import { useTranslation } from 'react-i18next';
 import SearchIcon from '@mui/icons-material/Search';
+import CreateSubAdminDialog from './CreateAccount';
 
 interface AlertConfirmDialogProps {
     onClose: () => void;
@@ -217,6 +218,8 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
     const { t } = useTranslation();
     const store = useStore();
     const [openDetail, setOpenDetail] = useState(false);
+    const [openCreate, setOpenCreate] = useState(false);
+
     const [openBan, setOpenBan] = useState(false);
     const [openUnBan, setOpenUnBan] = useState(false);
     const [openConfirm, setOpenConfirm] = useState(false);
@@ -246,6 +249,13 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
         setOpenDetail(false);
     };
 
+    const handleClickOpenCreateDialog = () => {
+        setOpenCreate(true);
+    };
+    const handleCloseCreateDialog = () => {
+        setOpenCreate(false);
+    };
+
     const handleClickOpenBanDialog = () => {
         setOpenBan(true);
     };
@@ -257,7 +267,7 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
     const handleClickOpenUnBanDialog = () => {
         setOpenUnBan(true);
     };
-        const handleCloseUnBanDialog = () => {
+    const handleCloseUnBanDialog = () => {
         setSelectedUser(undefined);
         setOpenUnBan(false);
     };
@@ -366,11 +376,10 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
                             backgroundColor: '#fff59d',
                         },
                     }}
-                    onClick={handleClickOpenDetailDialog}
+                    onClick={handleClickOpenCreateDialog}
                 >
                     <AddIcon fontSize="small" />
                 </IconButton>
-
             </div>
             {/* <div className="absolute top-2 right-5">
                 <Input
@@ -572,6 +581,8 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
                 </Table>
             </TableContainer>
             <DetailDialog open={openDetail} onClose={handleCloseDetailDialog} users={users} user={selectedUser} />
+            <CreateSubAdminDialog open={openCreate} onClose={handleCloseCreateDialog} onUpdate={getDataUser}/>
+
             <AlertConfirmDialog
                 open={openConfirm}
                 onClose={handleCloseConfirmDialog}

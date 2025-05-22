@@ -200,7 +200,7 @@ export default function CommissionStatisticTable() {
                         </Select>
                     </FormControl>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    {/* <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <Input
                             value={filterId}
                             className="border border-gray-300 rounded-lg p-1"
@@ -213,7 +213,7 @@ export default function CommissionStatisticTable() {
                         <IconButton color="primary">
                             <SearchIcon />
                         </IconButton>
-                    </Box>
+                    </Box> */}
                 </Box>
                 <Table aria-label="collapsible table">
                     <TableHead>

@@ -23,9 +23,6 @@ import Header from '../components/user-guest/header/Header';
 import { GetApi, PostGuestApi } from '../untils/Api';
 import IndexAdmin from '../pages/admin';
 import ApplicationsMessenger from '../pages/admin/scenes/Messenger';
-import Wallet from '../pages/user-guest/wallet/Wallet';
-import RegisterWallet from '../pages/user-guest/wallet/RegisterWallet';
-import Voucher from '../pages/user-guest/voucher/voucher';
 import DashboardAdmin from '../pages/admin/scenes/Dashboard';
 import UserManagement from '../pages/admin/scenes/User';
 import { checkCart, getListProductIdInCart, toastWarning, totalQuantityInCart } from '../untils/Logic';
@@ -35,7 +32,6 @@ import OriginManagement from '../pages/admin/scenes/Origin';
 import BrandManagement from '../pages/admin/scenes/Brand';
 import MaterialManagement from '../pages/admin/scenes/Material';
 import StylesManagement from '../pages/admin/scenes/Styles';
-import OrderRevenueManagement from '../pages/shop/scenes/Revenue';
 import HomeLayout from '../pages/user-guest/HomeLayout';
 import ProductDetail from '../pages/user-guest/product/ProductDetail2';
 import ProductCollection from '../pages/user-guest/category/Collection';
@@ -59,12 +55,7 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
     const { t } = useTranslation();
     const role = useSelector((state: ReducerProps) => state.role);
     const user = useSelector((state: ReducerProps) => state.user);
-    // const getDataAddress = async () => {
-    //     const resDataAddress = await GetApi('/user/address/get', localStorage.getItem('token'));
-    //     if (resDataAddress.status == 200) {
-    //         store.dispatch(change_list_address(resDataAddress.data.listAddress));
-    //     }
-    // };
+
     const getNumberCart = async () => {
         const res_number_cart = await PostGuestApi('/api/check-cart', { productDetailIds: getListProductIdInCart() });
         if (res_number_cart.data.message == 'Success') {
@@ -128,15 +119,11 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                         {defaultPage}
                         <Route path="/user/info-user" element={<InfoUser />}></Route>
                         <Route path="/user/address" element={<AllAddress />}></Route>
-                        <Route path="/user/wallet" element={<Wallet />}></Route>
-                        <Route path="/user/wallet/register" element={<RegisterWallet />}></Route>
                         <Route path="/user/address/create" element={<AddressCreate />}></Route>
                         <Route path="/user/address/edit/:addressId" element={<AddressEdit />}></Route>
-                        <Route path="/user/voucher" element={<Voucher />}></Route>
                         <Route path="/checkout" element={<Checkout />}></Route>
                         <Route path="/user/order" element={<Order />}></Route>
                         <Route path="/user/order/:orderId" element={<OrderDetail />}></Route>
-
                     </Routes>
 
                 </BrowserRouter>
@@ -158,16 +145,29 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                         <Route path="management/detail-commission" element={<DetailCommissionManagement />} />
                         <Route path="management/commission-statistics" element={<CommissionStatistic />} />
                         <Route path="management/user" element={<UserManagement />} />
-                        <Route path="management/origin" element={<OriginManagement />} />
+                        {/* <Route path="management/origin" element={<OriginManagement />} />
                         <Route path="management/styles" element={<StylesManagement />} />
                         <Route path="management/material" element={<MaterialManagement />} />
-                        <Route path="management/brand" element={<BrandManagement />} />
-                        <Route path="messenger" element={<ApplicationsMessenger />} />
+                        <Route path="management/brand" element={<BrandManagement />} /> */}
                     </Route>
                 </Routes>
             </BrowserRouter>
         );
-    } else {
+    } else if (role === typeRole.SUB_ADMIN) {
+        return (
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/err404" element={<Page404 />}></Route>
+                    <Route path="/" element={<IndexAdmin />}></Route>
+                    <Route path="/admin" element={<AdminSidebarLayout />}>
+                        {/* <Route path="" element={<DashboardAdmin />} /> */}
+                        <Route path="management/new-orders" element={<NewOrder />} />
+                        <Route path="management/orders" element={<OrderManagement />} />
+                    </Route>
+                </Routes>
+            </BrowserRouter>
+        );
+    }else {
         return <></>;
     }
 };

@@ -52,7 +52,8 @@ const ProductDetail: React.FC = () => {
     };
 
     const handleAddToCart = () => {
-        addToListCartStore(selectedProductDetail.id, quantity, selectedProductDetail);
+        const isJibbitz = product?.categoryId === '67b81eb6fb30030990a31918';
+        addToListCartStore(selectedProductDetail.id, quantity, selectedProductDetail, isJibbitz);
         store.dispatch(set_number_cart(quantity));
         store.dispatch(add_list_item_in_cart(selectedProductDetail));
         toastSuccess('Thêm vào giỏ hàng thành công');
@@ -69,7 +70,7 @@ const ProductDetail: React.FC = () => {
 
     return (
         <>
-            <Container sx={{ marginTop: { xs: '200px', md: '160px' } }}>
+            <Container sx={{ marginTop: { xs: '210px', md: '160px' } }}>
                 <Box sx={{ paddingTop: { xs: '0px', md: '10px' } }}>
                     <Breadcrumbs separator="›" aria-label="breadcrumb">
                         <IconButton href="/">

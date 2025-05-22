@@ -22,6 +22,8 @@ import CategoryIcon from '@mui/icons-material/Category';
 import AssessmentTwoToneIcon from '@mui/icons-material/AssessmentTwoTone';
 import { SidebarContext } from '../../../../../contexts/SidebarContext';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import { ReducerProps } from '../../../../../reducers/ReducersProps';
 
 const MenuWrapper = styled(Box)(
     ({ theme }) => `
@@ -165,10 +167,12 @@ const SubMenuWrapper = styled(Box)(
 function SidebarMenu() {
     const { closeSidebar } = useContext(SidebarContext);
     const { t } = useTranslation();
+    const user = useSelector((state: ReducerProps) => state.user);
+
     return (
         <>
             <MenuWrapper>
-                <List
+              {user.role === 'ADMIN' && (<List
                     component="div"
                     subheader={
                         <ListSubheader component="div" disableSticky>
@@ -191,7 +195,8 @@ function SidebarMenu() {
                             </ListItem>
                         </List>
                     </SubMenuWrapper>
-                </List>
+                </List>)}
+                
                 <List
                     component="div"
                     subheader={
@@ -202,41 +207,44 @@ function SidebarMenu() {
                 >
                     <SubMenuWrapper>
                         <List component="div">
-                            <ListItem component="div">
-                                <Button
-                                    disableRipple
-                                    component={RouterLink}
-                                    onClick={closeSidebar}
-                                    to="/admin/management/products"
-                                    startIcon={<StoreTwoToneIcon />}
-                                >
-                                  
-                                    Sản phẩm
-                                </Button>
-                            </ListItem>
-                            <ListItem component="div">
-                                <Button
-                                    disableRipple
-                                    component={RouterLink}
-                                    onClick={closeSidebar}
-                                    to="/admin/management/categories"
-                                    startIcon={<CategoryIcon />}
-                                >
-                                    {t('admin.Category')}
-                                </Button>
-                            </ListItem>
-                            <ListItem component="div">
-                                <Button
-                                    disableRipple
-                                    component={RouterLink}
-                                    onClick={closeSidebar}
-                                    to="/admin/management/user"
-                                    startIcon={<AccountCircleTwoToneIcon />}
-                                >
-                                    {t('admin.User')}
-                                </Button>
-                            </ListItem>
-                          
+                            {user.role === 'ADMIN' && (
+                                <>
+                                    <ListItem component="div">
+                                        <Button
+                                            disableRipple
+                                            component={RouterLink}
+                                            onClick={closeSidebar}
+                                            to="/admin/management/products"
+                                            startIcon={<StoreTwoToneIcon />}
+                                        >
+                                            Sản phẩm
+                                        </Button>
+                                    </ListItem>
+                                    <ListItem component="div">
+                                        <Button
+                                            disableRipple
+                                            component={RouterLink}
+                                            onClick={closeSidebar}
+                                            to="/admin/management/categories"
+                                            startIcon={<CategoryIcon />}
+                                        >
+                                            {t('admin.Category')}
+                                        </Button>
+                                    </ListItem>
+                                    <ListItem component="div">
+                                        <Button
+                                            disableRipple
+                                            component={RouterLink}
+                                            onClick={closeSidebar}
+                                            to="/admin/management/user"
+                                            startIcon={<AccountCircleTwoToneIcon />}
+                                        >
+                                            {t('admin.User')}
+                                        </Button>
+                                    </ListItem>
+                                </>
+                            )}
+
                             <ListItem component="div">
                                 <Button
                                     disableRipple
@@ -259,7 +267,8 @@ function SidebarMenu() {
                                     Quản lý đơn hàng
                                 </Button>
                             </ListItem>
-                            <ListItem component="div">
+                            {user.role === 'ADMIN' && (
+                              <><ListItem component="div">
                                 <Button
                                     disableRipple
                                     component={RouterLink}
@@ -280,7 +289,8 @@ function SidebarMenu() {
                                 >
                                     Thống kê hoa hồng
                                 </Button>
-                            </ListItem>
+                            </ListItem></>
+                            )}
                         </List>
                     </SubMenuWrapper>
                 </List>

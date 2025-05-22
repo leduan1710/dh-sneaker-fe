@@ -42,26 +42,6 @@ const LeftNav: React.FC<LeftNavProps> = (props) => {
                 <PersonIcon /> &nbsp;<div>{t('user.Profile')}</div>
             </div>
             <div
-                className={`transition-transform duration-500 ease-linear transform hover:translate-x-4 rounded p-4 cursor-pointer flex items-center mt-6 ${
-                    index == 1
-                        ? 'bg-blue-200 font-bold opacity-70 hover:opacity-50'
-                        : 'hover:bg-blue-200 hover:opacity-70'
-                }`}
-                onClick={() => nav('/user/address')}
-            >
-                <LocationOnIcon /> &nbsp;<div>{t('user.AllAddress')}</div>
-            </div>
-            <div
-                onClick={() => nav('/user/wallet')}
-                className={`transition-transform duration-500 ease-linear transform hover:translate-x-4 rounded p-4 cursor-pointer flex items-center mt-6 ${
-                    index == 2
-                        ? 'bg-blue-200 font-bold opacity-70 hover:opacity-50'
-                        : 'hover:bg-blue-200 hover:opacity-70'
-                }`}
-            >
-                <WalletIcon /> &nbsp;<div>{t('user.Wallet')}</div>
-            </div>
-            <div
                 onClick={() => nav('/user/order', { state: { indexTabs: 0 } })}
                 className={`transition-transform duration-500 ease-linear transform hover:translate-x-4 rounded p-4 cursor-pointer flex items-center mt-6 ${
                     index == 3
@@ -70,26 +50,6 @@ const LeftNav: React.FC<LeftNavProps> = (props) => {
                 }`}
             >
                 <InventoryIcon /> &nbsp;<div>{t('user.Orders')}</div>
-            </div>
-            <div
-                className={`transition-transform duration-500 ease-linear transform hover:translate-x-4 rounded p-4 cursor-pointer flex items-center mt-6 ${
-                    index == 4
-                        ? 'bg-blue-200 font-bold opacity-70 hover:opacity-50'
-                        : 'hover:bg-blue-200 hover:opacity-70'
-                }`}
-                onClick={() => nav('/user/voucher')}
-            >
-                <DiscountIcon /> &nbsp;<div>{t('Voucher')}</div>
-            </div>
-            <div
-                onClick={handleClickShop}
-                className={`transition-transform duration-500 ease-linear transform hover:translate-x-4 rounded p-4 cursor-pointer flex items-center mt-6 ${
-                    index == 5
-                        ? 'bg-blue-200 font-bold opacity-70 hover:opacity-50'
-                        : 'hover:bg-blue-200 hover:opacity-70'
-                }`}
-            >
-                <AddBusinessIcon /> &nbsp;<div>{t('user.Shop')}</div>
             </div>
         </div>
     );

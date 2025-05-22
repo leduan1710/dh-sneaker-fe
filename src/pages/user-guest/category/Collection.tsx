@@ -265,6 +265,10 @@ const ProductCollection = () => {
                 setExpand={setExpandColor}
             />
         ) : null;
+    console.log(selectedSizes);
+    console.log(selectedTypes);
+    console.log(selectedStyles);
+
     console.log(listProduct.length, Math.ceil(listProduct.length / limit));
     return (
         <>
@@ -318,7 +322,7 @@ const ProductCollection = () => {
                                 }}
                             >
                                 {/* Hiển thị tiêu chí lọc đã chọn */}
-                                {(selectedSizes.length > 0 || selectedColors.length > 0) && (
+                                {(selectedSizes.length > 0 || selectedColors.length > 0 || selectedStyles.length > 0 || selectedTypes.length > 0) && (
                                     <Box sx={{ mt: 1, mb: 2 }}>
                                         <Box
                                             sx={{
@@ -451,19 +455,23 @@ const ProductCollection = () => {
                                     borderColor: 'darkgray',
                                     color: '#111111',
                                     borderRadius: '4px',
-                                    fontWeight: 'bold', // Chữ in đậm
-                                    fontSize: '1rem', // Kích thước font chữ
-                                    minWidth: 165,
+                                    fontWeight: 'bold',
+                                    fontSize: '1rem',
+                                    minWidth: 160,
+                                    display: {
+                                        xs: 'flex',
+                                        md: 'none',
+                                    },
                                     '&:hover': {
                                         borderColor: '#111',
                                         color: '#111',
                                     },
                                 }}
-                                startIcon={<TuneIcon sx={{ marginRight: 1 }} />} // Sử dụng biểu tượng mới
+                                startIcon={<TuneIcon sx={{ marginRight: 1 }} />}
                             >
                                 Lọc
                             </Button>
-                            <FormControl variant="outlined" sx={{ minWidth: 165, ml: '10px' }}>
+                            <FormControl variant="outlined" sx={{ minWidth: 160, ml: '10px' }}>
                                 <InputLabel
                                     id="sort-select-label"
                                     sx={{
@@ -558,7 +566,7 @@ const ProductCollection = () => {
                 {/* Drawer cho lọc sản phẩm */}
                 <Drawer anchor="right" open={openDrawer} onClose={toggleDrawer}>
                     <Box sx={{ width: 250, padding: 2 }}>
-                        {(selectedSizes.length > 0 || selectedColors.length > 0) && (
+                        {(selectedSizes.length > 0 || selectedColors.length > 0 || selectedStyles.length > 0 || selectedTypes.length > 0)  && (
                             <Box sx={{ mt: 2, mb: 2 }}>
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <Typography variant="body1">Lọc Theo:</Typography>

@@ -48,14 +48,6 @@ const DrawerSearch: React.FC<DrawerSearchProps> = (props) => {
         }
         store.dispatch(change_is_loading(false));
     };
-    const getDataListHot = async () => {
-        store.dispatch(change_is_loading(true));
-        const resHot = await GetGuestApi('/api/keyword-hot');
-        if (resHot.data.message == 'Success') {
-            setListHot(resHot.data.keywords);
-        }
-        store.dispatch(change_is_loading(false));
-    };
     useEffect(() => {
         typingTimeoutRef.current = setTimeout(() => {
             if (search != '') {
@@ -68,11 +60,22 @@ const DrawerSearch: React.FC<DrawerSearchProps> = (props) => {
     useEffect(() => {
         if (open) {
             if (listSuggestion.length == 0) getDataSuggestion();
-            if (listHot.length == 0) getDataListHot();
         }
     }, [open]);
     const DrawerList = (
-        <Box sx={{ maxWidth: '900px', minWidth: '500px' }} role="presentation">
+        <Box
+            sx={{
+                maxWidth: {
+                    xs: '100%',
+                    md: '900px',
+                },
+                minWidth: {
+                    xs: '100%',
+                    md: '500px',
+                },
+            }}
+            role="presentation"
+        >
             <div className="pt-3 pl-3 pb-3 flex justify-start items-center bg-general">
                 <KeyboardBackspaceIcon className="cursor-pointer" onClick={toggleDrawer(false)} />{' '}
                 <span className="cursor-pointer pl-3" onClick={toggleDrawer(false)}>
@@ -115,55 +118,7 @@ const DrawerSearch: React.FC<DrawerSearchProps> = (props) => {
                 listProduct.map((product: any, index: number) => <ProductItemSearch key={index} product={product} />)
             ) : (
                 <>
-                    <div className="mt-6 ml-12 mr-12">
-                        <div className="font-bold">{t('homepage.Hot key')}</div>
-
-                        <div className="flex mt-3 grid grid-cols-4">
-                            {listHot.length > 0 ? (
-                                listHot.map((hot, index) => (
-                                    <Hot key={index} hot={hot} setSearch={setSearch} getDataSearch={getDataSearch} />
-                                ))
-                            ) : (
-                                <div className="col-span-4 grid grid-cols-4 w-full">
-                                    <div>
-                                        <Skeleton variant="rectangular" className=" m-3 rounded-full" height={50} />
-                                    </div>
-                                    <div>
-                                        <Skeleton variant="rectangular" className=" m-3 rounded-full" height={50} />
-                                    </div>
-                                    <div>
-                                        <Skeleton
-                                            variant="rectangular"
-                                            className=" mt-3 m-3 rounded-full"
-                                            height={50}
-                                        />
-                                    </div>
-                                    <div>
-                                        <Skeleton
-                                            variant="rectangular"
-                                            className=" mt-3 m-3 rounded-full"
-                                            height={50}
-                                        />
-                                    </div>
-                                    <div>
-                                        <Skeleton
-                                            variant="rectangular"
-                                            className=" mt-3 m-3 rounded-full"
-                                            height={50}
-                                        />
-                                    </div>
-                                    <div>
-                                        <Skeleton
-                                            variant="rectangular"
-                                            className=" mt-3 m-3 rounded-full"
-                                            height={50}
-                                        />
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    <div className="mt-6 ml-12 mr-12">
+                    {/* <div className="mt-6 ml-12 mr-12">
                         <div className="font-bold">{t('homepage.Product suggestions')}</div>
                         {listSuggestion.length > 0 ? (
                             <div className="flex mt-3 grid grid-cols-2">
@@ -187,7 +142,7 @@ const DrawerSearch: React.FC<DrawerSearchProps> = (props) => {
                                 </div>
                             </div>
                         )}
-                    </div>
+                    </div> */}
                 </>
             )}
         </Box>

@@ -15,18 +15,7 @@ const Footer: React.FC<FooterProps> = (props) => {
                 >
                     <div className="info">
                         <div className="text-xl">{t('footer.Contact')}</div>
-                        <div className="mt-3">
-                            <strong>VP Hồ Chí Minh</strong>: 203 Huỳnh Văn Nghệ, phường 12, quận Gò Vấp
-                        </div>
-                        <div className="mt-2">
-                            <strong>Hotline</strong>: 0888.566.599
-                        </div>
-                        <div className="mt-2">
-                            <strong>Email</strong>: chauthuanphat10@gmail.com&nbsp;
-                        </div>
-                        <div className="mt-2">
-                            <strong>Email</strong>: lequanduan1710@gmail.com&nbsp;
-                        </div>
+                        
                     </div>
                     <div className="info pl-4">
                         <h1 className="text-xl">{t('footer.Services')}</h1>

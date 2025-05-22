@@ -14,7 +14,6 @@ import axios from 'axios';
 import { toastSuccess, toastWarning } from '../../../../untils/Logic';
 import { useTranslation } from 'react-i18next';
 import ProductsTable from './ProductsTable';
-import CreateProductDialog from './CreateDialog';
 
 function ProductManagement() {
     const { t } = useTranslation();
@@ -37,13 +36,12 @@ function ProductManagement() {
     };
     //
     const getDataProduct = async () => {
-            store.dispatch(change_is_loading(true));
-            const resProducts = await GetApi(`/api/products`, localStorage.getItem('token'));
-            if (resProducts.data.message == 'Success') {
-                setProducts(resProducts.data.products);
-            }
-            store.dispatch(change_is_loading(false));
-        
+        store.dispatch(change_is_loading(true));
+        const resProducts = await GetApi(`/admin/get/products`, localStorage.getItem('token'));
+        if (resProducts.data.message == 'Success') {
+            setProducts(resProducts.data.products);
+        }
+        store.dispatch(change_is_loading(false));
     };
     const getDataCategory = async () => {
         store.dispatch(change_is_loading(true));

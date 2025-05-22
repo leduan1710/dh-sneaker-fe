@@ -224,7 +224,7 @@ function Row(props: RowProps) {
                 onUpdate={handleUpdateOrderList}
                 status={newStatus}
             />
-             <DetailOrder
+            <DetailOrder
                 open={openDetailOrder}
                 onClose={handleCloseDetailOrder}
                 order={order}
@@ -238,7 +238,7 @@ export default function OrderTable() {
     const { t } = useTranslation();
     const store = useStore();
     const location = useLocation();
-    const { status } = location.state ? location.state : 'all';
+    const { status } = location.state ? location.state : 'ALL';
     const user = useSelector((state: ReducerProps) => state.user);
     const [orders, setOrders] = useState<any[]>([]);
     const [orderDetails, setOrderDetails] = useState<any[]>([]);
@@ -246,9 +246,9 @@ export default function OrderTable() {
     // Pagination state
     const [page, setPage] = useState(0);
     const [limit, setLimit] = useState(5);
-    const [statusFilter, setStatusFilter] = useState<string>('all');
-    const [shipMethodFilter, setShipMethodFilter] = useState<string>('all');
-    const [ctvFilter, setCtvFilter] = useState('all');
+    const [statusFilter, setStatusFilter] = useState<string>('ALL');
+    const [shipMethodFilter, setShipMethodFilter] = useState<string>('ALL');
+    const [ctvFilter, setCtvFilter] = useState('ALL');
     const [ctvNames, setCtvNames] = useState<string[]>([]);
 
     const getDataOrder = async () => {
@@ -289,6 +289,7 @@ export default function OrderTable() {
         if (status) {
             getDataOrder();
             setStatusFilter(status);
+
             setPage(0);
             location.state = null;
         }
@@ -325,25 +326,28 @@ export default function OrderTable() {
     };
 
     const filteredOrders = orders.filter((order) => {
-        const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-        const matchesCtv = ctvFilter === 'all' || order.ctvName === ctvFilter;
-        const matchesShipMethod = shipMethodFilter === 'all' || order.shipMethod === shipMethodFilter;
+        const matchesStatus = statusFilter === 'ALL' || order.status === statusFilter;
+        const matchesCtv = ctvFilter === 'ALL' || order.ctvName === ctvFilter;
+        const matchesShipMethod = shipMethodFilter === 'ALL' || order.shipMethod === shipMethodFilter;
 
         return matchesStatus && matchesCtv && matchesShipMethod;
     });
 
     const paginatedOrders = filteredOrders.slice(page * limit, page * limit + limit);
     // filter Id
-    const [filterId, setFilterId] = useState<string>('');
+    const [searchTerm, setSearchTerm] = useState<string>('');
     const typingTimeoutRef = useRef<any>(null);
     if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
     }
-    const filterById = async (id: string) => {
-        if (id != '') {
+    const filterById = async (searchTerm: string) => {
+        if (searchTerm != '') {
             store.dispatch(change_is_loading(true));
-            const res = await GetApi(`/shop/get/order/${id}`, localStorage.getItem('token'));
-
+            const res = await PostApi(
+                `/admin/search/order-by-phone-or-delivering-code`,
+                localStorage.getItem('token'),
+                { searchTerm: searchTerm },
+            );
             if (res.data.message == 'Success') {
                 setOrders(res.data.order);
                 await getOrderDetails(res.data.order);
@@ -351,21 +355,15 @@ export default function OrderTable() {
             }
             store.dispatch(change_is_loading(false));
         } else {
-            store.dispatch(change_is_loading(true));
-            const resOrders = await GetApi(`/shop/get/order-by-shop/${user.shopId}`, localStorage.getItem('token'));
-            if (resOrders.data.message === 'Success') {
-                setOrders(resOrders.data.orders);
-                await getOrderDetails(resOrders.data.orders);
-            }
-            store.dispatch(change_is_loading(false));
+            getDataOrder();
         }
     };
 
     useEffect(() => {
         typingTimeoutRef.current = setTimeout(() => {
-            filterById(filterId);
+            filterById(searchTerm);
         }, 500);
-    }, [filterId]);
+    }, [searchTerm]);
     return (
         <>
             <TableContainer className="relative" component={Paper}>
@@ -373,7 +371,7 @@ export default function OrderTable() {
                     <FormControl variant="outlined" sx={{ minWidth: 200 }}>
                         <InputLabel>Trạng thái</InputLabel>
                         <Select value={statusFilter} onChange={handleStatusChange} label="Trạng thái">
-                            <MenuItem value="all">{t('orther.All')}</MenuItem>
+                            <MenuItem value="ALL">Tất cả</MenuItem>
                             <MenuItem value="SUCCESS">Thành công</MenuItem>
                             <MenuItem value="BOOM">Boom</MenuItem>
                             <MenuItem value="CANCEL">Đã hủy</MenuItem>
@@ -383,7 +381,7 @@ export default function OrderTable() {
                     <FormControl variant="outlined" sx={{ minWidth: 200 }}>
                         <InputLabel>Hình thức ship</InputLabel>
                         <Select value={shipMethodFilter} onChange={handleShipMethodChange} label="Hình thức ship">
-                            <MenuItem value="all">{t('orther.All')}</MenuItem>
+                            <MenuItem value="ALL">Tất cả</MenuItem>
                             <MenuItem value="VIETTELPOST">Viettelpost</MenuItem>
                             <MenuItem value="GRAB">Grab/Kho khác</MenuItem>
                             <MenuItem value="OFFLINE">Offline</MenuItem>
@@ -392,7 +390,7 @@ export default function OrderTable() {
                     <FormControl variant="outlined" sx={{ minWidth: 200 }}>
                         <InputLabel>Tên CTV</InputLabel>
                         <Select value={ctvFilter} onChange={handleCtvChange} label="Tên CTV">
-                            <MenuItem value="all">{t('orther.All')}</MenuItem>
+                            <MenuItem value="ALL">Tất cả</MenuItem>
                             {ctvNames.map((ctvName, index) => (
                                 <MenuItem key={index} value={ctvName}>
                                     {ctvName}
@@ -402,20 +400,17 @@ export default function OrderTable() {
                     </FormControl>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <Input
-                            value={filterId}
+                            value={searchTerm}
                             className="border border-gray-300 rounded-lg p-1"
-                            sx={{ display: 'block', width: 300, marginRight: 2 }}
+                            sx={{ display: 'block', width: 350, marginRight: 2 }}
                             placeholder={'Tìm kiếm'}
                             onChange={(e) => {
-                                filterSpecialInput(e.target.value, setFilterId);
+                                filterSpecialInput(e.target.value, setSearchTerm);
                             }}
                         />
                         <IconButton color="primary">
                             <SearchIcon />
                         </IconButton>
-                        <Button variant="contained" color="primary" onClick={() => {}} sx={{ marginLeft: 2 }}>
-                            Xuất Đơn Hàng
-                        </Button>
                     </Box>
                 </Box>
                 <Table aria-label="collapsible table">

@@ -58,28 +58,38 @@ const Input = styled('input')({
     display: 'none',
 });
 
-interface AlertDeleteDialogProps {
+interface AlertChangeStatusDialogProps {
     onClose: () => void;
     open: boolean;
     productId?: string;
+    product: any;
     onUpdate: () => void;
 }
 
-const AlertDeleteDialog: React.FC<AlertDeleteDialogProps> = (props) => {
+const AlertChangeStatusDialog: React.FC<AlertChangeStatusDialogProps> = (props) => {
     const { t } = useTranslation();
-    const { onClose, open, productId, onUpdate } = props;
+    const { onClose, open, productId, onUpdate, product } = props;
 
     const handleClose = () => {
         onClose();
     };
-    const handleDelete = async () => {
+    const handleChangeStatus = async () => {
         try {
-            const res = await PostApi(`/shop/delete/product/${productId}`, localStorage.getItem('token'), {});
+            if (product.active) {
+                const res = await GetApi(`/admin/disable-product/${productId}`, localStorage.getItem('token'));
 
-            if (res.data.message === 'Success') {
-                toastSuccess(t('toast.DeleteSuccess'));
-                onUpdate();
-            } else toastError(t('toast.DeleteFail'));
+                if (res.data.message === 'Success') {
+                    toastSuccess('Vô hiệu hóa thành công');
+                    onUpdate();
+                } else toastError('Thất bại');
+            } else {
+                const res = await GetApi(`/admin/enable-product/${productId}`, localStorage.getItem('token'));
+
+                if (res.data.message === 'Success') {
+                    toastSuccess('Kích hoạt thành công');
+                    onUpdate();
+                } else toastError('Thất bại');
+            }
         } catch (error) {
             console.error('Failed to delete :', error);
         }
@@ -95,16 +105,16 @@ const AlertDeleteDialog: React.FC<AlertDeleteDialogProps> = (props) => {
                 aria-describedby="dialog-description"
             >
                 <DialogTitle sx={{ textTransform: 'capitalize' }} id="dialog-title">
-                    {t('product.ShopManagement.DeleteProduct')}
+                    Thay đổi trạng thái sản phẩm
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText id="dialog-description">
-                        {t('product.ShopManagement.ConfirmToDeleteProduct')} ?
+                        {product?.active ? 'Vô hiệu hóa sản phẩm này' : ''}
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>{t('action.Cancel')}</Button>
-                    <Button onClick={handleDelete} autoFocus>
+                    <Button onClick={handleChangeStatus} autoFocus>
                         {t('action.Confirm')}
                     </Button>
                 </DialogActions>
@@ -135,7 +145,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
 
     const [openDetail, setOpenDetail] = useState(false);
     const [openEdit, setOpenEdit] = useState(false);
-    const [openDelete, setOpenDelete] = useState(false);
+    const [openDisable, setOpenDisable] = useState(false);
     const isLoading = useSelector((state: ReducerProps) => state.isLoading);
     const [products, setProducts] = useState<any[]>(initialProducts);
     const [selectedProduct, setSelectedProduct] = useState<any>();
@@ -173,52 +183,18 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
         setSelectedProduct(undefined);
         setOpenEdit(false);
     };
-    const handleClickOpenDeleteDialog = () => {
-        setOpenDelete(true);
+    const handleClickOpenDisableDialog = () => {
+        setOpenDisable(true);
     };
-    const handleCloseDeleteDialog = () => {
+    const handleCloseDisableDialog = () => {
         setSelectedProduct(undefined);
-        setOpenDelete(false);
+        setOpenDisable(false);
     };
 
     const getDataProduct = async () => {
-        if (user.shopId) {
-            if (name != '') {
-                store.dispatch(change_is_loading(true));
-                const res = await PostApi(`/shop/get/product-by-name`, localStorage.getItem('token'), { name: name });
-
-                if (res.data.message == 'Success') {
-                    setProducts(res.data.products);
-                    setPage(0);
-                }
-                store.dispatch(change_is_loading(false));
-            } else {
-                store.dispatch(change_is_loading(true));
-                const resProducts = await GetApi(
-                    `/shop/get/product-by-shop/${user.shopId}`,
-                    localStorage.getItem('token'),
-                );
-                if (resProducts.data.message == 'Success') {
-                    setProducts(resProducts.data.products);
-                }
-                store.dispatch(change_is_loading(false));
-            }
-        }
-    };
-
-    useEffect(() => {
-        setProducts(initialProducts);
-    }, [initialProducts]);
-    // filter Id
-    const [name, setFilterId] = useState<string>('');
-    const typingTimeoutRef = useRef<any>(null);
-    if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-    }
-    const filterById = async (name: string) => {
         if (name != '') {
             store.dispatch(change_is_loading(true));
-            const res = await PostApi(`/shop/get/product-by-name`, localStorage.getItem('token'), { name: name });
+            const res = await PostApi(`/admin/search/product-by-name`, localStorage.getItem('token'), { name: name });
 
             if (res.data.message == 'Success') {
                 setProducts(res.data.products);
@@ -227,7 +203,38 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
             store.dispatch(change_is_loading(false));
         } else {
             store.dispatch(change_is_loading(true));
-            const resProducts = await GetApi(`/shop/get/product-by-shop/${user.shopId}`, localStorage.getItem('token'));
+            const resProducts = await GetApi(`/admin/get/products`, localStorage.getItem('token'));
+
+            if (resProducts.data.message == 'Success') {
+                setProducts(resProducts.data.products);
+            }
+            store.dispatch(change_is_loading(false));
+        }
+    };
+
+    useEffect(() => {
+        setProducts(initialProducts);
+    }, [initialProducts]);
+    // filter Id
+    const [name, setSearchName] = useState<string>('');
+    const typingTimeoutRef = useRef<any>(null);
+    if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+    }
+    const searchByName = async (name: string) => {
+        if (name != '') {
+            store.dispatch(change_is_loading(true));
+            const res = await PostApi(`/admin/search/product-by-name`, localStorage.getItem('token'), { name: name });
+
+            if (res.data.message == 'Success') {
+                setProducts(res.data.products);
+                setPage(0);
+            }
+            store.dispatch(change_is_loading(false));
+        } else {
+            store.dispatch(change_is_loading(true));
+            const resProducts = await GetApi(`/admin/get/products`, localStorage.getItem('token'));
+
             if (resProducts.data.message == 'Success') {
                 setProducts(resProducts.data.products);
             }
@@ -236,7 +243,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
     };
     useEffect(() => {
         typingTimeoutRef.current = setTimeout(() => {
-            filterById(name);
+            searchByName(name);
         }, 500);
     }, [name]);
     return (
@@ -253,13 +260,13 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
                     variant="outlined"
                     className="border-gray-300"
                     style={{
-                        width: 280, // Kích thước chiều rộng
-                        borderRadius: '30px', // Độ tròn hơn
-                        padding: '0 10px', // Thêm padding
+                        width: 280,
+                        borderRadius: '30px',
+                        padding: '0 10px',
                     }}
-                    placeholder={t('action.EnterID')}
+                    placeholder={"Nhập tên sản phẩm"}
                     onChange={(e) => {
-                        filterSpecialInput(e.target.value, setFilterId);
+                        filterSpecialInput(e.target.value, setSearchName);
                     }}
                     InputProps={{
                         startAdornment: (
@@ -268,7 +275,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
                             </InputAdornment>
                         ),
                         sx: {
-                            height: '35px', // Chiều cao của thanh tìm kiếm
+                            height: '35px',
                         },
                     }}
                 />
@@ -280,7 +287,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
                         height: 36,
                         marginLeft: 1,
                         '&:hover': {
-                            backgroundColor: '#fff59d', // Màu vàng nhạt khi hover
+                            backgroundColor: '#fff59d',
                         },
                     }}
                     onClick={() => {
@@ -289,22 +296,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
                 >
                     <TuneIcon fontSize="small" />
                 </IconButton>
-                {/* <IconButton
-                    sx={{
-                        backgroundColor: '#fff9c4',
-                        borderRadius: '50%',
-                        width: 36,
-                        height: 36,
-                        marginLeft: 1,
-                        '&:hover': {
-                            backgroundColor: '#fff59d',
-                        },
-                    }}
-                    onClick={() => {
-                    }}
-                >
-                    <SwapVertIcon fontSize="small" />
-                </IconButton> */}
+
                 <IconButton
                     sx={{
                         backgroundColor: '#fff9c4',
@@ -415,7 +407,6 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
                                         </Typography>
                                     </TableCell>
 
-
                                     <TableCell>
                                         <Avatar
                                             variant="square"
@@ -492,22 +483,37 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
                                                 <EditTwoToneIcon fontSize="small" />
                                             </IconButton>
                                         </Tooltip>
-                                        <Tooltip title={t('action.Delete')} arrow>
-                                            <IconButton
-                                                sx={{
-                                                    '&:hover': { background: theme.colors.error.lighter },
-                                                    color: theme.palette.error.main,
-                                                }}
-                                                color="inherit"
-                                                size="small"
-                                                onClick={() => {
-                                                    handleClickOpenDeleteDialog();
-                                                    setSelectedProduct(product);
-                                                }}
-                                            >
-                                                <NotInterestedIcon fontSize="small" />
-                                            </IconButton>
-                                        </Tooltip>
+                                        {product.active ? (
+                                            <Tooltip title={t('action.Delete')} arrow>
+                                                <IconButton
+                                                    sx={{
+                                                        '&:hover': { background: theme.colors.error.lighter },
+                                                        color: theme.palette.error.main,
+                                                    }}
+                                                    color="inherit"
+                                                    size="small"
+                                                    onClick={() => {
+                                                        handleClickOpenDisableDialog();
+                                                        setSelectedProduct(product);
+                                                    }}
+                                                >
+                                                    <NotInterestedIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        ) : (
+                                            <Tooltip title={t('action.UnBan')} arrow>
+                                                <IconButton
+                                                    color="primary"
+                                                    size="small"
+                                                    onClick={() => {
+                                                        handleClickOpenDisableDialog();
+                                                        setSelectedProduct(product);
+                                                    }}
+                                                >
+                                                    <SwitchAccessShortcutAddIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             );
@@ -536,11 +542,12 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
                 product={selectedProduct}
                 onUpdate={getDataProduct}
             />
-            <AlertDeleteDialog
-                open={openDelete}
-                onClose={handleCloseDeleteDialog}
+            <AlertChangeStatusDialog
+                open={openDisable}
+                onClose={handleCloseDisableDialog}
                 productId={selectedProduct?.id}
                 onUpdate={getDataProduct}
+                product={selectedProduct}
             />
             <Box p={2}>
                 <TablePagination

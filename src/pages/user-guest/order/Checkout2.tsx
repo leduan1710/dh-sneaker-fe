@@ -28,6 +28,7 @@ import { ReducerProps } from '../../../reducers/ReducersProps';
 import { HOST_BE } from '../../../common/Common';
 import { PostApi } from '../../../untils/Api';
 import { useNavigate } from 'react-router-dom';
+import { change_is_loading } from '../../../reducers/Actions';
 
 const Input = styled('input')({
     display: 'none',
@@ -39,7 +40,7 @@ const Checkout: React.FC = () => {
     const navigate = useNavigate();
     const listItemInCart = useSelector((state: ReducerProps) => state.listItemInCart);
     const listCart = JSON.parse(localStorage.getItem('listCart') || '[]');
-
+    const [listCheckout, setListCheckout] = useState<any>(JSON.parse(sessionStorage.getItem('checkout') || '[]'));
     const [customerName, setCustomerName] = useState('');
     const [totalCOD, setTotalCOD] = useState('');
     const [totalAmount, setTotalAmount] = useState(0);
@@ -95,32 +96,50 @@ const Checkout: React.FC = () => {
         const address = e.target.value;
         setCustomerAddress(address);
     };
-    const handleBuy = async () => {
-        // Tạo danh sách chi tiết đơn hàng
-        const listOrderDetail = listItemInCart.map((item: any) => {
-            const index_quantity = listCart.findIndex((item_inStore: any) => item_inStore.productDetailId === item.id);
-            return {
-                productDetailId: item.id,
-                productName: item.name,
-                image: item.image,
-                sellPrice: item.sellPrice,
-                importPrice: item.importPrice,
-                ctvPrice: item.ctvPrice,
-                color: item.colorName,
-                size: item.sizeName,
-                quantity: listCart[index_quantity].quantity,
-            };
+    const removeFromCart = () => {
+        let list_cart = JSON.parse(localStorage.getItem('listCart') || '[]');
+        listCheckout.map((item_store: any) => {
+            list_cart = list_cart.filter((item: any) => item.productDetailId !== item_store.productDetailId);
         });
+        localStorage.setItem('listCart', JSON.stringify(list_cart));
+    };
+    const handleBuy = async () => {
+        store.dispatch(change_is_loading(true));
+        // Tạo danh sách chi tiết đơn hàng
+        const listOrderDetail = listItemInCart
+            .filter((item: any) => {
+                const index_quantity = listCart.findIndex(
+                    (item_inStore: any) => item_inStore.productDetailId === item.id,
+                );
+                return index_quantity !== -1 && listCart[index_quantity].isCheck; // Kiểm tra isCheck
+            })
+            .map((item: any) => {
+                const index_quantity = listCart.findIndex(
+                    (item_inStore: any) => item_inStore.productDetailId === item.id,
+                );
+                return {
+                    productDetailId: item.id,
+                    productName: item.name,
+                    image: item.image,
+                    sellPrice: item.sellPrice,
+                    importPrice: item.importPrice,
+                    ctvPrice: item.ctvPrice,
+                    color: item.colorName,
+                    size: item.sizeName,
+                    quantity: listCart[index_quantity].quantity,
+                    isJibbitz: listCart[index_quantity].isJibbitz
+                };
+            });
 
         if (shippingMethod === 'OFFLINE') {
-            if(!(orderNote && customerName && shippingMethod && totalCOD)){
+            if (!(orderNote && customerName && shippingMethod && totalCOD)) {
                 toastWarning('Vui lòng nhập đủ thông tin');
                 return;
             }
             const formData = new FormData();
 
             // Thêm thông tin đơn hàng vào FormData
-            formData.append('userId', user.id)
+            formData.append('userId', user.id);
             formData.append('ctvName', user.name);
             formData.append('ctvNote', orderNote);
             formData.append('customerName', customerName);
@@ -147,7 +166,11 @@ const Checkout: React.FC = () => {
 
                 if (res.data.message === 'Success') {
                     toastSuccess('Đặt hàng thành công');
-                    navigate("/user/order")
+                    sessionStorage.removeItem('checkout');
+
+                    removeFromCart();
+                    navigate('/user/order');
+                    store.dispatch(change_is_loading(false));
                 }
             } catch (error) {
                 console.error('Failed to place order:', error);
@@ -157,7 +180,7 @@ const Checkout: React.FC = () => {
             const formData = new FormData();
 
             // Thêm thông tin đơn hàng vào FormData
-            formData.append('userId', user.id)
+            formData.append('userId', user.id);
             formData.append('ctvName', user.name);
             formData.append('ctvNote', orderNote);
             formData.append('customerName', customerName);
@@ -193,26 +216,29 @@ const Checkout: React.FC = () => {
 
                 if (res.data.message === 'Success') {
                     toastSuccess('Đặt hàng thành công');
-                    navigate("/user/order")
+                    sessionStorage.removeItem('checkout');
+
+                    removeFromCart();
+                    navigate('/user/order');
+                    store.dispatch(change_is_loading(false));
                 }
             } catch (error) {
                 console.error('Failed to place order:', error);
             }
         }
     };
-    
+
     useEffect(() => {
         let total = 0;
 
         listItemInCart.forEach((item: any) => {
-            const cartItem = listCart.find((cartItem: any) => cartItem.productDetailId === item.id);
+            const cartItem = listCart.find((cartItem: any) => cartItem.productDetailId === item.id && cartItem.isCheck);
             const quantity = cartItem ? cartItem.quantity : 0;
             total += item.sellPrice * quantity;
         });
 
         setTotalAmount(total);
     }, [listItemInCart, listCart]);
-
     useEffect(() => {
         getDataProvince();
     }, []);
@@ -223,6 +249,7 @@ const Checkout: React.FC = () => {
         getDataWard();
     }, [district]);
 
+    console.log(listItemInCart);
     return (
         <Grid container spacing={3} sx={{ mt: { md: '160px', xs: '170px' }, mb: 4, px: { md: 16, xs: 2 } }}>
             <Grid item xs={12} md={6} sx={{ overflow: { md: 'auto' }, maxHeight: { md: '100vh' } }}>
@@ -279,14 +306,13 @@ const Checkout: React.FC = () => {
                 />
 
                 <Typography variant="body2" sx={{ marginBottom: 1 }}>
-        {"Ảnh ghi chú (Nếu có)"}
-    </Typography>
+                    {'Ảnh ghi chú (Nếu có)'}
+                </Typography>
                 <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                
                     {selectImage && (
                         <Avatar
                             variant="square"
-                            sx={{ height: {md: 200, xs: 250}, width: "auto" }}
+                            sx={{ height: { md: 200, xs: 250 }, width: 'auto' }}
                             src={selectImage ? URL.createObjectURL(selectImage) : undefined}
                         />
                     )}
@@ -573,74 +599,79 @@ const Checkout: React.FC = () => {
                     </Typography>
                     <Divider sx={{ my: 1 }}></Divider>
                     <Box sx={{ p: 3 }}>
-                        {listItemInCart.map((item: any, index: number) => {
-                            const cartItem = listCart.find((cartItem: any) => cartItem.productDetailId === item.id);
-                            const quantity = cartItem ? cartItem.quantity : 0;
+                        {listItemInCart
+                            .filter((item: any) => {
+                                const cartItem = listCart.find((cartItem: any) => cartItem.productDetailId === item.id);
+                                return cartItem && cartItem.isCheck; // Chỉ lấy các item có isCheck = true
+                            })
+                            .map((item: any, index: number) => {
+                                const cartItem = listCart.find((cartItem: any) => cartItem.productDetailId === item.id);
+                                const quantity = cartItem ? cartItem.quantity : 0;
 
-                            return (
-                                <Box key={item.productDetailId}>
-                                    <Box
-                                        sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            borderRadius: '4px',
-                                            boxShadow: 1,
-                                        }}
-                                    >
-                                        <Box sx={{ position: 'relative', mr: 2 }}>
-                                            <img
-                                                src={
-                                                    item.image.startsWith('uploads')
-                                                        ? `${HOST_BE}/${item.image}`
-                                                        : item.image
-                                                }
-                                                alt={item.name}
-                                                style={{ width: 80, height: 80, borderRadius: '4px' }}
-                                            />
-                                            <Box
-                                                sx={{
-                                                    position: 'absolute',
-                                                    top: -5,
-                                                    right: -5,
-                                                    bgcolor: 'rgb(226, 50, 50)',
-                                                    color: '#fff',
-                                                    borderRadius: '50%', // Hình tròn
-                                                    padding: '4px',
-                                                    width: '24px',
-                                                    height: '24px',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    fontSize: '0.8rem',
-                                                }}
-                                            >
-                                                {quantity}
+                                return (
+                                    <Box key={item.productDetailId}>
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                borderRadius: '4px',
+                                                boxShadow: 1,
+                                            }}
+                                        >
+                                            <Box sx={{ position: 'relative', mr: 2 }}>
+                                                <img
+                                                    src={
+                                                        item.image.startsWith('uploads')
+                                                            ? `${HOST_BE}/${item.image}`
+                                                            : item.image
+                                                    }
+                                                    alt={item.name}
+                                                    style={{ width: 80, height: 80, borderRadius: '4px' }}
+                                                />
+                                                <Box
+                                                    sx={{
+                                                        position: 'absolute',
+                                                        top: -5,
+                                                        right: -5,
+                                                        bgcolor: 'rgb(226, 50, 50)',
+                                                        color: '#fff',
+                                                        borderRadius: '50%', // Hình tròn
+                                                        padding: '4px',
+                                                        width: '24px',
+                                                        height: '24px',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        fontSize: '0.8rem',
+                                                    }}
+                                                >
+                                                    {quantity}
+                                                </Box>
+                                            </Box>
+                                            <Box sx={{ flexGrow: 1 }}>
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
+                                                        alignItems: 'center',
+                                                    }}
+                                                >
+                                                    <Typography variant="h6" sx={{ fontSize: 17 }}>
+                                                        {item.name}
+                                                    </Typography>
+                                                    <Typography variant="body1" sx={{ fontSize: 15 }} color="#111">
+                                                        {formatPrice(item.sellPrice)}
+                                                    </Typography>
+                                                </Box>
+                                                <Typography variant="body2" color="textSecondary">
+                                                    Size: {item.sizeName}
+                                                </Typography>
                                             </Box>
                                         </Box>
-                                        <Box sx={{ flexGrow: 1 }}>
-                                            <Box
-                                                sx={{
-                                                    display: 'flex',
-                                                    justifyContent: 'space-between',
-                                                    alignItems: 'center',
-                                                }}
-                                            >
-                                                <Typography variant="h6" sx={{ fontSize: 17 }}>
-                                                    {item.name}
-                                                </Typography>
-                                                <Typography variant="body1" sx={{ fontSize: 15 }} color="#111">
-                                                    {formatPrice(item.sellPrice)}
-                                                </Typography>
-                                            </Box>
-                                            <Typography variant="body2" color="textSecondary">
-                                                Size: {item.sizeName}
-                                            </Typography>
-                                        </Box>
+                                        {index < listCheckout.length - 1 && <Divider sx={{ my: 2 }} />}
                                     </Box>
-                                    {index < listItemInCart.length - 1 && <Divider sx={{ my: 2 }} />}
-                                </Box>
-                            );
-                        })}
+                                );
+                            })}
                     </Box>
                     <Divider sx={{ my: 1 }}></Divider>
                     <Box sx={{ p: 3 }}>

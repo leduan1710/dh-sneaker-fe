@@ -60,7 +60,7 @@ const ColorFilterSection: React.FC<ColorFilterSectionProps> = ({
                                     width: '20px',
                                     height: '20px',
                                     borderRadius: '50%',
-                                    backgroundColor: option.colorCode.toLowerCase(),
+                                    backgroundColor: option.colorCode?.toLowerCase(),
                                     display: 'inline-block',
                                     border: selectedOptions.includes(option) ? '2px solid black' : '0.5px solid rgba(200, 200, 200, 0.7)',
                                     marginRight: '8px',
