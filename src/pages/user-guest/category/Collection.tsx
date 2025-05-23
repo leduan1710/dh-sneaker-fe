@@ -86,7 +86,7 @@ const ProductCollection = () => {
     };
 
     const getDataFilter = async () => {
-        const resTypes = await GetGuestApi('/api/all-type');
+        const resTypes = await GetGuestApi(`/api/type-by-category-name/${categoryName}`);
         if (resTypes.data.message == 'Success') {
             setOptionType(resTypes.data.types);
         }

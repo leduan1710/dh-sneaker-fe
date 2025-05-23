@@ -33,7 +33,7 @@ import BrandManagement from '../pages/admin/scenes/Brand';
 import MaterialManagement from '../pages/admin/scenes/Material';
 import StylesManagement from '../pages/admin/scenes/Styles';
 import HomeLayout from '../pages/user-guest/HomeLayout';
-import ProductDetail from '../pages/user-guest/product/ProductDetail2';
+import ProductDetail from '../pages/user-guest/product/ProductDetail';
 import ProductCollection from '../pages/user-guest/category/Collection';
 import ProductManagement from '../pages/admin/scenes/Product';
 import Footer from '../components/admin-shop/footer/Footer';

@@ -7,10 +7,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import HomeIcon from '@mui/icons-material/Home';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
-import HotStyle from '../../../components/user-guest/home/HotStyle';
 import { addCheckout, addToListCartStore, formatPrice, toastSuccess } from '../../../untils/Logic';
 import SizeGuideDialog from './SizeGuideDialog';
 import { HOST_BE } from '../../../common/Common';
+import RelatedProducts from '../../../components/user-guest/home/RelatedProduct';
 
 const ProductDetail: React.FC = () => {
     const { productId } = useParams();
@@ -77,7 +77,7 @@ const ProductDetail: React.FC = () => {
                             <HomeIcon fontSize="small" />
                         </IconButton>
                         <Typography color="textPrimary" fontSize={13} fontWeight={520}>
-                            CROCS
+                            {product?.categoryName}
                         </Typography>
                         <Typography color="textPrimary" fontSize={13}>
                             {product?.name}
@@ -161,25 +161,27 @@ const ProductDetail: React.FC = () => {
                                 >
                                     {formatPrice(product?.sellPrice)}
                                 </Typography>
-                                <Typography
-                                    variant="h5"
-                                    style={{
-                                        margin: '0',
-                                        textDecoration: 'line-through',
-                                        color: 'gray',
-                                        fontSize: 16,
-                                    }}
-                                >
-                                    {formatPrice(product?.virtualPrice)}
-                                </Typography>
+                                {product?.virtualPrice > 0 && (
+                                    <Typography
+                                        variant="h5"
+                                        style={{
+                                            margin: '0',
+                                            textDecoration: 'line-through',
+                                            color: 'gray',
+                                            fontSize: 16,
+                                        }}
+                                    >
+                                        {formatPrice(product?.virtualPrice)}
+                                    </Typography>
+                                )}
                             </Box>
                             <Divider></Divider>
-                            <Typography variant="h5" sx={{ mt: 1, mb: 1, fontSize: 16, fontWeight: "bold" }}>
+                            <Typography variant="h5" sx={{ mt: 1, mb: 1, fontSize: 16, fontWeight: 'bold' }}>
                                 Màu sắc: {product?.colorName}
                             </Typography>
                             <Divider></Divider>
                             <Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
-                                <Typography variant="h5" sx={{ mt: 1, mb: 1, fontSize: 16, fontWeight: "bold" }}>
+                                <Typography variant="h5" sx={{ mt: 1, mb: 1, fontSize: 16, fontWeight: 'bold' }}>
                                     Kích thước:
                                 </Typography>
                                 <Typography
@@ -249,7 +251,7 @@ const ProductDetail: React.FC = () => {
                             )}
                             <Box display="flex" alignItems="center" mt={2}>
                                 <LocalShippingOutlinedIcon style={{ marginRight: '8px' }} />
-                                <Typography variant="h4" sx={{ fontSize: 17, fontWeight: "bold" }}>
+                                <Typography variant="h4" sx={{ fontSize: 17, fontWeight: 'bold' }}>
                                     Giao hàng tận nơi
                                 </Typography>
                             </Box>
@@ -413,9 +415,7 @@ const ProductDetail: React.FC = () => {
                     {/* Phần chính sách đổi trả */}
                     <Grid item xs={12} md={3}>
                         <Paper elevation={3} sx={{ padding: '16px', mt: 2 }}>
-                            <Typography variant="h5">
-                                TỔNG ĐÀI HỖ TRỢ
-                            </Typography>
+                            <Typography variant="h5">TỔNG ĐÀI HỖ TRỢ</Typography>
                             <Typography variant="body2" sx={{ mt: 1 }}>
                                 Hotline mua hàng: <strong>9999999999</strong>
                             </Typography>
@@ -451,7 +451,7 @@ const ProductDetail: React.FC = () => {
                 <Typography variant="h5" sx={{ mt: 2, mb: 2 }}>
                     SẢN PHẨM LIÊN QUAN
                 </Typography>
-                <HotStyle />
+                {product && <RelatedProducts categoryId={product.categoryId} />}
             </Container>
         </>
     );

@@ -199,7 +199,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                     </div>
                     <div className="lg:flex hidden flex-grow items-center justify-center">
                         <a
-                            href="/category"
+                            href="/"
                             style={{ fontSize: '19px' }}
                             className={`hover:border-blue-300 border-b-2 border-white mr-5 cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
                                 index === 0 ? 'font-bold text-blue-400' : ''
@@ -208,32 +208,51 @@ const Header: React.FC<HeaderProps> = (props) => {
                             TRANG CHỦ
                         </a>
                         <a
-                            href="#product-new-id"
+                            href="collections?category=Crocs"
                             style={{ fontSize: '19px' }}
                             className={`hover:border-blue-300 border-b-2 border-white mr-5 cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
                                 index === 1 ? 'font-bold text-blue-400' : ''
                             }`}
                         >
-                            TẤT CẢ SẢN PHẨM
+                            CROCS
                         </a>
                         <a
-                            href={`/category-view/${MALE_ID}`}
+                            href={`collections?category=MLB`}
                             style={{ fontSize: '19px' }}
                             className={`hover:border-blue-300 border-b-2 border-white mr-5 cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
                                 index === 2 ? 'font-bold text-blue-400' : ''
                             }`}
                         >
-                            SẢN PHẨM MỚI
+                            MLB
+                        </a>
+                                                <a
+                            href={`collections?category=Adidas`}
+                            style={{ fontSize: '19px' }}
+                            className={`hover:border-blue-300 border-b-2 border-white mr-5 cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
+                                index === 2 ? 'font-bold text-blue-400' : ''
+                            }`}
+                        >
+                            ADIDAS
+                        </a>
+                                                <a
+                            href={`collections?category=Trẻ em`}
+                            style={{ fontSize: '19px' }}
+                            className={`hover:border-blue-300 border-b-2 border-white mr-5 cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
+                                index === 2 ? 'font-bold text-blue-400' : ''
+                            }`}
+                        >
+                            TRẺ EM
                         </a>
                         <a
-                            href={`/category-view/${FEMALE_ID}`}
+                            href={`collections?category=Jibbitz`}
                             style={{ fontSize: '19px' }}
                             className={`hover:border-blue-300 border-b-2 border-white  cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
                                 index === 3 ? 'font-bold text-blue-400' : ''
                             }`}
                         >
-                            NỔI BẬT
+                            JIBBITZ
                         </a>
+                        
                     </div>
 
                     <div className="flex items-center justify-end flex-grow">
