@@ -100,7 +100,6 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                 <BrowserRouter>
                     <Routes>
                         <Route path="/" element={<HomeLayout />}>
-
                             {defaultPage}
                             <Route path="/login" element={<Login />}></Route>
                             <Route path="/login-register" element={<LoginRegister />}></Route>
@@ -125,7 +124,6 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                         <Route path="/user/order" element={<Order />}></Route>
                         <Route path="/user/order/:orderId" element={<OrderDetail />}></Route>
                     </Routes>
-
                 </BrowserRouter>
             </>
         );
@@ -137,6 +135,8 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                     <Route path="/" element={<IndexAdmin />}></Route>
                     <Route path="/admin" element={<AdminSidebarLayout />}>
                         {/* <Route path="" element={<DashboardAdmin />} /> */}
+                        <Route path="" element={<DashboardAdmin />} />
+
                         <Route path="dashboard" element={<DashboardAdmin />} />
                         <Route path="management/categories" element={<CategoryManagement />} />
                         <Route path="management/products" element={<ProductManagement />} />
@@ -167,7 +167,7 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                 </Routes>
             </BrowserRouter>
         );
-    }else {
+    } else {
         return <></>;
     }
 };

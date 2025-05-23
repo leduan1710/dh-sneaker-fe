@@ -76,6 +76,15 @@ function ProductManagement() {
     return (
         <>
             <PageTitleWrapper>
+                <Grid container justifyContent="space-between" alignItems="center">
+                    <Grid item>
+                        <Typography sx={{ textTransform: 'capitalize' }} variant="h4" component="h3" gutterBottom>
+                            Quản lý sản phẩm
+                        </Typography>
+                    </Grid>
+                </Grid>
+            </PageTitleWrapper>
+            <Container maxWidth="lg">
                 <Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
                     <Grid item xs={12}>
                         <Card>
@@ -90,34 +99,7 @@ function ProductManagement() {
                         </Card>
                     </Grid>
                 </Grid>
-                {/* <Grid container justifyContent="space-between" alignItems="center">
-                    <Grid item>
-                        <Typography sx={{ textTransform: 'capitalize' }} variant="h3" component="h3" gutterBottom>
-                            {t('product.ShopManagement.ProductManagement')}
-                        </Typography>
-                    </Grid>
-                    <Grid item>
-                        <Button
-                            sx={{ mt: { xs: 2, md: 0 } }}
-                            variant="contained"
-                            startIcon={<AddTwoToneIcon fontSize="small" />}
-                            onClick={handleClickOpen}
-                        >
-                            {t('product.ShopManagement.CreateProduct')}
-                        </Button>
-                        <CreateProductDialog
-                            open={open}
-                            onClose={handleClose}
-                            categories={categories}
-                            styles={styles}
-                            colors={colors}
-                            types={types}
-                            sizes={sizes}
-                            onUpdate={getDataProduct}
-                        />
-                    </Grid>
-                </Grid> */}
-            </PageTitleWrapper>
+            </Container>
             <Footer />
         </>
     );

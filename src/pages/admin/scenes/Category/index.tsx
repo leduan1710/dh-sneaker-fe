@@ -47,37 +47,23 @@ function CategoryManagement() {
     return (
         <>
             <PageTitleWrapper>
-            <Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
+                <Grid container justifyContent="space-between" alignItems="center">
+                    <Grid item>
+                        <Typography sx={{ textTransform: 'capitalize' }} variant="h4" component="h3" gutterBottom>
+                            Quản lý danh mục
+                        </Typography>
+                    </Grid>
+                </Grid>
+            </PageTitleWrapper>
+            <Container maxWidth="lg">
+                <Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={3}>
                     <Grid item xs={12}>
                         <Card>
                             <CategoriesTable initialCategories={categories} />
                         </Card>
                     </Grid>
                 </Grid>
-                {/* <Grid container justifyContent="space-between" alignItems="center">
-                    <Grid item>
-                        <Typography sx={{ textTransform: 'capitalize' }} variant="h3" component="h3" gutterBottom>
-                            {t('category.Admin.CategoryManagement')}
-                        </Typography>
-                    </Grid>
-                    <Grid item>
-                        <Button
-                            sx={{ mt: { xs: 2, md: 0 } }}
-                            variant="contained"
-                            startIcon={<AddTwoToneIcon fontSize="small" />}
-                            onClick={handleClickOpen}
-                        >
-                            {t('category.Admin.CreateCategory')}
-                        </Button>
-                        <CreateCateDialog
-                            open={open}
-                            onClose={handleClose}
-                            categories={categories}
-                            onUpdate={getDataCategory}
-                        />
-                    </Grid>
-                </Grid> */}
-            </PageTitleWrapper>
+            </Container>
             <Footer />
         </>
     );

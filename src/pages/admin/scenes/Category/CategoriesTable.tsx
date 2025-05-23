@@ -162,12 +162,8 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
 
     return (
         <Card className="relative">
-            <CardHeader
-                sx={{ textTransform: 'capitalize' }}
-                action={<Box width={150}></Box>}
-                title={t('category.Admin.CategoryList')}
-            />
- <div className="absolute top-2 right-5 flex items-center">
+            <CardHeader sx={{ minHeight: '50px' }} action={<Box width={150}></Box>} />
+            <div className="absolute top-2 right-5 flex items-center">
                 <TextField
                     value={filterId}
                     variant="outlined"
@@ -200,20 +196,19 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
                         height: 36,
                         marginLeft: 1,
                         '&:hover': {
-                            backgroundColor: '#fff59d'
-                        }
+                            backgroundColor: '#fff59d',
+                        },
                     }}
                     onClick={handleClickOpenCreate}
-                    >
+                >
                     <AddIcon fontSize="small" />
-
                 </IconButton>
                 <CreateCateDialog
-                            open={openCreate}
-                            onClose={handleCloseCreate}
-                            categories={categories}
-                            onUpdate={getDataCategory}
-                    />
+                    open={openCreate}
+                    onClose={handleCloseCreate}
+                    categories={categories}
+                    onUpdate={getDataCategory}
+                />
             </div>
             <Divider />
             <TableContainer>

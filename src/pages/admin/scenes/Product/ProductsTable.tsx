@@ -248,11 +248,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
     }, [name]);
     return (
         <Card className="relative">
-            <CardHeader
-                sx={{ textTransform: 'capitalize' }}
-                action={<Box width={150}></Box>}
-                title={t('product.ShopManagement.ProductList')}
-            />
+            <CardHeader sx={{ minHeight: '50px' }} action={<Box width={150}></Box>} />
 
             <div className="absolute top-2 right-5 flex items-center">
                 <TextField
@@ -264,7 +260,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
                         borderRadius: '30px',
                         padding: '0 10px',
                     }}
-                    placeholder={"Nhập tên sản phẩm"}
+                    placeholder={'Nhập tên sản phẩm'}
                     onChange={(e) => {
                         filterSpecialInput(e.target.value, setSearchName);
                     }}

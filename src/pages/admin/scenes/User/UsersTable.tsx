@@ -335,11 +335,8 @@ const UsersTable: FC<UsersTableProps> = ({ initialUsers }) => {
     }, [email]);
     return (
         <Card className="relative">
-            <CardHeader
-                sx={{ textTransform: 'capitalize' }}
-                action={<Box width={150}></Box>}
-                title={t('category.Admin.UserList')}
-            />
+            <CardHeader sx={{ minHeight: '50px' }} action={<Box width={150}></Box>} />
+
             <div className="absolute top-2 right-5 flex items-center">
                 <TextField
                     value={email}

@@ -53,7 +53,6 @@ function App() {
     return (
         <Provider store={store}>
             <ThemeProvider>
-                <SelectTranslate />
                 <MainRouters />
                 <ToastContainer />
                 <LoadingProcess />

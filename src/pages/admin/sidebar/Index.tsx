@@ -4,6 +4,7 @@ import { Outlet } from 'react-router-dom';
 
 import Sidebar from './sidebar/Sidebar';
 import Header from './header/Header';
+import { SidebarProvider } from '../../../contexts/SidebarContext';
 
 interface AdminSidebarLayoutProps {
   children?: ReactNode;
@@ -14,6 +15,7 @@ const AdminSidebarLayout: FC<AdminSidebarLayoutProps> = () => {
 
   return (
     <>
+    <SidebarProvider>
       <Box
         sx={{
           flex: 1,
@@ -60,6 +62,7 @@ const AdminSidebarLayout: FC<AdminSidebarLayoutProps> = () => {
           </Box>
         </Box>
       </Box>
+      </SidebarProvider>
     </>
   );
 };

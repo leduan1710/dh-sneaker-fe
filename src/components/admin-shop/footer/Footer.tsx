@@ -29,7 +29,7 @@ function Footer() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            HCMUTE
+            DH Sneaker
           </Link>
         </Typography>
       </Box>
