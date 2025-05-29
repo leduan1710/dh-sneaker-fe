@@ -60,10 +60,6 @@ interface CreateProductDialogProps {
     onClose: () => void;
     open: boolean;
     categories: Array<any>;
-    sizes: Array<any>;
-    styles: Array<any>;
-    colors: Array<any>;
-    types: Array<any>;
     onUpdate: () => void;
 }
 
@@ -71,7 +67,7 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
     const { t } = useTranslation();
     const store = useStore();
     const user = useSelector((state: ReducerProps) => state.user);
-    const { onClose, open, categories, sizes, styles, colors, types, onUpdate } = props;
+    const { onClose, open, categories, onUpdate } = props;
 
     const [productName, setProductName] = useState('');
     const [importPrice, setImportPrice] = useState<number | string>('');
@@ -80,9 +76,12 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
     const [virtualPrice, setVirtualPrice] = useState<number | string>('');
 
     const [selectImage, setSelectImage] = useState<File | null>(null);
+    const [uploadedImages, setUploadedImages] = useState<File[]>([]);
 
-    const [typeByCategories, setTypeByCategory] = useState(types);
+    const [typeByCategories, setTypeByCategory] = useState<any>([]);
     const [sizeByCategory, setSizeByCategory] = useState<any>([]);
+    const [colorByCategory, setColorByCategory] = useState<any>([]);
+    const [styleByCategory, setStyleByCategory] = useState<any>([]);
 
     //select
     const [categoryNameSelect, setCategoryNameSelected] = useState('');
@@ -95,7 +94,20 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
     const [colorIdSelect, setColorIdSelected] = useState('');
     const [typeIdSelect, setTypeIdSelected] = useState('');
 
-    const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+    const [selectedSizes, setSelectedSizes] = useState<{ sizeId: string; quantity: number }[]>([]);
+    const [otherSizeName, setOtherSizeName] = useState('');
+    const [otherColorName, setOtherColorName] = useState('');
+    const [otherTypeName, setOtherTypeName] = useState('');
+    const [otherStyleName, setOtherStyleName] = useState('');
+
+    const [currentSize, setCurrentSize] = useState<string>('');
+    const [currentQuantity, setCurrentQuantity] = useState<string>('');
+    const [sizeError, setSizeError] = useState<string | null>(null);
+    const [colorError, setColorError] = useState<string | null>(null);
+    const [typeError, setTypeError] = useState<string | null>(null);
+    const [styleError, setStyleError] = useState<string | null>(null);
+
+    const [quantityError, setQuantityError] = useState<string | null>(null);
 
     const handleClose = () => {
         onClose();
@@ -115,14 +127,6 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
     const handleImageRemove = (index: number) => {
         setUploadedImages((prevImages) => prevImages.filter((_, i) => i !== index));
     };
-
-    const [selectedSizes, setSelectedSizes] = useState<{ sizeId: string; quantity: number }[]>([]);
-    const [currentSize, setCurrentSize] = useState<string>('');
-    const [otherSizeName, setOtherSizeName] = useState('');
-
-    const [currentQuantity, setCurrentQuantity] = useState<string>('');
-    const [sizeError, setSizeError] = useState<string | null>(null);
-    const [quantityError, setQuantityError] = useState<string | null>(null);
 
     const handleAddSize = () => {
         const quantity = parseInt(currentQuantity);
@@ -185,9 +189,11 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
             setSizeError('Vui lòng nhập tên kích cỡ');
             return;
         }
-
+        if (!categoryIdSelect) {
+            toastWarning('Vui lòng chọn hãng sản phẩm');
+            return;
+        }
         try {
-            // Gọi API để thêm kích cỡ mới
             const res = await axios.post(
                 `${HOST_BE}/admin/add/size`,
                 {
@@ -203,12 +209,120 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
             );
 
             if (res.data.message === 'Success') {
+                toastSuccess('Thêm thành công');
                 getSizeByCategory(categoryIdSelect);
-
                 setCurrentSize(res.data.size.id);
-
-                // Xóa tên kích cỡ mới
                 setOtherSizeName('');
+            } else {
+                toastError('Thêm thất bại');
+            }
+        } catch (error: any) {
+            toastError('Thêm thất bại');
+        }
+    };
+    const handleAddNewStyle = async () => {
+        if (!otherStyleName) {
+            setStyleError('Vui lòng nhập tên kiểu dáng');
+            return;
+        }
+        if (!categoryIdSelect) {
+            toastWarning('Vui lòng chọn hãng sản phẩm');
+            return;
+        }
+        try {
+            const res = await axios.post(
+                `${HOST_BE}/admin/add/style`,
+                {
+                    otherStyleName,
+                    categoryIdSelect,
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                },
+            );
+
+            if (res.data.message === 'Success') {
+                toastSuccess('Thêm thành công');
+                getStyleByCategory(categoryIdSelect);
+                setSelectedStyles((prevStyles) =>
+                    prevStyles.map((style) => (style === 'other' ? res.data.style.id : style)),
+                );
+                setOtherSizeName('');
+            } else {
+                toastError('Thêm thất bại');
+            }
+        } catch (error: any) {
+            toastError('Thêm thất bại');
+        }
+    };
+    const handleAddNewColor = async () => {
+        if (!otherColorName) {
+            setColorError('Vui lòng nhập tên màu sắc');
+            return;
+        }
+        if (!categoryIdSelect) {
+            toastWarning('Vui lòng chọn hãng sản phẩm');
+            return;
+        }
+        try {
+            const res = await axios.post(
+                `${HOST_BE}/admin/add/color`,
+                {
+                    otherColorName,
+                    categoryIdSelect,
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                },
+            );
+
+            if (res.data.message === 'Success') {
+                toastSuccess('Thêm thành công');
+                getColorByCategory(categoryIdSelect);
+                setColorIdSelected(res.data.color.id);
+                setOtherColorName('');
+            } else {
+                toastError('Thêm thất bại');
+            }
+        } catch (error: any) {
+            toastError('Thêm thất bại');
+        }
+    };
+    const handleAddNewType = async () => {
+        if (!otherTypeName) {
+            setTypeError('Vui lòng nhập tên loại');
+            return;
+        }
+        if (!categoryIdSelect) {
+            toastWarning('Vui lòng chọn hãng sản phẩm');
+            return;
+        }
+        try {
+            const res = await axios.post(
+                `${HOST_BE}/admin/add/type`,
+                {
+                    otherTypeName,
+                    categoryIdSelect,
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                },
+            );
+
+            if (res.data.message === 'Success') {
+                toastSuccess('Thêm thành công');
+                getTypeByCategory(categoryIdSelect);
+                setTypeIdSelected(res.data.type.id);
+                setOtherTypeName('');
             } else {
                 toastError('Thêm thất bại');
             }
@@ -267,6 +381,7 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
         setSelectImage(null);
         setUploadedImages([]);
         setCategoryIdSelected('');
+        setCategoryNameSelected('');
         setSizeIdSelected('');
         setCurrentQuantity('');
         setStyleIdSelected('');
@@ -278,7 +393,35 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
         setSellPrice('');
         setProductName('');
         setSelectedSizes([]);
+        setSelectedStyles([]);
         setSizeByCategory([]);
+        setColorByCategory([]);
+        setTypeByCategory([]);
+        setStyleByCategory([]);
+        setTypeError('');
+        setColorError('');
+        setSizeError('');
+        setStyleError('');
+    };
+    const getColorByCategory = async (categoryId: string) => {
+        try {
+            const resColor = await GetApi(`/api/color-by-category/${categoryId}`, null);
+            if (resColor.data.message == 'Success') {
+                setColorByCategory(resColor.data.colors);
+            }
+        } catch (error) {
+            console.error('Error', error);
+        }
+    };
+    const getStyleByCategory = async (categoryId: string) => {
+        try {
+            const resStyles = await GetApi(`/api/style-by-category/${categoryId}`, null);
+            if (resStyles.data.message == 'Success') {
+                setStyleByCategory(resStyles.data.styles);
+            }
+        } catch (error) {
+            console.error('Error', error);
+        }
     };
     const getTypeByCategory = async (categoryId: string) => {
         try {
@@ -303,8 +446,10 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
 
     useEffect(() => {
         if (categoryIdSelect) {
-            getTypeByCategory(categoryIdSelect);
             getSizeByCategory(categoryIdSelect);
+            getStyleByCategory(categoryIdSelect);
+            getColorByCategory(categoryIdSelect);
+            getTypeByCategory(categoryIdSelect);
         }
     }, [categoryIdSelect]);
 
@@ -313,6 +458,7 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
             resetFields();
         }
     }, [open]);
+    console.log(selectedStyles);
     return (
         <React.Fragment>
             <Dialog onClose={handleClose} open={open}>
@@ -326,18 +472,27 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
                         onSubmit: async (event: React.FormEvent<HTMLFormElement>) => {
                             event.preventDefault();
                             const formData = new FormData(event.currentTarget);
-                            const formJson = Object.fromEntries((formData as any).entries());
 
                             if (currentSize === 'other' && !otherSizeName) {
                                 setSizeError('Vui lòng nhập tên kích cỡ');
                                 return;
                             }
-                            if (selectedSizes.length < 1)
-                            {
-                                toastWarning("Vui lòng thêm kích cỡ và số lượng")
+                            if (uploadedImages.length < 1) {
+                                toastWarning('Cần thêm ít nhất 1 ảnh');
                                 return;
                             }
-
+                            if (selectedSizes.length < 1) {
+                                toastWarning('Vui lòng thêm kích cỡ và số lượng');
+                                return;
+                            }
+                            if (!(importPrice && sellPrice && ctvPrice)) {
+                                toastWarning('Giá nhập, giá ctv, giá bán chưa đầy đủ');
+                                return;
+                            }
+                            if (!colorIdSelect) {
+                                toastWarning('Chưa chọn màu');
+                                return;
+                            }
                             await handleCreateProduct();
                         },
                     }}
@@ -355,6 +510,7 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
                                                 <InputLabel id="select-category-label">Chọn hãng</InputLabel>
                                                 <Select
                                                     id="select-parent-cate-lvl1"
+                                                    label="Chọn hãng"
                                                     value={categoryIdSelect}
                                                     onChange={(e) => {
                                                         const selectedCategory = categories.find(
@@ -427,6 +583,7 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
                                                 <FormControl error={!!sizeError} sx={{ width: '223px' }}>
                                                     <InputLabel id="select-size-label">Chọn kích cỡ</InputLabel>
                                                     <Select
+                                                        label="Chọn kích cỡ"
                                                         id="select-size"
                                                         value={currentSize}
                                                         onChange={(e) => setCurrentSize(e.target.value)}
@@ -565,28 +722,66 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
                                             />
                                         </Stack>
                                         {categoryNameSelect === 'Crocs' && (
-                                            <FormControl component="fieldset" sx={{ mt: 1 }}>
-                                                <Typography variant="h5">Chọn kiểu dáng cho sản phẩm</Typography>
-                                                <FormGroup>
-                                                    {styles.map((style) => (
+                                            <>
+                                                <FormControl component="fieldset" sx={{ mt: 1 }}>
+                                                    <Typography variant="h5">Chọn kiểu dáng cho sản phẩm</Typography>
+                                                    <FormGroup>
+                                                        {styleByCategory.map((style: any) => (
+                                                            <FormControlLabel
+                                                                key={style.id}
+                                                                control={
+                                                                    <Checkbox
+                                                                        value={style.id}
+                                                                        checked={selectedStyles.includes(style.id)}
+                                                                        onChange={handleStyleChange}
+                                                                    />
+                                                                }
+                                                                label={style.name}
+                                                            />
+                                                        ))}
                                                         <FormControlLabel
-                                                            key={style.id}
                                                             control={
                                                                 <Checkbox
-                                                                    value={style.id}
-                                                                    checked={selectedStyles.includes(style.id)}
-                                                                    onChange={handleStyleChange}
+                                                                    value={'other'}
+                                                                    checked={selectedStyles.includes('other')}
+                                                                    onChange={(e) => {
+                                                                        const isChecked = e.target.checked;
+                                                                        if (isChecked) {
+                                                                            setOtherStyleName('');
+                                                                            handleStyleChange(e);
+                                                                        }
+                                                                    }}
                                                                 />
                                                             }
-                                                            label={style.name}
+                                                            label="Khác"
                                                         />
-                                                    ))}
-                                                </FormGroup>
-                                            </FormControl>
+                                                    </FormGroup>
+                                                </FormControl>
+                                                {selectedStyles.includes('other') && (
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            mt: 1,
+                                                        }}
+                                                    >
+                                                        <TextField
+                                                            label="Nhập tên kiểu dáng mới"
+                                                            value={otherStyleName}
+                                                            onChange={(e) => setOtherStyleName(e.target.value)}
+                                                            sx={{ width: '150px', marginRight: '10px' }}
+                                                        />
+                                                        <Button variant="contained" onClick={handleAddNewStyle}>
+                                                            Thêm
+                                                        </Button>
+                                                    </Box>
+                                                )}
+                                            </>
                                         )}
-                                        <Stack direction="row" spacing={1} sx={{ mb: 1, mt: 2 }}>
+                                        <Typography variant="h5">Chọn màu sắc</Typography>
+
+                                        <Stack direction="row" spacing={1} sx={{ mb: 1, mt: 1 }}>
                                             <FormControl variant="outlined" sx={{ m: 1, minWidth: 150 }}>
-                                                <FormHelperText>Chọn màu sắc</FormHelperText>
                                                 <Select
                                                     id="select-origin"
                                                     value={colorIdSelect}
@@ -594,11 +789,7 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
                                                     displayEmpty
                                                     required
                                                 >
-                                                    <MenuItem value="">
-                                                        <em>{t('orther.None')}</em>
-                                                    </MenuItem>
-
-                                                    {colors.map((color) => (
+                                                    {colorByCategory.map((color: any) => (
                                                         <MenuItem value={color.id} key={color.id}>
                                                             <Grid container alignItems="center">
                                                                 <Grid item>
@@ -616,29 +807,89 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
                                                             </Grid>
                                                         </MenuItem>
                                                     ))}
+                                                    <MenuItem value="other">
+                                                        <Grid container alignItems="center">
+                                                            <Grid item>
+                                                                <Box
+                                                                    sx={{
+                                                                        width: 20,
+                                                                        height: 20,
+                                                                        borderRadius: '50%',
+                                                                        backgroundColor: '#fff',
+                                                                        marginRight: 1,
+                                                                    }}
+                                                                />
+                                                            </Grid>
+                                                            <Grid item>Khác</Grid>
+                                                        </Grid>
+                                                    </MenuItem>
                                                 </Select>
                                             </FormControl>
-                                            {categoryNameSelect === 'Crocs' || categoryNameSelect === 'Jibbitz' ? (
-                                                <FormControl variant="outlined" sx={{ m: 1, minWidth: 180 }}>
-                                                    <FormHelperText>Chọn loại</FormHelperText>
-                                                    <Select
-                                                        id="select-type"
-                                                        value={typeIdSelect}
-                                                        onChange={(e) => handleChangeSelect(e, setTypeIdSelected)}
-                                                        displayEmpty
-                                                    >
-                                                        <MenuItem value="">
-                                                            <em>{t('orther.None')}</em>
-                                                        </MenuItem>
-                                                        {typeByCategories.map((type) => (
-                                                            <MenuItem value={type.id} key={type.id}>
-                                                                {type.name}
-                                                            </MenuItem>
-                                                        ))}
-                                                    </Select>
-                                                </FormControl>
-                                            ) : null}
+                                            {colorIdSelect === 'other' && (
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                    }}
+                                                >
+                                                    <TextField
+                                                        label="Nhập tên màu sắc mới"
+                                                        value={otherColorName}
+                                                        onChange={(e) => setOtherColorName(e.target.value)}
+                                                        error={!!colorError}
+                                                        helperText={colorError}
+                                                        sx={{ width: '150px', marginRight: '10px' }}
+                                                    />
+                                                    <Button variant="contained" onClick={handleAddNewColor}>
+                                                        Thêm
+                                                    </Button>
+                                                </Box>
+                                            )}
                                         </Stack>
+                                        {categoryNameSelect === 'Crocs' || categoryNameSelect === 'Jibbitz' ? (
+                                            <>
+                                                <Typography variant="h5">Chọn loại</Typography>
+                                                <Stack direction="row" spacing={1} sx={{ mb: 1, mt: 1 }}>
+                                                    <FormControl variant="outlined" sx={{ m: 1, minWidth: 180 }}>
+                                                        <Select
+                                                            id="select-type"
+                                                            value={typeIdSelect}
+                                                            onChange={(e) => handleChangeSelect(e, setTypeIdSelected)}
+                                                            displayEmpty
+                                                        >
+                                                            {typeByCategories.map((type: any) => (
+                                                                <MenuItem value={type.id} key={type.id}>
+                                                                    {type.name}
+                                                                </MenuItem>
+                                                            ))}
+                                                            <MenuItem value="other">
+                                                                <em>Khác</em>
+                                                            </MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                </Stack>
+                                                {typeIdSelect === 'other' && (
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                        }}
+                                                    >
+                                                        <TextField
+                                                            label="Nhập tên loại mới"
+                                                            value={otherTypeName}
+                                                            onChange={(e) => setOtherTypeName(e.target.value)}
+                                                            error={!!typeError}
+                                                            helperText={typeError}
+                                                            sx={{ width: '150px', marginRight: '10px' }}
+                                                        />
+                                                        <Button variant="contained" onClick={handleAddNewType}>
+                                                            Thêm
+                                                        </Button>
+                                                    </Box>
+                                                )}
+                                            </>
+                                        ) : null}
                                     </CardContent>
                                 </Card>
                             </React.Fragment>

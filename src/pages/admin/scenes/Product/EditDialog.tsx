@@ -29,23 +29,26 @@ import {
     TableRow,
     TableCell,
     TableBody,
+    InputLabel,
+    FormGroup,
+    FormControlLabel,
+    Checkbox,
+    ListItemIcon,
+    Grid,
 } from '@mui/material';
 
 import { useSelector, useStore } from 'react-redux';
 import { change_is_loading } from '../../../../reducers/Actions';
-import UploadTwoToneIcon from '@mui/icons-material/UploadTwoTone';
-import CloseIcon from '@mui/icons-material/Close';
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { HOST_BE } from '../../../../common/Common';
 import axios from 'axios';
-import { toastSuccess, toastWarning } from '../../../../untils/Logic';
+import { toastError, toastSuccess, toastWarning } from '../../../../untils/Logic';
 import { useTranslation } from 'react-i18next';
 import { ReducerProps } from '../../../../reducers/ReducersProps';
-import { ProductDetail, ProductModel } from '../../../../models/product';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { GetApi } from '../../../../untils/Api';
-import ReactQuill from 'react-quill';
-import QuillNoSSRWrapper, { Quill } from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+
 const Input = styled('input')({
     display: 'none',
 });
@@ -58,8 +61,8 @@ interface EditProductDialogProps {
     styles: Array<any>;
     colors: Array<any>;
     types: Array<any>;
+    product?: any;
     onUpdate: () => void;
-    product?: ProductModel;
 }
 
 const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
@@ -68,112 +71,38 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
     const user = useSelector((state: ReducerProps) => state.user);
     const { onClose, open, categories, sizes, styles, colors, types, onUpdate, product } = props;
 
-    const [productEdit, setProductEdit] = useState<ProductModel | undefined>(product);
     const [productName, setProductName] = useState('');
-    const [productPrice, setProductPrice] = useState(0);
-    const [productDescribe, setProductDescribe] = useState('');
-    const [productImage, setProductImage] = useState('');
+    const [importPrice, setImportPrice] = useState('');
+    const [ctvPrice, setCtvPrice] = useState('');
+    const [sellPrice, setSellPrice] = useState('');
+    const [virtualPrice, setVirtualPrice] = useState('');
+
     const [selectImage, setSelectImage] = useState<File | null>(null);
-    const reactQuillRef = useRef<ReactQuill>(null);
-    const modules = {
-        toolbar: {
-            container: [
-                ['bold', 'italic', 'underline'],
-                [{ list: 'ordered' }, { list: 'bullet' }],
-                [{ size: [] }],
-                [{ font: [] }],
-                ['image', 'video'],
-                ['clean'],
-            ],
-        },
-        clipboard: {
-            matchVisual: false,
-        },
-    };
 
-    const formats = [
-        'font',
-        'size',
-        'bold',
-        'italic',
-        'underline',
-        'strike',
-        'blockquote',
-        'list',
-        'bullet',
-        'indent',
-        'image',
-        'video',
-    ];
+    const [typeByCategories, setTypeByCategory] = useState(types);
     //select
+    const [categoryNameSelect, setCategoryNameSelected] = useState('');
+
     const [categoryIdSelect, setCategoryIdSelected] = useState('');
-    const [materialIdSelect, setMaterialIdSelected] = useState('');
+    const [sizeIdSelect, setSizeIdSelected] = useState('');
+    const [sizeByCategory, setSizeByCategory] = useState<any>([]);
+
     const [styleIdSelect, setStyleIdSelected] = useState('');
-    const [originIdSelect, setOriginIdSelected] = useState('');
-    const [brandIdSelect, setBrandIdSelected] = useState('');
-    //option
-    const [colorInput, setColorInput] = useState<string>('');
-    const [sizeInput, setSizeInput] = useState<string>('');
-    const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
-    const [prices, setPrices] = useState<{ [key: string]: number }>({});
-    const [uploadedImages, setUploadedImages] = useState<{ [key: string]: string[] }>({});
-    const [productDetailIds, setProductDetailIds] = useState<{ [key: string]: string }>({});
+    const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
 
-    const [uploadImages, setUploadImages] = useState<{ [key: string]: File[] }>({});
+    const [colorIdSelect, setColorIdSelected] = useState('');
+    const [typeIdSelect, setTypeIdSelected] = useState('');
+    const [imageList, setImageList] = useState<any[]>([]);
 
-    const getDataProductDetail = async () => {
-        if (product) {
-            store.dispatch(change_is_loading(true));
-            const resProductDetails = await GetApi(
-                `/shop/get/productDetail-by-productId/${product.id}`,
-                localStorage.getItem('token'),
-            );
-            if (resProductDetails.data.message == 'Success') {
-                const initialQuantities: { [key: string]: number } = {};
-                const initialPrices: { [key: string]: number } = {};
-                const initialUploadedImages: { [key: string]: string[] } = {};
-                const initialProductDetailIds: { [key: string]: string } = {};
+    const [uploadedImages, setUploadedImages] = useState<File[]>([]);
 
-                resProductDetails.data.productDetails.forEach((detail: ProductDetail) => {
-                    const key = `${detail.option1}-${detail.option2}`;
-                    initialQuantities[key] = detail.quantity;
-                    initialPrices[key] = detail.price;
-                    initialUploadedImages[key] = detail.images; // Khởi tạo mảng hình ảnh rỗng cho mỗi key
-                    initialProductDetailIds[key] = detail.id;
-                });
+    const [selectedSizes, setSelectedSizes] = useState<any[]>([]);
+    const [currentSize, setCurrentSize] = useState<string>('');
+    const [otherSizeName, setOtherSizeName] = useState('');
 
-                setQuantities(initialQuantities);
-                setPrices(initialPrices);
-                setUploadedImages(initialUploadedImages);
-                setProductDetailIds(initialProductDetailIds);
-            }
-            store.dispatch(change_is_loading(false));
-        }
-    };
-    const initFields = () => {
-        if (product) {
-            setProductEdit(product);
-            setProductName(product.name);
-            setProductDescribe(product.describe);
-            setProductPrice(product.price);
-            setProductImage(product.image);
-            setCategoryIdSelected(product.categoryId);
-            setMaterialIdSelected(product.materialId);
-            setStyleIdSelected(product.styleId);
-            setOriginIdSelected(product.originId);
-            setBrandIdSelected(product.brandId);
-        }
-    };
-
-    useEffect(() => {
-        setQuantities({});
-        setPrices({});
-        setUploadedImages({});
-        setUploadImages({});
-        setProductDetailIds({});
-        getDataProductDetail();
-        initFields();
-    }, [product]);
+    const [currentQuantity, setCurrentQuantity] = useState<string>('');
+    const [sizeError, setSizeError] = useState<string | null>(null);
+    const [quantityError, setQuantityError] = useState<string | null>(null);
 
     const handleClose = () => {
         onClose();
@@ -182,30 +111,146 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
         setter(event.target.value);
     };
 
-    const handleEditProduct = async () => {
-        handleClose();
+    const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (files) {
+            const newFiles = Array.from(files);
+            setUploadedImages((prevImages) => [...prevImages, ...newFiles]);
+        }
+    };
+
+    // const handleImageRemove = (index: number) => {
+    //     setUploadedImages((prevImages) => prevImages.filter((_, i) => i !== index));
+    // };
+    const handleImageRemove = (index: number, isUploaded: boolean) => {
+        if (isUploaded) {
+            // Xóa ảnh từ uploadedImages
+            setUploadedImages((prevImages) => prevImages.filter((_, i) => i !== index));
+        } else {
+            // Xóa ảnh từ images
+            setImageList((prevImages) => prevImages.filter((_, i) => i !== index));
+        }
+    };
+
+    const handleAddSize = () => {
+        const quantity = parseInt(currentQuantity);
+        let hasError = false;
+
+        if (!currentSize) {
+            setSizeError('Vui lòng chọn kích cỡ.');
+            hasError = true;
+        } else {
+            setSizeError(null);
+        }
+
+        if (quantity <= 0) {
+            setQuantityError('Số lượng phải lớn hơn 0.');
+            hasError = true;
+        } else {
+            setQuantityError(null);
+        }
+
+        if (!hasError) {
+            const isDuplicate = selectedSizes.some((item) => item.sizeId === currentSize);
+            if (!isDuplicate) {
+                setSelectedSizes((prev) => [...prev, { sizeId: currentSize, quantity }]);
+                setCurrentSize('');
+                setCurrentQuantity('');
+            } else {
+                setSizeError('Kích cỡ đã được chọn. Vui lòng chọn kích cỡ khác.');
+            }
+        }
+    };
+
+    const handleDeleteSize = (sizeId: string) => {
+        setSelectedSizes((prev) => prev.filter((item) => item.sizeId !== sizeId));
+    };
+    const handleOtherSizeNameChange = (e: any) => {
+        setOtherSizeName(e.target.value);
+    };
+
+    const handleQuantityChange = (sizeId: string, quantity: number) => {
+        if (quantity > 0) {
+            setSelectedSizes((prev) => prev.map((item) => (item.sizeId === sizeId ? { ...item, quantity } : item)));
+            setQuantityError(null);
+        } else {
+            setQuantityError('Số lượng không được bé hơn 1.');
+        }
+    };
+    const handleStyleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const styleId: string = event.target.value;
+        setSelectedStyles((prev) => {
+            if (prev.includes(styleId)) {
+                return prev.filter((id) => id !== styleId);
+            } else {
+                return [...prev, styleId];
+            }
+        });
+    };
+    const handleAddNewSize = async () => {
+        if (!otherSizeName) {
+            setSizeError('Vui lòng nhập tên kích cỡ');
+            return;
+        }
+
+        try {
+            // Gọi API để thêm kích cỡ mới
+            const res = await axios.post(
+                `${HOST_BE}/admin/add/size`,
+                {
+                    otherSizeName,
+                    categoryIdSelect,
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                },
+            );
+
+            if (res.data.message === 'Success') {
+                getSizeByCategory(categoryIdSelect);
+
+                setCurrentSize(res.data.size.id);
+
+                // Xóa tên kích cỡ mới
+                setOtherSizeName('');
+            } else {
+                toastError('Thêm thất bại');
+            }
+        } catch (error: any) {
+            toastError('Thêm thất bại');
+        }
+    };
+    const handleCreateProduct = async () => {
         store.dispatch(change_is_loading(true));
         const formData = new FormData();
-        const productId = product?.id || '';
-        formData.append('id', productId);
+        formData.append('id', product.id);
         formData.append('name', productName);
-        formData.append('price', productPrice.toString());
-        formData.append('describe', productDescribe);
-        formData.append('categoryId', categoryIdSelect);
-        formData.append('materialId', materialIdSelect);
-        formData.append('styleId', styleIdSelect);
-        formData.append('originId', originIdSelect);
-        formData.append('brandId', brandIdSelect);
-        formData.append('shopId', user.shopId);
-        formData.append('options', JSON.stringify({ sizes, colors }));
+        formData.append('sellPrice', sellPrice.toString());
+        formData.append('virtualPrice', virtualPrice.toString());
+        formData.append('ctvPrice', ctvPrice.toString());
+        formData.append('importPrice', importPrice.toString());
 
-        if (selectImage) {
+        formData.append('categoryId', categoryIdSelect);
+        formData.append('sizeId', sizeIdSelect);
+        formData.append('styleIds', JSON.stringify(selectedStyles));
+        formData.append('selectedSizes', JSON.stringify(selectedSizes));
+        formData.append('oldImageList', JSON.stringify(imageList));
+
+        formData.append('colorId', colorIdSelect);
+        formData.append('typeId', typeIdSelect);
+
+        // Upload images
+        const images = uploadedImages || [];
+        for (const image of images) {
             const uniqueFilename = `image_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            const imageBlob = await fetch(URL.createObjectURL(selectImage)).then((response) => response.blob());
-            formData.append('file', imageBlob, uniqueFilename);
+            const imageBlob = await fetch(URL.createObjectURL(image)).then((response) => response.blob());
+            formData.append('files', imageBlob, uniqueFilename);
         }
         try {
-            const res = await axios.post(`${HOST_BE}/shop/update/product`, formData, {
+            const res = await axios.post(`${HOST_BE}/admin/edit/product`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -213,128 +258,87 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
             });
 
             if (res.data.message === 'Success') {
-                await handleEditProductDetail(res.data.product.id);
-                toastSuccess(t('toast.EditSuccess'));
+                toastSuccess(t('toast.CreateSuccess'));
+                store.dispatch(change_is_loading(false));
+                onUpdate();
+            } else {
+                store.dispatch(change_is_loading(false));
             }
         } catch (error) {
             console.error('Failed to add product:', error);
-        } finally {
             store.dispatch(change_is_loading(false));
-        }
-        store.dispatch(change_is_loading(false));
-    };
-    const handleEditProductDetail = async (productId: string) => {
-        store.dispatch(change_is_loading(true));
-        const combinations = createCombinations();
-        console.log(combinations);
-        console.log(prices);
-        console.log(quantities);
-
-        combinations.forEach(async (combo) => {
-            const formData = new FormData();
-            formData.append('name', productName);
-            formData.append('price', prices[`${combo.size}-${combo.color}`]?.toString() || productPrice.toString());
-            formData.append('quantity', quantities[`${combo.size}-${combo.color}`]?.toString() || '0');
-            formData.append('productId', productId);
-            formData.append('option1', combo.size);
-            formData.append('option2', combo.color);
-
-            const existingImages = uploadedImages[`${combo.size}-${combo.color}`];
-
-            if (existingImages)
-                existingImages.forEach((image) => {
-                    formData.append('images[]', image); // Thêm hình ảnh cũ vào formData
-                });
-            // Upload new images
-            const images = uploadImages[`${combo.size}-${combo.color}`] || [];
-
-            console.log(uploadedImages);
-            console.log(uploadImages);
-            console.log(combo.size, combo.color);
-            console.log(existingImages, images);
-            for (const image of images) {
-                const uniqueFilename = `image_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                const imageBlob = await fetch(URL.createObjectURL(image)).then((response) => response.blob());
-                formData.append('files', imageBlob, uniqueFilename);
-            }
-            console.log('id:', productDetailIds[`${combo.size}-${combo.color}`]);
-            if (productDetailIds[`${combo.size}-${combo.color}`]) {
-                formData.append('id', productDetailIds[`${combo.size}-${combo.color}`]);
-                try {
-                    const res = await axios.post(`${HOST_BE}/shop/update/productDetail`, formData, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                            Authorization: `Bearer ${localStorage.getItem('token')}`,
-                        },
-                    });
-
-                    if (res.data.message === 'Success') {
-                        onUpdate();
-                    }
-                } catch (error) {
-                    console.error('Failed to add product detail:', error);
-                }
-            } else {
-                try {
-                    const res = await axios.post(`${HOST_BE}/shop/add/productDetail`, formData, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                            Authorization: `Bearer ${localStorage.getItem('token')}`,
-                        },
-                    });
-
-                    if (res.data.message === 'Success') {
-                        onUpdate();
-                    }
-                } catch (error) {
-                    console.error('Failed to add product detail:', error);
-                }
-            }
-        });
-        store.dispatch(change_is_loading(false));
-    };
-
-    const createCombinations = (): { size: string; color: string }[] => {
-        const combinations: { size: string; color: string }[] = [];
-        sizes.forEach((size) => {
-            colors.forEach((color) => {
-                combinations.push({ size, color });
-            });
-        });
-        return combinations;
-    };
-    const handleUploadImages = (size: string, color: string, files: FileList | null) => {
-        if (files) {
-            const uniqueKey = `${size}-${color}`;
-            const newImages = Array.from(files);
-            setUploadImages((prev) => ({
-                ...prev,
-                [uniqueKey]: [...(prev[uniqueKey] || []), ...newImages],
-            }));
+        } finally {
+            handleClose();
         }
     };
-    const handleRemoveImage = (size: string, color: string, imgIndex: number) => {
-        const key = `${size}-${color}`;
-        setUploadedImages((prev) => {
-            const updatedImages = [...(prev[key] || [])];
-            updatedImages.splice(imgIndex, 1);
-            return {
-                ...prev,
-                [key]: updatedImages,
-            };
-        });
+
+    const setField = () => {
+        setProductName(product.name);
+        setImportPrice(product.importPrice);
+        setCtvPrice(product.ctvPrice);
+        setSellPrice(product.sellPrice);
+        setVirtualPrice(product.virtualPrice);
+        setCategoryIdSelected(product.categoryId);
+        const selectedCategory = categories.find((category) => category.id === product.categoryId);
+        if (selectedCategory) {
+            setCategoryNameSelected(selectedCategory.name);
+        }
+        setTypeIdSelected(product.typeId);
+        setSelectedStyles(product.styleIds);
+        setColorIdSelected(product.colorId);
+        setImageList(product.imageList);
     };
-    const handleRemoveUpdateImage = (size: string, color: string, imgIndex: number) => {
-        const key = `${size}-${color}`;
-        setUploadImages((prev) => {
-            const updatedImages = [...(prev[key] || [])];
-            updatedImages.splice(imgIndex, 1);
-            return {
-                ...prev,
-                [key]: updatedImages,
-            };
-        });
+    const getTypeByCategory = async (categoryId: string) => {
+        try {
+            const resTypes = await GetApi(`/api/type-by-category/${categoryId}`, null);
+            if (resTypes.data.message == 'Success') {
+                setTypeByCategory(resTypes.data.types);
+            }
+        } catch (error) {
+            console.error('Error', error);
+        }
     };
+    const getSizeByCategory = async (categoryId: string) => {
+        try {
+            const resTypes = await GetApi(`/api/size-by-category/${categoryId}`, null);
+            if (resTypes.data.message == 'Success') {
+                setSizeByCategory(resTypes.data.sizes);
+            }
+        } catch (error) {
+            console.error('Error', error);
+        }
+    };
+    const getProductDetail = async () => {
+        try {
+            const resTypes = await GetApi(`/api/product-detail-by-product/${product.id}`, null);
+            if (resTypes.data.message == 'Success') {
+                const sizes = resTypes.data.productDetails.map((product: any) => ({
+                    productDetailId: product.id,
+                    sizeId: product.sizeId,
+                    sizeName: product.sizeName,
+                    quantity: product.quantity,
+                }));
+
+                setSelectedSizes(sizes);
+            }
+        } catch (error) {
+            console.error('Error', error);
+        }
+    };
+    useEffect(() => {
+        if (categoryIdSelect) {
+            getTypeByCategory(categoryIdSelect);
+            getSizeByCategory(categoryIdSelect);
+        }
+    }, [categoryIdSelect]);
+
+    useEffect(() => {
+        if (product) {
+            getProductDetail();
+            setField();
+        }
+    }, [product]);
+
     return (
         <React.Fragment>
             <Dialog onClose={handleClose} open={open}>
@@ -350,372 +354,330 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
                             const formData = new FormData(event.currentTarget);
                             const formJson = Object.fromEntries((formData as any).entries());
 
-                            if (colors.length === 0 || sizes.length === 0) {
-                                toastWarning(t('toast.NeedAtleastOneColorOneSize'));
-                                return;
-                            } else {
-                                await handleEditProduct();
-                            }
+                            // if (colors.length === 0 || sizes.length === 0) {
+                            //     toastWarning(t('toast.CreateProductCondition'));
+                            //     return;
+                            // }
+                            // if (!selectImage) {
+                            //     toastWarning(t('toast.NeedProductImage'));
+                            //     return;
+                            // }
+                            await handleCreateProduct();
                         },
                     }}
                 >
-                    <DialogTitle>{t('product.ShopManagement.EditProduct')}</DialogTitle>
+                    <DialogTitle>Tạo sản phẩm mới</DialogTitle>
                     <DialogContent>
-                        <DialogContentText sx={{ mb: 1 }}>
-                            {t('product.ShopManagement.FormEditProduct')}
-                        </DialogContentText>
                         <Box>
                             <React.Fragment>
                                 <Card>
-                                    <CardHeader title={t('product.ShopManagement.EditProduct')}></CardHeader>
+                                    <CardHeader title={'Thông tin sản phẩm'}></CardHeader>
                                     <Divider />
                                     <CardContent>
                                         <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
-                                            <TextField
-                                                autoFocus
-                                                required
-                                                margin="dense"
-                                                id="name"
-                                                name="name"
-                                                label={t('product.Name')}
-                                                fullWidth
-                                                variant="outlined"
-                                                sx={{ mb: 1 }}
-                                                defaultValue={product?.name}
-                                                onChange={(e) => {
-                                                    setProductName(e.target.value);
-                                                }}
-                                            />
-                                            <TextField
-                                                error={!(productPrice >= 0)}
-                                                helperText={productPrice < 0 ? t('product.NonNegativePrice') : ''}
-                                                required
-                                                margin="dense"
-                                                id="price"
-                                                name="price"
-                                                label={t('product.Price')}
-                                                type="number"
-                                                fullWidth
-                                                variant="outlined"
-                                                sx={{ mb: 1, maxWidth: 150 }}
-                                                defaultValue={product?.price}
-                                                onChange={(e) => {
-                                                    setProductPrice(Number(e.target.value));
-                                                }}
-                                            />
-                                        </Stack>
-                                        <QuillNoSSRWrapper
-                                            ref={reactQuillRef}
-                                            style={{ maxHeight: 400, height: 400 }}
-                                            theme="snow"
-                                            defaultValue={product?.describe}
-                                            onChange={(value) => {
-                                                setProductDescribe(value);
-                                            }}
-                                            modules={modules}
-                                            formats={formats}
-                                        />
-                                        <Stack direction="row" spacing={1} sx={{ mb: 1, mt: 5 }}>
                                             <FormControl variant="outlined" sx={{ m: 1, minWidth: 200 }}>
-                                                <FormHelperText>
-                                                    {t('product.ShopManagement.CategorySelect')}
-                                                </FormHelperText>
+                                                <InputLabel id="select-category-label">Chọn hãng</InputLabel>
                                                 <Select
-                                                    id="select-category"
+                                                    id="select-parent-cate-lvl1"
                                                     value={categoryIdSelect}
-                                                    onChange={(e) => handleChangeSelect(e, setCategoryIdSelected)}
-                                                    displayEmpty
+                                                    onChange={(e) => {
+                                                        console.log('change');
+                                                        const selectedCategory = categories.find(
+                                                            (category) => category.id === e.target.value,
+                                                        );
+                                                        if (selectedCategory) {
+                                                            setCategoryNameSelected(selectedCategory.name);
+                                                        }
+                                                        handleChangeSelect(e, setCategoryIdSelected);
+                                                    }}
                                                     required
                                                 >
-                                                    <MenuItem value="">
-                                                        <em>{t('orther.None')}</em>
-                                                    </MenuItem>
                                                     {categories.map((category) => (
                                                         <MenuItem value={category.id}>{category.name}</MenuItem>
                                                     ))}
                                                 </Select>
                                             </FormControl>
-                                            <FormControl variant="outlined" sx={{ m: 1, minWidth: 150 }}>
-                                                <FormHelperText>
-                                                    {t('product.ShopManagement.sizeselect')}
-                                                </FormHelperText>
-                                                <Select
-                                                    id="select-material"
-                                                    value={materialIdSelect}
-                                                    onChange={(e) => handleChangeSelect(e, setMaterialIdSelected)}
-                                                    displayEmpty
-                                                    required
-                                                >
-                                                    <MenuItem value="">
-                                                        <em>{t('orther.None')}</em>
-                                                    </MenuItem>
-                                                    {sizes.map((material) => (
-                                                        <MenuItem value={material.id}>{material.name}</MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                            <FormControl variant="outlined" sx={{ m: 1, minWidth: 150 }}>
-                                                <FormHelperText>
-                                                    {t('product.ShopManagement.StyleSelect')}
-                                                </FormHelperText>
-                                                <Select
-                                                    id="select-style"
-                                                    value={styleIdSelect}
-                                                    onChange={(e) => handleChangeSelect(e, setStyleIdSelected)}
-                                                    displayEmpty
-                                                    required
-                                                >
-                                                    <MenuItem value="">
-                                                        <em>{t('orther.None')}</em>
-                                                    </MenuItem>
-                                                    {styles.map((style) => (
-                                                        <MenuItem value={style.id}>{style.name}</MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                            <FormControl variant="outlined" sx={{ m: 1, minWidth: 150 }}>
-                                                <FormHelperText>
-                                                    {t('product.ShopManagement.colorselect')}
-                                                </FormHelperText>
-                                                <Select
-                                                    id="select-origin"
-                                                    value={originIdSelect}
-                                                    onChange={(e) => handleChangeSelect(e, setOriginIdSelected)}
-                                                    displayEmpty
-                                                    required
-                                                >
-                                                    <MenuItem value="">
-                                                        <em>{t('orther.None')}</em>
-                                                    </MenuItem>
-                                                    {colors.map((origin) => (
-                                                        <MenuItem value={origin.id}>{origin.name}</MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                            <FormControl variant="outlined" sx={{ m: 1, minWidth: 180 }}>
-                                                <FormHelperText>
-                                                    {t('product.ShopManagement.typeselect')}
-                                                </FormHelperText>
-                                                <Select
-                                                    id="select-brand"
-                                                    value={brandIdSelect}
-                                                    onChange={(e) => handleChangeSelect(e, setBrandIdSelected)}
-                                                    displayEmpty
-                                                    required
-                                                >
-                                                    <MenuItem value="">
-                                                        <em>{t('orther.None')}</em>
-                                                    </MenuItem>
-                                                    {types.map((brand) => (
-                                                        <MenuItem value={brand.id}>{brand.name}</MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                        </Stack>
-                                        
-                                        <Divider sx={{ mb: 1, mt: 1 }} />
-                                        <Typography variant="h6">{t('product.Image')}</Typography>
-                                        <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                                            {selectImage ? (
-                                                <Avatar
-                                                    variant="square"
-                                                    sx={{ minWidth: 200, minHeight: 200 }}
-                                                    src={selectImage ? URL.createObjectURL(selectImage) : undefined}
-                                                />
-                                            ) : (
-                                                <Avatar
-                                                    variant="square"
-                                                    sx={{ minWidth: 200, minHeight: 200 }}
-                                                    src={
-                                                        product?.image
-                                                            ? product.image.startsWith('uploads')
-                                                                ? `${HOST_BE}/${product?.image}`
-                                                                : product?.image
-                                                            : undefined
-                                                    }
-                                                />
-                                            )}
-                                            <label
-                                                htmlFor="image"
-                                                style={{ position: 'absolute', bottom: '8px', right: '8px' }}
-                                            >
-                                                <IconButton component="span" color="primary">
-                                                    <UploadTwoToneIcon />
-                                                </IconButton>
-                                            </label>
-                                            <Input
-                                                id="image"
-                                                name="image"
-                                                type="file"
-                                                accept="image/*"
-                                                style={{ display: 'none' }} // Ẩn input file
-                                                onChange={(e: any) => {
-                                                    const file = e.target.files[0];
-                                                    console.log(file);
-                                                    if (
-                                                        file &&
-                                                        (file.type === 'image/png' ||
-                                                            file.type === 'image/jpeg' ||
-                                                            file.type === 'image/webp')
-                                                    ) {
-                                                        setSelectImage(file);
-                                                    } else {
-                                                        toastWarning('File type is not allowed');
-                                                    }
+                                            <TextField
+                                                required
+                                                margin="dense"
+                                                id="name"
+                                                name="name"
+                                                label={'Tên sản phẩm'}
+                                                fullWidth
+                                                variant="outlined"
+                                                sx={{ mb: 1 }}
+                                                value={productName}
+                                                onChange={(e) => {
+                                                    setProductName(e.target.value);
                                                 }}
                                             />
-                                        </Box>
-                                    </CardContent>
-                                </Card>
-                                <Card>
-                                    <CardHeader title={t('product.ProductOptionList')}></CardHeader>
-                                    <Divider />
-                                    <CardContent>
-                                        <TableContainer>
-                                            <Table>
-                                                <TableHead>
-                                                    <TableRow>
-                                                        <TableCell>Màu sắc</TableCell>
-                                                        <TableCell>Kích thước</TableCell>
-                                                        <TableCell>Giá</TableCell>
-                                                        <TableCell>Số lượng</TableCell>
-                                                        <TableCell>Tải lên Ảnh</TableCell>
-                                                        <TableCell>Ảnh đã tải lên</TableCell>
-                                                    </TableRow>
-                                                </TableHead>
-                                                <TableBody>
-                                                    {createCombinations().map((combo, index) => (
-                                                        <TableRow key={index}>
-                                                            <TableCell>{combo.color}</TableCell>
-                                                            <TableCell>{combo.size}</TableCell>
-                                                            <TableCell>
-                                                                <TextField
-                                                                    type="number"
-                                                                    value={
-                                                                        prices[`${combo.size}-${combo.color}`] ||
-                                                                        productPrice
-                                                                    }
-                                                                    onChange={(e) =>
-                                                                        setPrices({
-                                                                            ...prices,
-                                                                            [`${combo.size}-${combo.color}`]: Number(
-                                                                                e.target.value,
-                                                                            ),
-                                                                        })
-                                                                    }
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <TextField
-                                                                    type="number"
-                                                                    value={
-                                                                        quantities[`${combo.size}-${combo.color}`] || 0
-                                                                    }
-                                                                    onChange={(e) =>
-                                                                        setQuantities({
-                                                                            ...quantities,
-                                                                            [`${combo.size}-${combo.color}`]: Number(
-                                                                                e.target.value,
-                                                                            ),
-                                                                        })
-                                                                    }
-                                                                />
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <input
-                                                                    type="file"
-                                                                    accept="image/*"
-                                                                    style={{ display: 'none' }}
-                                                                    id={`upload-${combo.size}-${combo.color}`}
-                                                                    onChange={(e) =>
-                                                                        handleUploadImages(
-                                                                            combo.size,
-                                                                            combo.color,
-                                                                            e.target.files,
-                                                                        )
-                                                                    }
-                                                                />
-                                                                <label htmlFor={`upload-${combo.size}-${combo.color}`}>
-                                                                    <IconButton component="span" color="primary">
-                                                                        <UploadTwoToneIcon />
-                                                                    </IconButton>
-                                                                </label>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                {uploadedImages[`${combo.size}-${combo.color}`]?.map(
-                                                                    (image, imgIndex) => (
-                                                                        <div
-                                                                            key={imgIndex}
-                                                                            style={{
-                                                                                display: 'flex',
-                                                                                alignItems: 'center',
-                                                                            }}
-                                                                        >
-                                                                            <img
-                                                                                src={
-                                                                                    image?.startsWith('uploads')
-                                                                                        ? `${HOST_BE}/${image}`
-                                                                                        : image
-                                                                                }
-                                                                                alt={`img-${imgIndex}`}
-                                                                                style={{
-                                                                                    width: '50px',
-                                                                                    height: '50px',
-                                                                                    marginRight: '10px',
-                                                                                }}
-                                                                            />
-                                                                            <IconButton
-                                                                                onClick={() =>
-                                                                                    handleRemoveImage(
-                                                                                        combo.size,
-                                                                                        combo.color,
-                                                                                        imgIndex,
-                                                                                    )
-                                                                                }
-                                                                            >
-                                                                                <CloseIcon />
-                                                                            </IconButton>
-                                                                        </div>
+                                        </Stack>
+                                        <Typography variant="h5">{t('product.Image')}</Typography>
+                                        <Stack direction="row" spacing={2} sx={{ mb: 2, mt: 2 }}>
+                                            {imageList.map((image, index) => (
+                                                <Box key={index} sx={{ position: 'relative' }}>
+                                                    <img
+                                                        src={
+                                                            image.startsWith('uploads') ? `${HOST_BE}/${image}` : image
+                                                        }
+                                                        alt={`image-${index}`}
+                                                        style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                                                    />
+                                                    <IconButton
+                                                        onClick={() => handleImageRemove(index, false)}
+                                                        sx={{ position: 'absolute', top: 0, right: 0 }}
+                                                    >
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </Box>
+                                            ))}
+                                            {uploadedImages.map((file, index) => (
+                                                <Box key={index} sx={{ position: 'relative' }}>
+                                                    <img
+                                                        src={URL.createObjectURL(file)}
+                                                        alt={`uploaded-${index}`}
+                                                        style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                                                    />
+                                                    <IconButton
+                                                        onClick={() => handleImageRemove(index, true)}
+                                                        sx={{ position: 'absolute', top: 0, right: 0 }}
+                                                    >
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </Box>
+                                            ))}
+                                            <label htmlFor="upload-button">
+                                                <input
+                                                    accept="image/*"
+                                                    id="upload-button"
+                                                    type="file"
+                                                    multiple
+                                                    onChange={handleImageUpload}
+                                                    style={{ display: 'none' }}
+                                                />
+                                                <IconButton
+                                                    component="span"
+                                                    sx={{ width: '100px', height: '100px', border: '1px dashed grey' }}
+                                                >
+                                                    <AddPhotoAlternateIcon fontSize="large" />
+                                                </IconButton>
+                                            </label>
+                                        </Stack>
+                                        <Stack spacing={2} sx={{ mb: 0 }}>
+                                            <Typography variant="h5">Chọn kích cỡ và số lượng</Typography>
+                                            <Stack direction="row" spacing={2}>
+                                                <FormControl error={!!sizeError} sx={{ width: '223px' }}>
+                                                    <InputLabel id="select-size-label">Chọn kích cỡ</InputLabel>
+                                                    <Select
+                                                        id="select-size"
+                                                        value={currentSize}
+                                                        onChange={(e) => setCurrentSize(e.target.value)}
+                                                    >
+                                                        {sizeByCategory
+                                                            .filter(
+                                                                (size: any) =>
+                                                                    !selectedSizes.some(
+                                                                        (item) => item.sizeId === size.id,
                                                                     ),
-                                                                )}
-                                                                {uploadImages[`${combo.size}-${combo.color}`]?.map(
-                                                                    (image, imgIndex) => (
-                                                                        <div
-                                                                            key={imgIndex}
-                                                                            style={{
-                                                                                display: 'flex',
-                                                                                alignItems: 'center',
-                                                                            }}
-                                                                        >
-                                                                            <img
-                                                                                src={URL.createObjectURL(image)}
-                                                                                alt={`img-${imgIndex}`}
-                                                                                style={{
-                                                                                    width: '50px',
-                                                                                    height: '50px',
-                                                                                    marginRight: '10px',
-                                                                                }}
-                                                                            />
-                                                                            <IconButton
-                                                                                onClick={() =>
-                                                                                    handleRemoveUpdateImage(
-                                                                                        combo.size,
-                                                                                        combo.color,
-                                                                                        imgIndex,
-                                                                                    )
-                                                                                }
-                                                                            >
-                                                                                <CloseIcon />
-                                                                            </IconButton>
-                                                                        </div>
-                                                                    ),
-                                                                )}
-                                                            </TableCell>
-                                                        </TableRow>
+                                                            )
+                                                            .map((size: any) => (
+                                                                <MenuItem key={size.id} value={size.id}>
+                                                                    {size.name}
+                                                                </MenuItem>
+                                                            ))}
+                                                        {categoryNameSelect && <MenuItem value="other">Khác</MenuItem>}
+                                                    </Select>
+                                                    {sizeError && <FormHelperText>{sizeError}</FormHelperText>}
+                                                </FormControl>
+                                                {currentSize === 'other' && (
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            marginTop: '10px',
+                                                        }}
+                                                    >
+                                                        <TextField
+                                                            label="Nhập tên kích cỡ mới"
+                                                            value={otherSizeName}
+                                                            onChange={handleOtherSizeNameChange}
+                                                            error={!!sizeError}
+                                                            helperText={sizeError}
+                                                            sx={{ width: '150px', marginRight: '10px' }}
+                                                        />
+                                                        <Button variant="contained" onClick={handleAddNewSize}>
+                                                            Thêm
+                                                        </Button>
+                                                    </Box>
+                                                )}
+                                                <FormControl error={!!quantityError} sx={{ width: '100px' }}>
+                                                    <TextField
+                                                        type="number"
+                                                        value={currentQuantity}
+                                                        onChange={(e) => setCurrentQuantity(e.target.value)}
+                                                        label="Số lượng"
+                                                        inputProps={{ min: 1 }}
+                                                    />
+                                                    {quantityError && <FormHelperText>{quantityError}</FormHelperText>}
+                                                </FormControl>
+                                                <IconButton color="primary" onClick={handleAddSize}>
+                                                    <AddIcon />
+                                                </IconButton>
+                                            </Stack>
+                                            <Stack spacing={1}>
+                                                {selectedSizes.map((item) => (
+                                                    <Stack
+                                                        key={item.sizeId}
+                                                        direction="row"
+                                                        spacing={1}
+                                                        alignItems="center"
+                                                        sx={{
+                                                            border: '1px solid #ccc',
+                                                            padding: '8px',
+                                                            borderRadius: '4px',
+                                                            width: 400,
+                                                        }}
+                                                    >
+                                                        <Typography sx={{ flexGrow: 1, width: 100 }}>
+                                                            Kích cỡ:{' '}
+                                                            <strong>
+                                                                {sizes.find((size) => size.id === item.sizeId)?.name}
+                                                            </strong>
+                                                        </Typography>
+                                                        <Typography sx={{ flexGrow: 1 }}>Số lượng:</Typography>
+                                                        <TextField
+                                                            type="number"
+                                                            value={item.quantity}
+                                                            onChange={(e) =>
+                                                                handleQuantityChange(
+                                                                    item.sizeId,
+                                                                    parseInt(e.target.value),
+                                                                )
+                                                            }
+                                                            inputProps={{ min: 1 }} // Ràng buộc số lượng phải lớn hơn 0
+                                                            required
+                                                            sx={{ width: '100px' }} // Điều chỉnh chiều rộng
+                                                        />
+                                                        <IconButton
+                                                            color="secondary"
+                                                            onClick={() => handleDeleteSize(item.sizeId)}
+                                                        >
+                                                            <DeleteIcon />
+                                                        </IconButton>
+                                                    </Stack>
+                                                ))}
+                                            </Stack>
+                                        </Stack>
+                                        <Typography variant="h5" sx={{ mt: 1 }}>
+                                            Nhập giá cho sản phẩm
+                                        </Typography>
+
+                                        <Stack spacing={1} direction="row" sx={{ mb: 1, mt: 2 }}>
+                                            <TextField
+                                                label="Giá ảo"
+                                                type="number"
+                                                value={virtualPrice}
+                                                onChange={(e) => setVirtualPrice(e.target.value)}
+                                                InputProps={{ inputProps: { min: 0 } }}
+                                            />
+                                            <TextField
+                                                label="Giá nhập"
+                                                type="number"
+                                                value={importPrice}
+                                                onChange={(e) => setImportPrice(e.target.value)}
+                                                InputProps={{ inputProps: { min: 0 } }}
+                                            />
+                                            <TextField
+                                                label="Giá CTV"
+                                                type="number"
+                                                value={ctvPrice}
+                                                onChange={(e) => setCtvPrice(e.target.value)}
+                                                InputProps={{ inputProps: { min: 0 } }}
+                                            />
+                                            <TextField
+                                                label="Giá bán"
+                                                type="number"
+                                                value={sellPrice}
+                                                onChange={(e) => setSellPrice(e.target.value)}
+                                                InputProps={{ inputProps: { min: 0 } }}
+                                            />
+                                        </Stack>
+                                        {categoryNameSelect === 'Crocs' && (
+                                            <FormControl component="fieldset" sx={{ mt: 1 }}>
+                                                <Typography variant="h5">Chọn kiểu dáng cho sản phẩm</Typography>
+                                                <FormGroup>
+                                                    {styles.map((style) => (
+                                                        <FormControlLabel
+                                                            key={style.id}
+                                                            control={
+                                                                <Checkbox
+                                                                    value={style.id}
+                                                                    checked={selectedStyles.includes(style.id)}
+                                                                    onChange={handleStyleChange}
+                                                                />
+                                                            }
+                                                            label={style.name}
+                                                        />
                                                     ))}
-                                                </TableBody>
-                                            </Table>
-                                        </TableContainer>
+                                                </FormGroup>
+                                            </FormControl>
+                                        )}
+
+                                        <Stack direction="row" spacing={1} sx={{ mb: 1, mt: 2 }}>
+                                            <FormControl variant="outlined" sx={{ m: 1, minWidth: 150 }}>
+                                                <FormHelperText>Chọn màu sắc</FormHelperText>
+                                                <Select
+                                                    id="select-origin"
+                                                    value={colorIdSelect}
+                                                    onChange={(e) => handleChangeSelect(e, setColorIdSelected)}
+                                                    displayEmpty
+                                                    required
+                                                >
+                                                    <MenuItem value="">
+                                                        <em>{t('orther.None')}</em>
+                                                    </MenuItem>
+
+                                                    {colors.map((color) => (
+                                                        <MenuItem value={color.id} key={color.id}>
+                                                            <Grid container alignItems="center">
+                                                                <Grid item>
+                                                                    <Box
+                                                                        sx={{
+                                                                            width: 20,
+                                                                            height: 20,
+                                                                            borderRadius: '50%',
+                                                                            backgroundColor: color.colorCode,
+                                                                            marginRight: 1,
+                                                                        }}
+                                                                    />
+                                                                </Grid>
+                                                                <Grid item>{color.name}</Grid>
+                                                            </Grid>
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                            {categoryNameSelect === 'Crocs' || categoryNameSelect === 'Jibbitz' ? (
+                                                <FormControl variant="outlined" sx={{ m: 1, minWidth: 180 }}>
+                                                    <FormHelperText>Chọn loại</FormHelperText>
+                                                    <Select
+                                                        id="select-type"
+                                                        value={typeIdSelect}
+                                                        onChange={(e) => handleChangeSelect(e, setTypeIdSelected)}
+                                                        displayEmpty
+                                                    >
+                                                        <MenuItem value="">
+                                                            <em>{t('orther.None')}</em>
+                                                        </MenuItem>
+                                                        {typeByCategories.map((type) => (
+                                                            <MenuItem value={type.id} key={type.id}>
+                                                                {type.name}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </Select>
+                                                </FormControl>
+                                            ) : null}
+                                        </Stack>
                                     </CardContent>
                                 </Card>
                             </React.Fragment>

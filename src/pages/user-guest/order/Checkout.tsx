@@ -17,6 +17,7 @@ import {
     IconButton,
     Avatar,
     styled,
+    Stack,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import UploadTwoToneIcon from '@mui/icons-material/UploadTwoTone';
@@ -46,7 +47,10 @@ const Checkout: React.FC = () => {
     const [totalAmount, setTotalAmount] = useState(0);
 
     const [orderNote, setOrderNote] = useState('');
+
     const [selectImage, setSelectImage] = useState<File | null>(null);
+    const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+
     const [shippingMethod, setShippingMethod] = useState('');
     const [shippingFee, setShippingFee] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
@@ -92,6 +96,19 @@ const Checkout: React.FC = () => {
             }
         }
     };
+
+    const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (files) {
+            const newFiles = Array.from(files);
+            setUploadedImages((prevImages) => [...prevImages, ...newFiles]);
+        }
+    };
+
+    const handleImageRemove = (index: number) => {
+        setUploadedImages((prevImages) => prevImages.filter((_, i) => i !== index));
+    };
+
     const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const address = e.target.value;
         setCustomerAddress(address);
@@ -127,7 +144,7 @@ const Checkout: React.FC = () => {
                     color: item.colorName,
                     size: item.sizeName,
                     quantity: listCart[index_quantity].quantity,
-                    isJibbitz: listCart[index_quantity].isJibbitz
+                    isJibbitz: listCart[index_quantity].isJibbitz,
                 };
             });
 
@@ -150,10 +167,11 @@ const Checkout: React.FC = () => {
             formData.append('listOrderDetail', JSON.stringify(listOrderDetail));
 
             // Upload hình ảnh nếu có
-            if (selectImage) {
+            const images = uploadedImages || [];
+            for (const image of images) {
                 const uniqueFilename = `image_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                const imageBlob = await fetch(URL.createObjectURL(selectImage)).then((response) => response.blob());
-                formData.append('file', imageBlob, uniqueFilename);
+                const imageBlob = await fetch(URL.createObjectURL(image)).then((response) => response.blob());
+                formData.append('files', imageBlob, uniqueFilename);
             }
 
             try {
@@ -201,11 +219,13 @@ const Checkout: React.FC = () => {
             formData.append('listOrderDetail', JSON.stringify(listOrderDetail));
 
             // Upload hình ảnh nếu có
-            if (selectImage) {
+            const images = uploadedImages || [];
+            for (const image of images) {
                 const uniqueFilename = `image_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                const imageBlob = await fetch(URL.createObjectURL(selectImage)).then((response) => response.blob());
-                formData.append('file', imageBlob, uniqueFilename);
+                const imageBlob = await fetch(URL.createObjectURL(image)).then((response) => response.blob());
+                formData.append('files', imageBlob, uniqueFilename);
             }
+
             try {
                 const res = await axios.post(`${HOST_BE}/user/handle-order`, formData, {
                     headers: {
@@ -251,7 +271,7 @@ const Checkout: React.FC = () => {
 
     console.log(listItemInCart);
     return (
-        <Grid container spacing={3} sx={{ mt: { md: '160px', xs: '170px' }, mb: 4, px: { md: 16, xs: 2 } }}>
+        <Grid container spacing={3} sx={{ mt: { md: '160px', xs: '183px' }, mb: 4, px: { md: 16, xs: 2 } }}>
             <Grid item xs={12} md={6} sx={{ overflow: { md: 'auto' }, maxHeight: { md: '100vh' } }}>
                 <Typography variant="h4" gutterBottom sx={{ mb: 1, fontSize: 22 }}>
                     Thông tin đơn hàng
@@ -308,7 +328,40 @@ const Checkout: React.FC = () => {
                 <Typography variant="body2" sx={{ marginBottom: 1 }}>
                     {'Ảnh ghi chú (Nếu có)'}
                 </Typography>
-                <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                <Stack direction="row" spacing={2} sx={{ mb: 2, mt: 2 }}>
+                    {uploadedImages.map((file, index) => (
+                        <Box key={index} sx={{ position: 'relative' }}>
+                            <img
+                                src={URL.createObjectURL(file)}
+                                alt={`uploaded-${index}`}
+                                style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                            />
+                            <IconButton
+                                onClick={() => handleImageRemove(index)}
+                                sx={{ position: 'absolute', top: 0, right: 0 }}
+                            >
+                                <DeleteIcon />
+                            </IconButton>
+                        </Box>
+                    ))}
+                    <label htmlFor="upload-button">
+                        <input
+                            accept="image/*"
+                            id="upload-button"
+                            type="file"
+                            multiple
+                            onChange={handleImageUpload}
+                            style={{ display: 'none' }}
+                        />
+                        <IconButton
+                            component="span"
+                            sx={{ width: '100px', height: '100px', border: '1px dashed grey' }}
+                        >
+                            <AddPhotoAlternateIcon fontSize="large" />
+                        </IconButton>
+                    </label>
+                </Stack>
+                {/* <Box sx={{ position: 'relative', display: 'inline-flex' }}>
                     {selectImage && (
                         <Avatar
                             variant="square"
@@ -350,7 +403,7 @@ const Checkout: React.FC = () => {
                             }
                         }}
                     />
-                </Box>
+                </Box> */}
                 <Divider sx={{ my: 2 }}></Divider>
                 <Typography variant="h4" gutterBottom sx={{ mb: 1, fontSize: 22 }}>
                     Giao hàng

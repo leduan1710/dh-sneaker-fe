@@ -52,8 +52,8 @@ const AvatarWrapper = styled(Avatar)(
     margin-right: ${theme.spacing(1)};
     padding: ${theme.spacing(0.5)};
     border-radius: 10px;
-    height: ${theme.spacing(5.5)};
-    width: ${theme.spacing(5.5)};
+    height: ${theme.spacing(5.0)};
+    width: ${theme.spacing(5.0)};
     background: ${
         theme.palette.mode === 'dark' ? theme.colors.alpha.trueWhite[30] : alpha(theme.colors.alpha.black[100], 0.07)
     };
@@ -63,8 +63,8 @@ const AvatarWrapper = styled(Avatar)(
       padding: ${theme.spacing(0.5)};
       display: block;
       border-radius: inherit;
-      height: ${theme.spacing(4.5)};
-      width: ${theme.spacing(4.5)};
+      height: ${theme.spacing(4.0)};
+      width: ${theme.spacing(4.0)};
     }
 `,
 );
@@ -181,11 +181,13 @@ export default function OrderTable() {
 
     return (
         <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-            <Grid container spacing={3} sx={{ p: 2 }}>
-                <Grid xs={12} sm={6} md={3} item>
+            <Grid container spacing={1} sx={{ p: 1 }}>
+                <Grid xs={6} sm={6} md={3} item>
                     <Card>
-                        <CardContent>
-                            <Grid container spacing={0}>
+                        <CardContent sx={{paddingTop: '8px', ":last-child": {
+                            paddingBottom: '8px'
+                        }}}>
+                            <Grid container spacing={1}>
                                 <Grid xs={4} sm={4} item display="flex" justifyContent="center" alignItems="center">
                                     <AvatarWrapper>
                                         <img alt="commission" src={require('../../../static/order-commission.png')} />
@@ -193,10 +195,10 @@ export default function OrderTable() {
                                 </Grid>
                                 <Grid xs={8} sm={8} item display="flex" alignItems="center">
                                     <Box>
-                                        <Typography variant="h6" gutterBottom noWrap>
+                                        <Typography variant="h5" sx={{fontSize: 16}} noWrap>
                                             Hoa hồng
                                         </Typography>
-                                        <Typography variant="body2" noWrap>
+                                        <Typography variant="body2" sx={{fontSize: 14}} noWrap>
                                             {formatPrice(totalCommission)}
                                         </Typography>
                                     </Box>
@@ -205,10 +207,12 @@ export default function OrderTable() {
                         </CardContent>
                     </Card>
                 </Grid>
-                <Grid xs={12} sm={6} md={3} item>
+                <Grid xs={6} sm={6} md={3} item>
                     <Card>
-                        <CardContent>
-                            <Grid container spacing={0}>
+                        <CardContent sx={{paddingTop: '8px', ":last-child": {
+                            paddingBottom:'8px'
+                        }}}>
+                            <Grid container spacing={1}>
                                 <Grid xs={4} sm={4} item display="flex" justifyContent="center" alignItems="center">
                                     <AvatarWrapper>
                                         <img alt="order-count" src={require('../../../static/order-count.png')} />
@@ -216,10 +220,10 @@ export default function OrderTable() {
                                 </Grid>
                                 <Grid xs={8} sm={8} item display="flex" alignItems="center">
                                     <Box>
-                                        <Typography variant="h6" gutterBottom noWrap>
+                                        <Typography variant="h5" sx={{fontSize: 16}} gutterBottom noWrap>
                                             Số lượng
                                         </Typography>
-                                        <Typography variant="body2" noWrap>
+                                        <Typography variant="body2" sx={{fontSize: 14}} noWrap>
                                             {totalQuantity || 0}
                                         </Typography>
                                     </Box>
@@ -228,10 +232,12 @@ export default function OrderTable() {
                         </CardContent>
                     </Card>
                 </Grid>
-                <Grid xs={12} sm={6} md={3} item>
+                <Grid xs={6} sm={6} md={3} item>
                     <Card>
-                        <CardContent>
-                            <Grid container spacing={0}>
+                        <CardContent sx={{paddingTop: '8px', ":last-child": {
+                            paddingBottom: '8px'
+                        }}}>
+                            <Grid container spacing={1}>
                                 <Grid xs={4} sm={4} item display="flex" justifyContent="center" alignItems="center">
                                     <AvatarWrapper>
                                         <img alt="revenue" src={require('../../../static/bonus.png')} />
@@ -239,10 +245,10 @@ export default function OrderTable() {
                                 </Grid>
                                 <Grid xs={8} sm={8} item display="flex" alignItems="center">
                                     <Box>
-                                        <Typography variant="h6" gutterBottom noWrap>
+                                        <Typography variant="h5" sx={{fontSize: 16}} gutterBottom noWrap>
                                             Thưởng
                                         </Typography>
-                                        <Typography variant="body2" noWrap>
+                                        <Typography variant="body2" sx={{fontSize: 14}} noWrap>
                                             {formatPrice(bonus)}
                                         </Typography>
                                     </Box>
@@ -251,10 +257,12 @@ export default function OrderTable() {
                         </CardContent>
                     </Card>
                 </Grid>
-                <Grid xs={12} sm={6} md={3} item>
+                <Grid xs={6} sm={6} md={3} item>
                     <Card>
-                        <CardContent>
-                            <Grid container spacing={0}>
+                        <CardContent sx={{paddingTop: '8px', ":last-child": {
+                            paddingBottom: '8px'
+                        }}}>
+                            <Grid container spacing={1}>
                                 <Grid xs={4} sm={4} item display="flex" justifyContent="center" alignItems="center">
                                     <AvatarWrapper>
                                         <img alt="revenue" src={require('../../../static/budget.png')} />
@@ -262,10 +270,10 @@ export default function OrderTable() {
                                 </Grid>
                                 <Grid xs={8} sm={8} item display="flex" alignItems="center">
                                     <Box>
-                                        <Typography variant="h6" gutterBottom noWrap>
+                                        <Typography variant="h5" sx={{fontSize: 16}} gutterBottom noWrap>
                                             Tổng
                                         </Typography>
-                                        <Typography variant="body2" noWrap>
+                                        <Typography variant="body2" sx={{fontSize: 14}} noWrap>
                                             {formatPrice(totalCommission + bonus)}
                                         </Typography>
                                     </Box>

@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import { useTranslation } from 'react-i18next';
-import { Checkbox, Divider } from '@mui/material';
+import { Avatar, Checkbox, Divider, Typography } from '@mui/material';
 import { TextField } from '@mui/material';
 import {
     addCheckout,
@@ -42,10 +42,10 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
     const { open, toggleDrawer } = props;
     const { t } = useTranslation();
     const listItemInCart = useSelector((state: ReducerProps) => state.listItemInCart);
+    const listCart = JSON.parse(localStorage.getItem('listCart') || '[]');
     const role = useSelector((state: ReducerProps) => state.role);
     const numberCart = useSelector((state: ReducerProps) => state.numberCart);
     const store = useStore();
-    const [groupedShop, setGroupedShop] = useState<any>([]);
 
     const nav = useNavigate();
     const [totalPrice, setTotalPrice] = useState<number>(0);
@@ -78,7 +78,7 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
     const getTotalPriceAndItem = () => {
         const list_cart = JSON.parse(localStorage.getItem('listCart') || '[]');
         //total item
-        const totalItem = list_cart.reduce((accumulator: any, currentValue: any) => {
+        const totalItem = listCart.reduce((accumulator: any, currentValue: any) => {
             if (currentValue.isCheck) {
                 return accumulator + currentValue.quantity;
             } else {
@@ -125,7 +125,7 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
         getTotalPriceAndItem();
     }, [numberCart]);
     const DrawerList = (
-        <Box sx={{ width: '100%', minWidth: 400 }} role="presentation">
+        <Box sx={{ width: '100%' }} role="presentation">
             <div className="pt-3 pl-3 pb-3 flex justify-start items-center bg-general sticky top-0 right-0 left-0 z-10">
                 <KeyboardBackspaceIcon
                     className="cursor-pointer"
@@ -142,19 +142,42 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
                     {t('homepage.Exit')}
                 </span>
             </div>
-            <div>
+            {listCart.length > 0 ? <div>
                 <Checkbox
                     checked={isCheckAll}
                     onChange={() => {
                         if (isCheckAll) {
-                            const listProductDetail = JSON.parse(localStorage.getItem('listCart') || '[]');
-                            listProductDetail.map((item: any) => (item.isCheck = false));
-                            localStorage.setItem('listCart', JSON.stringify(listProductDetail));
+                            const listCart = JSON.parse(localStorage.getItem('listCart') || '[]');
+                            listCart.map((item: any) => (item.isCheck = false));
+                            localStorage.setItem('listCart', JSON.stringify(listCart));
                         }
                         setIsCheckAll((prev) => !prev);
                     }}
                 />
-            </div>
+            </div> : <>
+                    <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: 'calc(100vh - 80px)', // Điều chỉnh chiều cao cho phù hợp
+                        padding: 2,
+                    }}
+                >
+                    <Avatar
+                        sx={{ minHeight: 200, width: "auto", marginBottom: 2 }}
+                        src={require('../../../static/cart-empty.jpg')}
+                    />
+                    <Typography variant="h6" align="center">
+                        “Hổng” có gì trong giỏ hết
+                    </Typography>
+                    <Typography variant="body2" align="center">
+                        Về trang cửa hàng để chọn mua sản phẩm bạn nhé!!
+                    </Typography>
+                </Box>
+            </>}
+            
             <div style={{ minHeight: 1000 }} className="mt-2 mb-6 ml-9 mr-9 relative ">
                 <AnimatePresence>
                     {listItemInCart.length > 0

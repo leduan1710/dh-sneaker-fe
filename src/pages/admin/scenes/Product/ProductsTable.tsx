@@ -43,13 +43,12 @@ import { change_is_loading } from '../../../../reducers/Actions';
 import axios from 'axios';
 import { useSelector, useStore } from 'react-redux';
 import { GetApi, PostApi } from '../../../../untils/Api';
-import EditCateDialog from './EditDialog';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 import DetailDialog from './DetailDialog';
 import { useTranslation } from 'react-i18next';
 import { ReducerProps } from '../../../../reducers/ReducersProps';
-import EditProductDialog from './EditDialog2';
+import EditProductDialog from './EditDialog';
 import DetailProductDialog from './DetailDialog';
 import SearchIcon from '@mui/icons-material/Search';
 import CreateProductDialog from './CreateDialog';
@@ -312,10 +311,6 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
                     open={openCreate}
                     onClose={handleCloseCreate}
                     categories={categories}
-                    styles={styles}
-                    colors={colors}
-                    types={types}
-                    sizes={sizes}
                     onUpdate={getDataProduct}
                 />
             </div>

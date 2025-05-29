@@ -109,7 +109,7 @@ function Row(props: RowProps) {
                 <TableCell>{formatPrice(order.shipFee)}</TableCell>
                 <TableCell>{formatPrice(order.CODPrice)}</TableCell>
                 <TableCell align="right">
-                    { order.status === 'PROCESSING' ? (
+                    {order.status === 'PROCESSING' ? (
                         <Tooltip title={t('order.ConfirmAction')} arrow>
                             <IconButton
                                 sx={{
@@ -145,7 +145,7 @@ function Row(props: RowProps) {
             </TableRow>
             <TableRow>
                 <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
-                    <Box sx={{ margin: 1, width: '100%', padding: 2, bgcolor: '#f9f9f9', borderRadius: '4px' }}>
+                    <Box sx={{ margin: 1, width: '100%', padding: 2, bgcolor: 'rgba(199, 232, 255, 0.87)', borderRadius: '4px' }}>
                         <Collapse in={open} timeout="auto" unmountOnExit>
                             <Typography variant="body1" gutterBottom component="div">
                                 <strong>Tên khách:</strong> {order.customerName}
@@ -158,7 +158,8 @@ function Row(props: RowProps) {
                             </Typography>
                             {order.addressDetail && (
                                 <Typography variant="body1" gutterBottom component="div">
-                                    <strong>Địa chỉ:</strong> {order.addressDetail}
+                                    <strong>Địa chỉ:</strong> {order.addressDetail}, {order.address.ward.WARDS_NAME},{' '}
+                                    {order.address.district.DISTRICT_NAME}, {order.address.province.PROVINCE_NAME}
                                 </Typography>
                             )}
 
@@ -176,7 +177,7 @@ function Row(props: RowProps) {
 
                             {showImage && order.noteImage && (
                                 <Avatar
-                                    variant='square'
+                                    variant="square"
                                     src={
                                         order.noteImage.startsWith('uploads')
                                             ? `${HOST_BE}/${order.noteImage}`
@@ -317,7 +318,7 @@ export default function NewOrderTable() {
     };
 
     const paginatedOrders = orders.slice(page * limit, page * limit + limit);
-    
+
     return (
         <>
             <TableContainer className="relative" component={Paper}>

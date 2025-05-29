@@ -26,13 +26,13 @@ export const typeRank = {
     GOLD: 'GOLD',
     DIAMONDS: 'DIAMONDS',
 };
-export const HOST_BE = 'https://dhsneaker-api.io.vn';
-export const SOCKET_HOST = 'https://dhsneaker-api.io.vn';
-export const HOST_FE = 'https://dhsneaker.com';
-export const REDIRECT_URL_GMAIL = 'https://dhsneaker.com/login-register';
+// export const HOST_BE = 'https://dhsneaker-api.io.vn';
+// export const SOCKET_HOST = 'https://dhsneaker-api.io.vn';
+// export const HOST_FE = 'https://dhsneaker.com';
+// export const REDIRECT_URL_GMAIL = 'https://dhsneaker.com/login-register';
 
-// export const HOST_BE = 'http://localhost:3035';
-// export const HOST_FE = 'http://localhost:3000';
-// export const SOCKET_HOST = 'http://localhost:3051';
-// export const REDIRECT_URL_GMAIL = 'http://localhost:3000/login-register';
+export const HOST_BE = 'http://localhost:3035';
+export const HOST_FE = 'http://localhost:3000';
+export const SOCKET_HOST = 'http://localhost:3051';
+export const REDIRECT_URL_GMAIL = 'http://localhost:3000/login-register';
 export const USD = 25800;
