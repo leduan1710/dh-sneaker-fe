@@ -35,7 +35,6 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import TuneIcon from '@mui/icons-material/Tune';
 import SwitchAccessShortcutAddIcon from '@mui/icons-material/SwitchAccessShortcutAdd';
 import NotInterestedIcon from '@mui/icons-material/NotInterested';
-import SwapVertIcon from '@mui/icons-material/SwapVert';
 import AddIcon from '@mui/icons-material/Add';
 import { HOST_BE } from '../../../../common/Common';
 import { filterSpecialInput, formatPrice, shortedString, toastError, toastSuccess } from '../../../../untils/Logic';

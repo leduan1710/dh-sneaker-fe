@@ -79,13 +79,20 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
 
     const [selectImage, setSelectImage] = useState<File | null>(null);
 
-    const [typeByCategories, setTypeByCategory] = useState(types);
+    const [typeByCategory, setTypeByCategory] = useState<any>([]);
+    const [sizeByCategory, setSizeByCategory] = useState<any>([]);
+    const [colorByCategory, setColorByCategory] = useState<any>([]);
+    const [styleByCategory, setStyleByCategory] = useState<any>([]);
+
+    const [otherSizeName, setOtherSizeName] = useState('');
+    const [otherColorName, setOtherColorName] = useState('');
+    const [otherTypeName, setOtherTypeName] = useState('');
+    const [otherStyleName, setOtherStyleName] = useState('');
     //select
     const [categoryNameSelect, setCategoryNameSelected] = useState('');
 
     const [categoryIdSelect, setCategoryIdSelected] = useState('');
     const [sizeIdSelect, setSizeIdSelected] = useState('');
-    const [sizeByCategory, setSizeByCategory] = useState<any>([]);
 
     const [styleIdSelect, setStyleIdSelected] = useState('');
     const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
@@ -98,10 +105,11 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
 
     const [selectedSizes, setSelectedSizes] = useState<any[]>([]);
     const [currentSize, setCurrentSize] = useState<string>('');
-    const [otherSizeName, setOtherSizeName] = useState('');
-
     const [currentQuantity, setCurrentQuantity] = useState<string>('');
     const [sizeError, setSizeError] = useState<string | null>(null);
+    const [colorError, setColorError] = useState<string | null>(null);
+    const [typeError, setTypeError] = useState<string | null>(null);
+    const [styleError, setStyleError] = useState<string | null>(null);
     const [quantityError, setQuantityError] = useState<string | null>(null);
 
     const handleClose = () => {
@@ -223,6 +231,116 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
             toastError('Thêm thất bại');
         }
     };
+    const handleAddNewStyle = async () => {
+        if (!otherStyleName) {
+            setStyleError('Vui lòng nhập tên kiểu dáng');
+            return;
+        }
+        if (!categoryIdSelect) {
+            toastWarning('Vui lòng chọn hãng sản phẩm');
+            return;
+        }
+        try {
+            const res = await axios.post(
+                `${HOST_BE}/admin/add/style`,
+                {
+                    otherStyleName,
+                    categoryIdSelect,
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                },
+            );
+
+            if (res.data.message === 'Success') {
+                toastSuccess('Thêm thành công');
+                getStyleByCategory(categoryIdSelect);
+                setSelectedStyles((prevStyles) =>
+                    prevStyles.map((style) => (style === 'other' ? res.data.style.id : style)),
+                );
+                setOtherSizeName('');
+            } else {
+                toastError('Thêm thất bại');
+            }
+        } catch (error: any) {
+            toastError('Thêm thất bại');
+        }
+    };
+    const handleAddNewColor = async () => {
+        if (!otherColorName) {
+            setColorError('Vui lòng nhập tên màu sắc');
+            return;
+        }
+        if (!categoryIdSelect) {
+            toastWarning('Vui lòng chọn hãng sản phẩm');
+            return;
+        }
+        try {
+            const res = await axios.post(
+                `${HOST_BE}/admin/add/color`,
+                {
+                    otherColorName,
+                    categoryIdSelect,
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                },
+            );
+
+            if (res.data.message === 'Success') {
+                toastSuccess('Thêm thành công');
+                getColorByCategory(categoryIdSelect);
+                setColorIdSelected(res.data.color.id);
+                setOtherColorName('');
+            } else {
+                toastError('Thêm thất bại');
+            }
+        } catch (error: any) {
+            toastError('Thêm thất bại');
+        }
+    };
+    const handleAddNewType = async () => {
+        if (!otherTypeName) {
+            setTypeError('Vui lòng nhập tên loại');
+            return;
+        }
+        if (!categoryIdSelect) {
+            toastWarning('Vui lòng chọn hãng sản phẩm');
+            return;
+        }
+        try {
+            const res = await axios.post(
+                `${HOST_BE}/admin/add/type`,
+                {
+                    otherTypeName,
+                    categoryIdSelect,
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                },
+            );
+
+            if (res.data.message === 'Success') {
+                toastSuccess('Thêm thành công');
+                getTypeByCategory(categoryIdSelect);
+                setTypeIdSelected(res.data.type.id);
+                setOtherTypeName('');
+            } else {
+                toastError('Thêm thất bại');
+            }
+        } catch (error: any) {
+            toastError('Thêm thất bại');
+        }
+    };
     const handleCreateProduct = async () => {
         store.dispatch(change_is_loading(true));
         const formData = new FormData();
@@ -258,14 +376,14 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
             });
 
             if (res.data.message === 'Success') {
-                toastSuccess(t('toast.CreateSuccess'));
+                toastSuccess("Sửa thành công");
                 store.dispatch(change_is_loading(false));
                 onUpdate();
             } else {
                 store.dispatch(change_is_loading(false));
             }
         } catch (error) {
-            console.error('Failed to add product:', error);
+            toastError('Thất bại')
             store.dispatch(change_is_loading(false));
         } finally {
             handleClose();
@@ -287,6 +405,26 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
         setSelectedStyles(product.styleIds);
         setColorIdSelected(product.colorId);
         setImageList(product.imageList);
+    };
+    const getColorByCategory = async (categoryId: string) => {
+        try {
+            const resColor = await GetApi(`/api/color-by-category/${categoryId}`, null);
+            if (resColor.data.message == 'Success') {
+                setColorByCategory(resColor.data.colors);
+            }
+        } catch (error) {
+            console.error('Error', error);
+        }
+    };
+    const getStyleByCategory = async (categoryId: string) => {
+        try {
+            const resStyles = await GetApi(`/api/style-by-category/${categoryId}`, null);
+            if (resStyles.data.message == 'Success') {
+                setStyleByCategory(resStyles.data.styles);
+            }
+        } catch (error) {
+            console.error('Error', error);
+        }
     };
     const getTypeByCategory = async (categoryId: string) => {
         try {
@@ -329,6 +467,8 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
         if (categoryIdSelect) {
             getTypeByCategory(categoryIdSelect);
             getSizeByCategory(categoryIdSelect);
+            getStyleByCategory(categoryIdSelect);
+            getColorByCategory(categoryIdSelect);
         }
     }, [categoryIdSelect]);
 
@@ -366,7 +506,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
                         },
                     }}
                 >
-                    <DialogTitle>Tạo sản phẩm mới</DialogTitle>
+                    <DialogTitle>Chỉnh sửa sản phẩm</DialogTitle>
                     <DialogContent>
                         <Box>
                             <React.Fragment>
@@ -379,6 +519,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
                                                 <InputLabel id="select-category-label">Chọn hãng</InputLabel>
                                                 <Select
                                                     id="select-parent-cate-lvl1"
+                                                    label="Chọn hãng"
                                                     value={categoryIdSelect}
                                                     onChange={(e) => {
                                                         console.log('change');
@@ -603,29 +744,68 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
                                             />
                                         </Stack>
                                         {categoryNameSelect === 'Crocs' && (
-                                            <FormControl component="fieldset" sx={{ mt: 1 }}>
-                                                <Typography variant="h5">Chọn kiểu dáng cho sản phẩm</Typography>
-                                                <FormGroup>
-                                                    {styles.map((style) => (
+                                            <>
+                                                <FormControl component="fieldset" sx={{ mt: 1 }}>
+                                                    <Typography variant="h5">Kiểu dáng sản phẩm</Typography>
+                                                    <FormGroup>
+                                                        {styleByCategory.map((style: any) => (
+                                                            <FormControlLabel
+                                                                key={style.id}
+                                                                control={
+                                                                    <Checkbox
+                                                                        value={style.id}
+                                                                        checked={selectedStyles.includes(style.id)}
+                                                                        onChange={handleStyleChange}
+                                                                    />
+                                                                }
+                                                                label={style.name}
+                                                            />
+                                                        ))}
                                                         <FormControlLabel
-                                                            key={style.id}
                                                             control={
                                                                 <Checkbox
-                                                                    value={style.id}
-                                                                    checked={selectedStyles.includes(style.id)}
-                                                                    onChange={handleStyleChange}
+                                                                    value={'other'}
+                                                                    checked={selectedStyles.includes('other')}
+                                                                    onChange={(e) => {
+                                                                        const isChecked = e.target.checked;
+                                                                        if (isChecked) {
+                                                                            setOtherStyleName('');
+                                                                            handleStyleChange(e);
+                                                                        }
+                                                                    }}
                                                                 />
                                                             }
-                                                            label={style.name}
+                                                            label="Khác"
                                                         />
-                                                    ))}
-                                                </FormGroup>
-                                            </FormControl>
+                                                    </FormGroup>
+                                                </FormControl>
+                                                {selectedStyles.includes('other') && (
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            mt: 1,
+                                                        }}
+                                                    >
+                                                        <TextField
+                                                            label="Nhập tên kiểu dáng mới"
+                                                            value={otherStyleName}
+                                                            error={!!styleError}
+                                                            helperText={styleError}
+                                                            onChange={(e) => setOtherStyleName(e.target.value)}
+                                                            sx={{ width: '150px', marginRight: '10px' }}
+                                                        />
+                                                        <Button variant="contained" onClick={handleAddNewStyle}>
+                                                            Thêm
+                                                        </Button>
+                                                    </Box>
+                                                )}
+                                            </>
                                         )}
+                                        <Typography variant="h5">Màu sắc</Typography>
 
                                         <Stack direction="row" spacing={1} sx={{ mb: 1, mt: 2 }}>
                                             <FormControl variant="outlined" sx={{ m: 1, minWidth: 150 }}>
-                                                <FormHelperText>Chọn màu sắc</FormHelperText>
                                                 <Select
                                                     id="select-origin"
                                                     value={colorIdSelect}
@@ -633,11 +813,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
                                                     displayEmpty
                                                     required
                                                 >
-                                                    <MenuItem value="">
-                                                        <em>{t('orther.None')}</em>
-                                                    </MenuItem>
-
-                                                    {colors.map((color) => (
+                                                    {colorByCategory.map((color: any) => (
                                                         <MenuItem value={color.id} key={color.id}>
                                                             <Grid container alignItems="center">
                                                                 <Grid item>
@@ -646,6 +822,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
                                                                             width: 20,
                                                                             height: 20,
                                                                             borderRadius: '50%',
+                                                                            borderColor: '#000',
                                                                             backgroundColor: color.colorCode,
                                                                             marginRight: 1,
                                                                         }}
@@ -655,29 +832,91 @@ const EditProductDialog: React.FC<EditProductDialogProps> = (props) => {
                                                             </Grid>
                                                         </MenuItem>
                                                     ))}
+                                                    <MenuItem value="other">
+                                                        <Grid container alignItems="center">
+                                                            <Grid item>
+                                                                <Box
+                                                                    sx={{
+                                                                        width: 20,
+                                                                        height: 20,
+                                                                        borderRadius: '50%',
+                                                                        backgroundColor: '#fff',
+                                                                        marginRight: 1,
+                                                                    }}
+                                                                />
+                                                            </Grid>
+                                                            <Grid item>Khác</Grid>
+                                                        </Grid>
+                                                    </MenuItem>
                                                 </Select>
                                             </FormControl>
-                                            {categoryNameSelect === 'Crocs' || categoryNameSelect === 'Jibbitz' ? (
-                                                <FormControl variant="outlined" sx={{ m: 1, minWidth: 180 }}>
-                                                    <FormHelperText>Chọn loại</FormHelperText>
-                                                    <Select
-                                                        id="select-type"
-                                                        value={typeIdSelect}
-                                                        onChange={(e) => handleChangeSelect(e, setTypeIdSelected)}
-                                                        displayEmpty
-                                                    >
-                                                        <MenuItem value="">
-                                                            <em>{t('orther.None')}</em>
-                                                        </MenuItem>
-                                                        {typeByCategories.map((type) => (
-                                                            <MenuItem value={type.id} key={type.id}>
-                                                                {type.name}
-                                                            </MenuItem>
-                                                        ))}
-                                                    </Select>
-                                                </FormControl>
-                                            ) : null}
+
+                                            {colorIdSelect === 'other' && (
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                    }}
+                                                >
+                                                    <TextField
+                                                        label="Nhập tên màu sắc mới"
+                                                        value={otherColorName}
+                                                        onChange={(e) => setOtherColorName(e.target.value)}
+                                                        error={!!colorError}
+                                                        helperText={colorError}
+                                                        sx={{ width: '150px', marginRight: '10px' }}
+                                                    />
+                                                    <Button variant="contained" onClick={handleAddNewColor}>
+                                                        Thêm
+                                                    </Button>
+                                                </Box>
+                                            )}
                                         </Stack>
+                                        {categoryNameSelect === 'Crocs' || categoryNameSelect === 'Jibbitz' ? (
+                                            <>
+                                                <Typography variant="h5">Loại sản phẩm</Typography>
+
+                                                <Stack direction="row" spacing={1} sx={{ mb: 1, mt: 2 }}>
+                                                    <FormControl variant="outlined" sx={{ m: 1, minWidth: 180 }}>
+                                                        <Select
+                                                            id="select-type"
+                                                            value={typeIdSelect}
+                                                            onChange={(e) => handleChangeSelect(e, setTypeIdSelected)}
+                                                            displayEmpty
+                                                        >
+                                                            {typeByCategory.map((type: any) => (
+                                                                <MenuItem value={type.id} key={type.id}>
+                                                                    {type.name}
+                                                                </MenuItem>
+                                                            ))}
+                                                            <MenuItem value="other">
+                                                                <em>Khác</em>
+                                                            </MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                    {typeIdSelect === 'other' && (
+                                                        <Box
+                                                            sx={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                            }}
+                                                        >
+                                                            <TextField
+                                                                label="Nhập tên loại mới"
+                                                                value={otherTypeName}
+                                                                onChange={(e) => setOtherTypeName(e.target.value)}
+                                                                error={!!typeError}
+                                                                helperText={typeError}
+                                                                sx={{ width: '150px', marginRight: '10px' }}
+                                                            />
+                                                            <Button variant="contained" onClick={handleAddNewType}>
+                                                                Thêm
+                                                            </Button>
+                                                        </Box>
+                                                    )}
+                                                </Stack>
+                                            </>
+                                        ) : null}
                                     </CardContent>
                                 </Card>
                             </React.Fragment>

@@ -10,7 +10,7 @@ import { OrderModel } from '../../../../models/order';
 import { change_is_loading } from '../../../../reducers/Actions';
 import { useStore } from 'react-redux';
 import { GetApi, PostApi } from '../../../../untils/Api';
-import { toastSuccess } from '../../../../untils/Logic';
+import { toastError, toastSuccess } from '../../../../untils/Logic';
 import { TextField } from '@mui/material';
 import axios from 'axios';
 
@@ -26,6 +26,8 @@ const StatusUpdateDialog: React.FC<StatusUpdateDialogProps> = ({ open, onClose, 
     const { t } = useTranslation();
     const store = useStore();
     const [cancelReason, setCancelReason] = useState('');
+    const [orderNote, setOrderNote] = useState('');
+
     const checkTokenExpiration = () => {
         const expiration = localStorage.getItem('VIETTELPOST_TOKEN_EXPIRATION');
         return expiration && Date.now() < Number(expiration);
@@ -33,7 +35,6 @@ const StatusUpdateDialog: React.FC<StatusUpdateDialogProps> = ({ open, onClose, 
 
     const fetchNewToken = async () => {
         const response = await GetApi(`/admin/get/tokenVTP`, localStorage.getItem('token'));
-        console.log(response.data);
         const { token, expired } = response.data;
         saveTokenToLocalStorage(token, expired);
         return token;
@@ -59,20 +60,22 @@ const StatusUpdateDialog: React.FC<StatusUpdateDialogProps> = ({ open, onClose, 
                     const resOrder = await PostApi(`/admin/createVTPOrder`, localStorage.getItem('token'), {
                         VTPToken: tokenVTP,
                         orderId: order.id,
+                        orderNote: orderNote,
                     });
                     if (resOrder.data.message == 'Success') {
                         toastSuccess(t('toast.Success'));
                         onUpdate();
-                    }
+                    } else toastError('Thất bại');
                 } else {
-                    const resOrder = await GetApi(
+                    const resOrder = await PostApi(
                         `/admin/update/order-confirmed/${order.id}`,
                         localStorage.getItem('token'),
+                        { orderNote: orderNote },
                     );
                     if (resOrder.data.message == 'Success') {
                         toastSuccess(t('toast.Success'));
                         onUpdate();
-                    }
+                    } else toastError('Thất bại');
                 }
 
                 store.dispatch(change_is_loading(false));
@@ -88,7 +91,7 @@ const StatusUpdateDialog: React.FC<StatusUpdateDialogProps> = ({ open, onClose, 
                 if (resOrder.data.message == 'Success') {
                     toastSuccess(t('toast.Success'));
                     onUpdate();
-                }
+                } else toastError('Thất bại');
                 store.dispatch(change_is_loading(false));
             }
         }
@@ -102,6 +105,22 @@ const StatusUpdateDialog: React.FC<StatusUpdateDialogProps> = ({ open, onClose, 
                         {selection === 'SUCCESS' && 'Xác nhận đơn hàng thành công ?'}
                         {selection === 'CANCEL' && 'Xác nhận từ chối đơn hàng này ?'}
                     </Typography>
+                    {selection === 'SUCCESS' && (
+                        <TextField
+                            autoFocus
+                            margin="dense"
+                            id="name"
+                            name="reason"
+                            label="Ghi chú của quản trị viên"
+                            type="text"
+                            value={orderNote}
+                            onChange={(e) => {
+                                setOrderNote(e.target.value);
+                            }}
+                            fullWidth
+                            variant="standard"
+                        />
+                    )}
                     {selection === 'CANCEL' && (
                         <TextField
                             autoFocus

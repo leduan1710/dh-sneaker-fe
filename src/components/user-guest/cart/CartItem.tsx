@@ -75,7 +75,7 @@ const CartItem: React.FC<CartItemProps> = (props) => {
             existingCart[productIndex].quantity += 1;
             localStorage.setItem('listCart', JSON.stringify(existingCart));
         }
-    }
+    };
 
     const handleCheck = () => {
         setCheckInStore(productDetailInStore.productDetailId, !isCheck);
@@ -90,16 +90,6 @@ const CartItem: React.FC<CartItemProps> = (props) => {
         setIsCheckAll(getIsCheck());
     };
 
-    const handleClickBuy = () => {
-        const isAdded = addCheckout(productDetail, quantity);
-        if (isAdded) {
-            if (location.pathname == '/checkout') {
-                window.location.href = '/checkout';
-            } else {
-                nav('/checkout');
-            }
-        }
-    };
     useEffect(() => {
         if (productDetailInStore) {
             setQuantity(productDetailInStore.quantity);
@@ -238,22 +228,6 @@ const CartItem: React.FC<CartItemProps> = (props) => {
                             )}
                         </>
                     </h1>
-                </div>
-                <div className="flex items-center col-span-3 lg:col-span-1 lg:justify-end pr-5 pl-5 mt-2 lg:mt-0">
-                    <Button
-                        onClick={() => {
-                            if (role == typeRole.CTV || role == typeRole.SHOP) {
-                                toggleDrawer(false);
-                                handleClickBuy();
-                            } else {
-                                toggleDrawer(false);
-                                AlertLogin();
-                            }
-                        }}
-                        style={{ width: '100%', textAlign: 'center' }}
-                    >
-                        {t('product.Buy')}
-                    </Button>
                 </div>
             </div>
         </div>

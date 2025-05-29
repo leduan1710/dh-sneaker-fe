@@ -164,9 +164,29 @@ function Row(props: RowProps) {
                 </TableCell>
             </TableRow>
             <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={10}>
+                <TableCell
+                    style={{
+                        paddingBottom: 0,
+                        paddingTop: 0,
+                        borderBottom: '5px solid transparent',
+                        backgroundImage:
+                            'linear-gradient(to right, rgba(63, 120, 181, 0.8), rgba(63, 116, 181, 0.4)), linear-gradient(to right, #ccc, #ccc)',
+                        backgroundPosition: 'bottom',
+                        backgroundSize: '100% 5px',
+                        backgroundRepeat: 'no-repeat',
+                    }}
+                    colSpan={10}
+                >
                     <Collapse in={open} timeout="auto" unmountOnExit>
-                        <Box sx={{ padding: 2, bgcolor: '#f9f9f9', borderRadius: '4px' }}>
+                        <Box
+                            sx={{
+                                marginBottom: 1,
+                                width: '100%',
+                                padding: 2,
+                                bgcolor: 'rgba(199, 232, 255, 0.5)',
+                                borderRadius: '4px',
+                            }}
+                        >
                             <Table size="small" aria-label="product details">
                                 <TableHead>
                                     <TableRow>
@@ -182,10 +202,18 @@ function Row(props: RowProps) {
                                     <TableRow>
                                         <TableCell>{order.customerName}</TableCell>
                                         <TableCell>{order?.customerPhone}</TableCell>
-                                        <TableCell>{order?.addressDetail}</TableCell>
+                                        <TableCell sx={{ maxWidth: '300px' }}>
+                                            {order?.addressDetail}{' '}
+                                            {order?.address ? (
+                                                <>
+                                                    , {order?.address?.ward.WARDS_NAME},{' '}
+                                                    {order?.address?.district.DISTRICT_NAME},{' '}
+                                                    {order?.address?.province.PROVINCE_NAME}
+                                                </>
+                                            ) : null}
+                                        </TableCell>{' '}
                                         <TableCell>{order?.shipMethod}</TableCell>
                                         <TableCell>{order?.deliveryCode}</TableCell>
-
                                         <TableCell>{formatPrice(order.shipFee)}</TableCell>
                                     </TableRow>
                                 </TableBody>
@@ -205,6 +233,12 @@ export default function DetailCommissionTable() {
     const user = useSelector((state: ReducerProps) => state.user);
     const [orders, setOrders] = useState<any[]>([]);
     const [orderDetails, setOrderDetails] = useState<any[]>([]);
+
+    const currentMonth = new Date().getMonth() + 1;
+    const currentYear = new Date().getFullYear();
+
+    const [selectedMonth, setSetlectedMonth] = useState(currentMonth);
+    const [selectedYear, setSetlectedYear] = useState(currentYear);
 
     // Pagination state
     const [page, setPage] = useState(0);
@@ -354,13 +388,13 @@ export default function DetailCommissionTable() {
     const totalCommission = orders.reduce((total, order) => {
         return total + order.commission;
     }, 0);
-const totalQuantity = orders
-    .filter((order) => order.status === 'SUCCESS')
-    .reduce((total, order) => {
-        const orderDetailsForOrder = orderDetails.filter((detail) => detail.orderId === order.id);
-        const filteredDetails = orderDetailsForOrder.filter((detail) => !detail.isJibbitz);
-        return total + filteredDetails.reduce((sum, detail) => sum + detail.quantity, 0);
-    }, 0);
+    const totalQuantity = orders
+        .filter((order) => order.status === 'SUCCESS')
+        .reduce((total, order) => {
+            const orderDetailsForOrder = orderDetails.filter((detail) => detail.orderId === order.id);
+            const filteredDetails = orderDetailsForOrder.filter((detail) => !detail.isJibbitz);
+            return total + filteredDetails.reduce((sum, detail) => sum + detail.quantity, 0);
+        }, 0);
     const calculateBonus = (totalQuantity: number) => {
         if (totalQuantity >= 300) return 700000;
         if (totalQuantity >= 200) return 400000;
@@ -568,7 +602,35 @@ const totalQuantity = orders
                     </Grid>
                 </Grid>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
-                    <FormControl variant="outlined" sx={{ minWidth: 200 }}>
+                    <FormControl variant="outlined" sx={{ minWidth: 120 }}>
+                        <InputLabel>Tháng</InputLabel>
+                        <Select
+                            value={selectedMonth}
+                            onChange={(e) => setSetlectedMonth(Number(e.target.value))}
+                            label={'Năm'}
+                        >
+                            {Array.from({ length: 12 }, (_, index) => (
+                                <MenuItem key={index + 1} value={index + 1}>
+                                    {`Tháng ${index + 1}`}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <FormControl variant="outlined" sx={{ minWidth: 120 }}>
+                        <InputLabel>Năm</InputLabel>
+                        <Select
+                            value={selectedYear}
+                            onChange={(e) => setSetlectedYear(Number(e.target.value))}
+                            label={'Năm'}
+                        >
+                            {Array.from({ length: 2 }, (_, index) => (
+                                <MenuItem key={currentYear - index} value={currentYear - index}>
+                                    {currentYear - index}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <FormControl variant="outlined" sx={{ minWidth: 180 }}>
                         <InputLabel>Tên CTV</InputLabel>
                         <Select value={ctvFilter} onChange={handleCtvChange} label="Tên CTV">
                             <MenuItem value="ALL">{t('orther.All')}</MenuItem>
@@ -579,7 +641,7 @@ const totalQuantity = orders
                             ))}
                         </Select>
                     </FormControl>
-                    <FormControl variant="outlined" sx={{ minWidth: 200 }}>
+                    <FormControl variant="outlined" sx={{ minWidth: 180 }}>
                         <InputLabel>Trạng thái</InputLabel>
                         <Select value={statusFilter} onChange={handleStatusChange} label="Trạng thái">
                             <MenuItem value="ALL">{t('orther.All')}</MenuItem>
@@ -590,7 +652,7 @@ const totalQuantity = orders
                         </Select>
                     </FormControl>
 
-                    <FormControl variant="outlined" sx={{ minWidth: 200 }}>
+                    <FormControl variant="outlined" sx={{ minWidth: 180 }}>
                         <InputLabel>Hình thức ship</InputLabel>
                         <Select value={shipMethodFilter} onChange={handleShipMethodChange} label="Hình thức ship">
                             <MenuItem value="ALL">{t('orther.All')}</MenuItem>
@@ -604,7 +666,7 @@ const totalQuantity = orders
                         <Input
                             value={filterId}
                             className="border border-gray-300 rounded-lg p-1"
-                            sx={{ display: 'block', width: 350, marginRight: 2 }}
+                            sx={{ display: 'block', width: 270, marginRight: 2 }}
                             placeholder={'Tìm kiếm'}
                             onChange={(e) => {
                                 filterSpecialInput(e.target.value, setFilterId);

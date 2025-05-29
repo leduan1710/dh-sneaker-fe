@@ -187,9 +187,34 @@ function Row(props: RowProps) {
                 </TableCell>
             </TableRow>
             <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
+                <TableCell
+                    style={{
+                        paddingBottom: 0,
+                        paddingTop: 0,
+                        borderBottom: '5px solid transparent',
+                        backgroundImage:
+                            'linear-gradient(to right, rgba(63, 120, 181, 0.8), rgba(63, 116, 181, 0.4)), linear-gradient(to right, #ccc, #ccc)',
+                        backgroundPosition: 'bottom',
+                        backgroundSize: '100% 5px',
+                        backgroundRepeat: 'no-repeat',
+                    }}
+                    colSpan={7}
+                >
                     <Collapse in={open} timeout="auto" unmountOnExit>
-                        <Box sx={{ padding: 2, bgcolor: '#f9f9f9', borderRadius: '4px' }}>
+                        <Box
+                            sx={{
+                                marginBottom: 1,
+                                padding: 2,
+                                bgcolor: 'rgba(199, 232, 255, 0.5)',
+                                borderRadius: '4px',
+                            }}
+                        >
+                            {order.adminNote && (
+                                <Typography variant="body1" gutterBottom component="div">
+                                    <strong>Ghi chú:</strong> {order.adminNote}
+                                </Typography>
+                            )}
+
                             <Table size="small" aria-label="product details">
                                 <TableHead>
                                     <TableRow>
@@ -205,7 +230,16 @@ function Row(props: RowProps) {
                                     <TableRow>
                                         <TableCell>{order.customerName}</TableCell>
                                         <TableCell>{order?.customerPhone}</TableCell>
-                                        <TableCell>{order?.addressDetail}</TableCell>
+                                        <TableCell sx={{ maxWidth: '300px' }}>
+                                            {order?.addressDetail}{' '}
+                                            {order?.address ? (
+                                                <>
+                                                    , {order?.address?.ward.WARDS_NAME},{' '}
+                                                    {order?.address?.district.DISTRICT_NAME},{' '}
+                                                    {order?.address?.province.PROVINCE_NAME}
+                                                </>
+                                            ) : null}
+                                        </TableCell>
                                         <TableCell>{order?.shipMethod}</TableCell>
                                         <TableCell>{order?.deliveryCode}</TableCell>
 
@@ -413,7 +447,7 @@ export default function OrderTable() {
                         </IconButton>
                     </Box>
                 </Box>
-                <Table aria-label="collapsible table">
+                <Table stickyHeader aria-label="collapsible table">
                     <TableHead>
                         <TableRow>
                             <TableCell>Mã đơn hàng</TableCell>

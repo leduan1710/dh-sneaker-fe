@@ -10,6 +10,8 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import CheckIcon from '@mui/icons-material/Check';
+import AddIcon from '@mui/icons-material/Add';
+import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import { useTranslation } from 'react-i18next';
 import { useSelector, useStore } from 'react-redux';
 import { ReducerProps } from '../../../../reducers/ReducersProps';
@@ -31,11 +33,86 @@ import {
     DialogContent,
     DialogActions,
     DialogContentText,
+    TextField,
 } from '@mui/material';
 import { filterSpecialInput, formatPrice, toastError, toastSuccess } from '../../../../untils/Logic';
 import TablePagination from '@mui/material/TablePagination';
 import { useLocation } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
+
+interface NoteDialogProps {
+    onClose: () => void;
+    open: boolean;
+    commission?: any;
+    onUpdate: () => void;
+}
+
+const NoteDialog: React.FC<NoteDialogProps> = (props) => {
+    const { t } = useTranslation();
+    const { onClose, open, commission, onUpdate } = props;
+    const [commissionNote, setCommissionNote] = useState(commission?.note);
+
+    const handleClose = () => {
+        onClose();
+    };
+    const handleConfirm = async () => {
+        try {
+            const updatedCommission = { ...commission, note: commissionNote };
+
+            const res = await PostApi(`/admin/update/commission-note`, localStorage.getItem('token'), {
+                commission: updatedCommission,
+            });
+
+            if (res.data.message === 'Success') {
+                toastSuccess('Thành công');
+                onUpdate();
+            } else toastError('Thất bại');
+        } catch (error) {
+            console.error('Failed to delete :', error);
+        }
+        onClose();
+    };
+
+    return (
+        <React.Fragment>
+            <Dialog
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="dialog-title"
+                aria-describedby="dialog-description"
+                maxWidth={'xs'}
+                fullWidth={true}
+            >
+                <DialogTitle sx={{ textTransform: 'capitalize' }} id="dialog-title">
+                    Ghi chú hoa hồng
+                </DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        required
+                        margin="dense"
+                        id="name"
+                        name="note"
+                        label="Nhập ghi chú"
+                        type="text"
+                        value={commissionNote}
+                        onChange={(e) => {
+                            setCommissionNote(e.target.value);
+                        }}
+                        fullWidth
+                        variant="standard"
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose}>Hủy</Button>
+                    <Button onClick={handleConfirm} autoFocus>
+                        Xác nhận
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </React.Fragment>
+    );
+};
 
 interface ConfirmDialogProps {
     onClose: () => void;
@@ -102,7 +179,8 @@ export default function CommissionStatisticTable() {
     const user = useSelector((state: ReducerProps) => state.user);
     const [commissions, setCommissions] = useState<any[]>([]);
     const [selectedCommission, setSelectedCommission] = useState<any>();
-
+    const [openCreate, setOpenCreate] = useState(false);
+    const [openEdit, setOpenEdit] = useState(false);
     // Pagination state
     const [page, setPage] = useState(0);
     const [limit, setLimit] = useState(5);
@@ -123,6 +201,13 @@ export default function CommissionStatisticTable() {
         setOpenConfirm(false);
     };
 
+    const handleClickOpenCreate = () => {
+        setOpenCreate(true);
+    };
+    const handleCloseCreate = () => {
+        setOpenCreate(false);
+    };
+
     const getDataCommission = async () => {
         store.dispatch(change_is_loading(true));
         const res = await GetApi(
@@ -139,7 +224,7 @@ export default function CommissionStatisticTable() {
 
     useEffect(() => {
         if (user) getDataCommission();
-    }, [user, selectedMonth]);
+    }, [selectedMonth, selectedYear]);
 
     const handlePageChange = (event: unknown, newPage: number) => {
         setPage(newPage);
@@ -184,7 +269,7 @@ export default function CommissionStatisticTable() {
     return (
         <>
             <TableContainer className="relative" component={Paper}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', padding: 2 }}>
                     <FormControl variant="outlined" sx={{ minWidth: 120, marginRight: 2 }}>
                         <InputLabel>Chọn tháng</InputLabel>
                         <Select
@@ -199,21 +284,20 @@ export default function CommissionStatisticTable() {
                             ))}
                         </Select>
                     </FormControl>
-
-                    {/* <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Input
-                            value={filterId}
-                            className="border border-gray-300 rounded-lg p-1"
-                            sx={{ display: 'block', width: 300, marginRight: 2 }} // Khoảng cách giữa input và biểu tượng tìm kiếm
-                            placeholder={t('action.EnterID')}
-                            onChange={(e) => {
-                                filterSpecialInput(e.target.value, setFilterId);
-                            }}
-                        />
-                        <IconButton color="primary">
-                            <SearchIcon />
-                        </IconButton>
-                    </Box> */}
+                    <FormControl variant="outlined" sx={{ minWidth: 120, marginRight: 2 }}>
+                        <InputLabel>Chọn năm</InputLabel>
+                        <Select
+                            value={selectedYear}
+                            onChange={(e) => setSetlectedYear(Number(e.target.value))}
+                            label={t('order.Month')}
+                        >
+                            {Array.from({ length: 2 }, (_, index) => (
+                                <MenuItem key={currentYear - index} value={currentYear - index}>
+                                    {currentYear - index}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                 </Box>
                 <Table aria-label="collapsible table">
                     <TableHead>
@@ -223,6 +307,7 @@ export default function CommissionStatisticTable() {
                             <TableCell>Thưởng</TableCell>
                             <TableCell>Tổng cộng</TableCell>
                             <TableCell>Trạng thái</TableCell>
+                            <TableCell>Ghi chú</TableCell>
                             <TableCell align="right">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
@@ -248,26 +333,48 @@ export default function CommissionStatisticTable() {
                                             {commission.isPaid ? 'Đã thanh toán' : 'Chưa thanh toán'}
                                         </Box>
                                     </TableCell>
-                                    {commission.isPaid ? <></> : <TableCell align="right">
-                                        <Tooltip title={'Xác nhận đã thanh toán'} arrow>
+                                    <TableCell sx={{ maxWidth: '300px' }}>{commission.note}</TableCell>
+
+                                    <TableCell align="right">
+                                        {commission.isPaid ? (
+                                            <></>
+                                        ) : (
+                                            <Tooltip title={'Xác nhận đã thanh toán'} arrow>
+                                                <IconButton
+                                                    sx={{
+                                                        '&:hover': {
+                                                            background: theme.colors.primary.lighter,
+                                                        },
+                                                        color: theme.palette.success.main,
+                                                    }}
+                                                    color="inherit"
+                                                    size="small"
+                                                    onClick={() => {
+                                                        handleClickOpenConfirmDialog();
+                                                        setSelectedCommission(commission);
+                                                    }}
+                                                >
+                                                    <CheckIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        )}
+                                        <Tooltip title={'Ghi chú'} arrow>
                                             <IconButton
                                                 sx={{
-                                                    '&:hover': {
-                                                        background: theme.colors.primary.lighter,
-                                                    },
-                                                    color: theme.palette.success.main,
+                                                    '&:hover': { background: theme.colors.primary.lighter },
+                                                    color: theme.palette.primary.main,
                                                 }}
                                                 color="inherit"
                                                 size="small"
                                                 onClick={() => {
-                                                    handleClickOpenConfirmDialog();
+                                                    handleClickOpenCreate();
                                                     setSelectedCommission(commission);
                                                 }}
                                             >
-                                                <CheckIcon fontSize="small" />
+                                                <EditTwoToneIcon fontSize="small" />
                                             </IconButton>
                                         </Tooltip>
-                                    </TableCell>}
+                                    </TableCell>
                                 </TableRow>
                             );
                         })}
@@ -277,6 +384,12 @@ export default function CommissionStatisticTable() {
                     open={openConfirm}
                     onClose={handleCloseConfirmDialog}
                     commissionId={selectedCommission?.id}
+                    onUpdate={getDataCommission}
+                />
+                <NoteDialog
+                    open={openCreate}
+                    onClose={handleCloseCreate}
+                    commission={selectedCommission}
                     onUpdate={getDataCommission}
                 />
                 <TablePagination

@@ -140,7 +140,7 @@ export const toastWarning = (text: string) => {
     toast.warning(text, { position: 'top-right', autoClose: 3000, pauseOnHover: false, closeOnClick: true });
 };
 
-export const addToListCartStore = (productDetailId: string, quantity: number, productDetail: any, isJibbitz: boolean) => {
+export const addToListCartStore = (productDetailId: string, quantity: number, productDetail: any, isCheck: boolean, isJibbitz: boolean) => {
     const existingCart = JSON.parse(localStorage.getItem('listCart') || '[]');
     const productIndex = existingCart.findIndex(
         (productDetail: any) => productDetail.productDetailId === productDetailId,
@@ -155,7 +155,7 @@ export const addToListCartStore = (productDetailId: string, quantity: number, pr
     } else {
         localStorage.setItem(
             'listCart',
-            JSON.stringify([...existingCart, { productDetailId: productDetailId, quantity: quantity, isCheck: false, isJibbitz: isJibbitz }]),
+            JSON.stringify([...existingCart, { productDetailId: productDetailId, quantity: quantity, isCheck: isCheck, isJibbitz: isJibbitz }]),
         );
     }
 };
@@ -265,10 +265,10 @@ export function formatNumber(num: number) {
     }
 }
 
-export const addCheckout = (productDetail: any, quantity: number) => {
+export const addCheckout = (productDetail: any, quantity: number, isJibbitz: boolean) => {
     try {
         sessionStorage.setItem('checkout', '');
-        sessionStorage.setItem('checkout', JSON.stringify([{ productDetailId: productDetail.id, quantity: quantity }]));
+        sessionStorage.setItem('checkout', JSON.stringify([{ productDetailId: productDetail.id, quantity: quantity, isJibbitz: isJibbitz }]));
         return true;
     } catch {
         return false;

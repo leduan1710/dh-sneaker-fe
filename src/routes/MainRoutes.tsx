@@ -109,7 +109,7 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                 </BrowserRouter>
             </>
         );
-    } else if (role === typeRole.CTV) {
+    } else if (role === typeRole.CTV || typeRole.ADMIN_CTV) {
         return (
             <>
                 <BrowserRouter>

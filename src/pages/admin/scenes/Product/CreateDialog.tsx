@@ -78,7 +78,7 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
     const [selectImage, setSelectImage] = useState<File | null>(null);
     const [uploadedImages, setUploadedImages] = useState<File[]>([]);
 
-    const [typeByCategories, setTypeByCategory] = useState<any>([]);
+    const [typeByCategory, setTypeByCategory] = useState<any>([]);
     const [sizeByCategory, setSizeByCategory] = useState<any>([]);
     const [colorByCategory, setColorByCategory] = useState<any>([]);
     const [styleByCategory, setStyleByCategory] = useState<any>([]);
@@ -768,6 +768,8 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
                                                         <TextField
                                                             label="Nhập tên kiểu dáng mới"
                                                             value={otherStyleName}
+                                                            error={!!styleError}
+                                                            helperText={styleError}
                                                             onChange={(e) => setOtherStyleName(e.target.value)}
                                                             sx={{ width: '150px', marginRight: '10px' }}
                                                         />
@@ -857,7 +859,7 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
                                                             onChange={(e) => handleChangeSelect(e, setTypeIdSelected)}
                                                             displayEmpty
                                                         >
-                                                            {typeByCategories.map((type: any) => (
+                                                            {typeByCategory.map((type: any) => (
                                                                 <MenuItem value={type.id} key={type.id}>
                                                                     {type.name}
                                                                 </MenuItem>
@@ -867,27 +869,27 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
                                                             </MenuItem>
                                                         </Select>
                                                     </FormControl>
+                                                    {typeIdSelect === 'other' && (
+                                                        <Box
+                                                            sx={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                            }}
+                                                        >
+                                                            <TextField
+                                                                label="Nhập tên loại mới"
+                                                                value={otherTypeName}
+                                                                onChange={(e) => setOtherTypeName(e.target.value)}
+                                                                error={!!typeError}
+                                                                helperText={typeError}
+                                                                sx={{ width: '150px', marginRight: '10px' }}
+                                                            />
+                                                            <Button variant="contained" onClick={handleAddNewType}>
+                                                                Thêm
+                                                            </Button>
+                                                        </Box>
+                                                    )}
                                                 </Stack>
-                                                {typeIdSelect === 'other' && (
-                                                    <Box
-                                                        sx={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                        }}
-                                                    >
-                                                        <TextField
-                                                            label="Nhập tên loại mới"
-                                                            value={otherTypeName}
-                                                            onChange={(e) => setOtherTypeName(e.target.value)}
-                                                            error={!!typeError}
-                                                            helperText={typeError}
-                                                            sx={{ width: '150px', marginRight: '10px' }}
-                                                        />
-                                                        <Button variant="contained" onClick={handleAddNewType}>
-                                                            Thêm
-                                                        </Button>
-                                                    </Box>
-                                                )}
                                             </>
                                         ) : null}
                                     </CardContent>

@@ -106,11 +106,13 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
             return false;
         }
     };
+
     const [isCheckAll, setIsCheckAll] = useState<boolean>(getIsCheck());
 
     //
     useEffect(() => {
         if (localStorage.getItem('listCart')) getDataInCart();
+        getTotalPriceAndItem();
     }, [numberCart]);
     useEffect(() => {
         getTotalPriceAndItem();
@@ -121,9 +123,7 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
             getTotalPriceAndItem();
         }
     }, [open]);
-    useEffect(() => {
-        getTotalPriceAndItem();
-    }, [numberCart]);
+
     const DrawerList = (
         <Box sx={{ width: '100%' }} role="presentation">
             <div className="pt-3 pl-3 pb-3 flex justify-start items-center bg-general sticky top-0 right-0 left-0 z-10">
@@ -142,42 +142,46 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
                     {t('homepage.Exit')}
                 </span>
             </div>
-            {listCart.length > 0 ? <div>
-                <Checkbox
-                    checked={isCheckAll}
-                    onChange={() => {
-                        if (isCheckAll) {
-                            const listCart = JSON.parse(localStorage.getItem('listCart') || '[]');
-                            listCart.map((item: any) => (item.isCheck = false));
-                            localStorage.setItem('listCart', JSON.stringify(listCart));
-                        }
-                        setIsCheckAll((prev) => !prev);
-                    }}
-                />
-            </div> : <>
-                    <Box
-                    sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: 'calc(100vh - 80px)', // Điều chỉnh chiều cao cho phù hợp
-                        padding: 2,
-                    }}
-                >
-                    <Avatar
-                        sx={{ minHeight: 200, width: "auto", marginBottom: 2 }}
-                        src={require('../../../static/cart-empty.jpg')}
+            {listCart.length > 0 ? (
+                <div>
+                    <Checkbox
+                        checked={isCheckAll}
+                        onChange={() => {
+                            if (isCheckAll) {
+                                const listCart = JSON.parse(localStorage.getItem('listCart') || '[]');
+                                listCart.map((item: any) => (item.isCheck = false));
+                                localStorage.setItem('listCart', JSON.stringify(listCart));
+                            }
+                            setIsCheckAll((prev) => !prev);
+                        }}
                     />
-                    <Typography variant="h6" align="center">
-                        “Hổng” có gì trong giỏ hết
-                    </Typography>
-                    <Typography variant="body2" align="center">
-                        Về trang cửa hàng để chọn mua sản phẩm bạn nhé!!
-                    </Typography>
-                </Box>
-            </>}
-            
+                </div>
+            ) : (
+                <>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: 'calc(100vh - 80px)', // Điều chỉnh chiều cao cho phù hợp
+                            padding: 2,
+                        }}
+                    >
+                        <Avatar
+                            sx={{ minHeight: 200, width: 'auto', marginBottom: 2 }}
+                            src={require('../../../static/cart-empty.jpg')}
+                        />
+                        <Typography variant="h6" align="center">
+                            “Hổng” có gì trong giỏ hết
+                        </Typography>
+                        <Typography variant="body2" align="center">
+                            Về trang cửa hàng để chọn mua sản phẩm bạn nhé!!
+                        </Typography>
+                    </Box>
+                </>
+            )}
+
             <div style={{ minHeight: 1000 }} className="mt-2 mb-6 ml-9 mr-9 relative ">
                 <AnimatePresence>
                     {listItemInCart.length > 0
@@ -229,11 +233,10 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
                             </div>
                             <Button
                                 onClick={() => {
-                                    if (role == typeRole.CTV || role == typeRole.SHOP) {
+                                    if (role == typeRole.CTV || role == typeRole.ADMIN_CTV) {
                                         handleBuy();
                                     } else {
                                         toggleDrawer(false);
-
                                         AlertLogin();
                                     }
                                 }}

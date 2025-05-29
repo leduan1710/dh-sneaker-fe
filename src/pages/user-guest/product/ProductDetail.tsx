@@ -53,13 +53,16 @@ const ProductDetail: React.FC = () => {
 
     const handleAddToCart = () => {
         const isJibbitz = product?.categoryId === '67b81eb6fb30030990a31918';
-        addToListCartStore(selectedProductDetail.id, quantity, selectedProductDetail, isJibbitz);
+        addToListCartStore(selectedProductDetail.id, quantity, selectedProductDetail, false, isJibbitz);
         store.dispatch(set_number_cart(quantity));
         store.dispatch(add_list_item_in_cart(selectedProductDetail));
         toastSuccess('Thêm vào giỏ hàng thành công');
     };
     const handleBuyNow = () => {
-        addCheckout(selectedProductDetail, quantity);
+        const isJibbitz = product?.categoryId === '67b81eb6fb30030990a31918';
+        addToListCartStore(selectedProductDetail.id, quantity, selectedProductDetail, true, isJibbitz);
+        store.dispatch(set_number_cart(quantity));
+        store.dispatch(add_list_item_in_cart(selectedProductDetail));
         nav('/checkout');
     };
 

@@ -26,8 +26,8 @@ import axios from 'axios';
 import { formatPrice, formatTitle, removeItemFromCart, toastSuccess, toastWarning } from '../../../untils/Logic';
 import { useSelector, useStore } from 'react-redux';
 import { ReducerProps } from '../../../reducers/ReducersProps';
-import { HOST_BE } from '../../../common/Common';
-import { PostApi } from '../../../untils/Api';
+import { HOST_BE, typeRole } from '../../../common/Common';
+import { GetApi, PostApi } from '../../../untils/Api';
 import { useNavigate } from 'react-router-dom';
 import { change_is_loading } from '../../../reducers/Actions';
 
@@ -38,6 +38,8 @@ const Input = styled('input')({
 const Checkout: React.FC = () => {
     const store = useStore();
     const user = useSelector((state: ReducerProps) => state.user);
+    const role = useSelector((state: ReducerProps) => state.role);
+
     const navigate = useNavigate();
     const listItemInCart = useSelector((state: ReducerProps) => state.listItemInCart);
     const listCart = JSON.parse(localStorage.getItem('listCart') || '[]');
@@ -56,6 +58,9 @@ const Checkout: React.FC = () => {
     const [customerPhone, setCustomerPhone] = useState('');
     const [customerAddress, setCustomerAddress] = useState('');
 
+    const [ctv, setCTV] = useState<any>(null);
+    const [ctvList, setCTVList] = useState<any>([]);
+
     const [province, setProvince] = useState<any>(null);
     const [provinceList, setProvinceList] = useState<any>([]);
     const [district, setDistrict] = useState<any>(null);
@@ -69,6 +74,12 @@ const Checkout: React.FC = () => {
         setShippingMethod(event.target.value);
     };
 
+    const getDataCTV = async () => {
+        const resCTV = await GetApi('/user/get/ctvList', localStorage.getItem('token'));
+        if (resCTV.data.message == 'Success') {
+            setCTVList(resCTV.data.ctvList);
+        }
+    };
     const getDataProvince = async () => {
         const resProvince = await axios('https://partner.viettelpost.vn/v2/categories/listProvinceById?provinceId=-1');
         if (resProvince.data.status == 200) {
@@ -156,6 +167,18 @@ const Checkout: React.FC = () => {
             const formData = new FormData();
 
             // Thêm thông tin đơn hàng vào FormData
+            if (role === typeRole.ADMIN_CTV) {
+                if (ctv) {
+                    formData.append('userId', ctv.id);
+                    formData.append('ctvName', ctv.name);
+                } else {
+                    toastWarning('Cần chọn CTV');
+                }
+            } else {
+                formData.append('userId', user.id);
+                formData.append('ctvName', user.name);
+            }
+
             formData.append('userId', user.id);
             formData.append('ctvName', user.name);
             formData.append('ctvNote', orderNote);
@@ -198,8 +221,17 @@ const Checkout: React.FC = () => {
             const formData = new FormData();
 
             // Thêm thông tin đơn hàng vào FormData
-            formData.append('userId', user.id);
-            formData.append('ctvName', user.name);
+            if (role === typeRole.ADMIN_CTV) {
+                if (ctv) {
+                    formData.append('userId', ctv.id);
+                    formData.append('ctvName', ctv.name);
+                } else {
+                    toastWarning('Cần chọn CTV');
+                }
+            } else {
+                formData.append('userId', user.id);
+                formData.append('ctvName', user.name);
+            }
             formData.append('ctvNote', orderNote);
             formData.append('customerName', customerName);
             formData.append('customerPhone', customerPhone);
@@ -260,6 +292,7 @@ const Checkout: React.FC = () => {
         setTotalAmount(total);
     }, [listItemInCart, listCart]);
     useEffect(() => {
+        getDataCTV();
         getDataProvince();
     }, []);
     useEffect(() => {
@@ -269,13 +302,36 @@ const Checkout: React.FC = () => {
         getDataWard();
     }, [district]);
 
-    console.log(listItemInCart);
     return (
         <Grid container spacing={3} sx={{ mt: { md: '160px', xs: '183px' }, mb: 4, px: { md: 16, xs: 2 } }}>
             <Grid item xs={12} md={6} sx={{ overflow: { md: 'auto' }, maxHeight: { md: '100vh' } }}>
                 <Typography variant="h4" gutterBottom sx={{ mb: 1, fontSize: 22 }}>
                     Thông tin đơn hàng
                 </Typography>
+                {role === typeRole.ADMIN_CTV && (
+                    <FormControl fullWidth sx={{ mb: 1 }}>
+                        <InputLabel>Chọn CTV</InputLabel>
+                        <Select
+                            value={ctv.id}
+                            onChange={(e) => {
+                                const selectedCTV = ctvList.find((c: any) => c.id === e.target.value);
+                                setCTV(selectedCTV);
+                            }}
+                            sx={{
+                                '& .MuiOutlinedInput-notchedOutline': {
+                                    borderRadius: '3px',
+                                },
+                            }}
+                            label={'Chọn CTV'}
+                        >
+                            {ctvList.map((ctv: any) => (
+                                <MenuItem key={ctv.id} value={ctv.id}>
+                                    {ctv.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                )}
 
                 <TextField
                     label="Tên Khách Hàng"
@@ -361,49 +417,7 @@ const Checkout: React.FC = () => {
                         </IconButton>
                     </label>
                 </Stack>
-                {/* <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                    {selectImage && (
-                        <Avatar
-                            variant="square"
-                            sx={{ height: { md: 200, xs: 250 }, width: 'auto' }}
-                            src={selectImage ? URL.createObjectURL(selectImage) : undefined}
-                        />
-                    )}
-                    {!selectImage && (
-                        <IconButton
-                            component="span"
-                            disabled
-                            sx={{ width: '100px', height: '100px', border: '1px dashed grey' }}
-                        >
-                            <AddPhotoAlternateIcon fontSize="large" />
-                        </IconButton>
-                    )}
-                    <label htmlFor="image" style={{ position: 'absolute', bottom: '8px', right: '8px' }}>
-                        <IconButton component="span" color="primary">
-                            <UploadTwoToneIcon />
-                        </IconButton>
-                    </label>
-                    <Input
-                        required
-                        id="image"
-                        name="image"
-                        type="file"
-                        accept="image/*"
-                        style={{ display: 'none' }}
-                        onChange={(e: any) => {
-                            const file = e.target.files[0];
-                            console.log(file);
-                            if (
-                                file &&
-                                (file.type === 'image/png' || file.type === 'image/jpeg' || file.type === 'image/webp')
-                            ) {
-                                setSelectImage(file);
-                            } else {
-                                toastWarning('File type is not allowed');
-                            }
-                        }}
-                    />
-                </Box> */}
+
                 <Divider sx={{ my: 2 }}></Divider>
                 <Typography variant="h4" gutterBottom sx={{ mb: 1, fontSize: 22 }}>
                     Giao hàng

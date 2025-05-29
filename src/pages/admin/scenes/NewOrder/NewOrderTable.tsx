@@ -40,6 +40,7 @@ import {
     CircularProgress,
     Input,
     Button,
+    Stack,
 } from '@mui/material';
 import { filterSpecialInput, formatPrice, shortedString } from '../../../../untils/Logic';
 import TablePagination from '@mui/material/TablePagination';
@@ -144,8 +145,28 @@ function Row(props: RowProps) {
                 </TableCell>
             </TableRow>
             <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
-                    <Box sx={{ margin: 1, width: '100%', padding: 2, bgcolor: 'rgba(199, 232, 255, 0.87)', borderRadius: '4px' }}>
+                <TableCell
+                    style={{
+                        paddingBottom: 0,
+                        paddingTop: 0,
+                        borderBottom: '5px solid transparent',
+                        backgroundImage:
+                            'linear-gradient(to right, rgba(63, 120, 181, 0.8), rgba(63, 116, 181, 0.4)), linear-gradient(to right, #ccc, #ccc)',
+                        backgroundPosition: 'bottom',
+                        backgroundSize: '100% 5px',
+                        backgroundRepeat: 'no-repeat',
+                    }}
+                    colSpan={8}
+                >
+                    <Box
+                        sx={{
+                            marginBottom: 1,
+                            width: '100%',
+                            padding: 2,
+                            bgcolor: 'rgba(199, 232, 255, 0.5)',
+                            borderRadius: '4px',
+                        }}
+                    >
                         <Collapse in={open} timeout="auto" unmountOnExit>
                             <Typography variant="body1" gutterBottom component="div">
                                 <strong>Tên khách:</strong> {order.customerName}
@@ -165,7 +186,7 @@ function Row(props: RowProps) {
 
                             <Typography variant="body1" gutterBottom component="div">
                                 <strong>Ghi chú:</strong> {order.ctvNote}
-                                {order.noteImage && (
+                                {order.noteImageList.length > 0 && (
                                     <span
                                         style={{ cursor: 'pointer', color: 'blue', marginLeft: '10px' }}
                                         onClick={handleToggleImage}
@@ -175,17 +196,17 @@ function Row(props: RowProps) {
                                 )}
                             </Typography>
 
-                            {showImage && order.noteImage && (
-                                <Avatar
-                                    variant="square"
-                                    src={
-                                        order.noteImage.startsWith('uploads')
-                                            ? `${HOST_BE}/${order.noteImage}`
-                                            : order.noteImage
-                                    }
-                                    alt="Ghi chú"
-                                    style={{ maxWidth: '100%', height: 'auto', minWidth: '150px' }}
-                                />
+                            {showImage && order.noteImageList.length > 0 && (
+                                <Stack direction="row" spacing={1}>
+                                    {order.noteImageList.map((image: string, index: number) => (
+                                        <Avatar
+                                            variant="square"
+                                            src={image.startsWith('uploads') ? `${HOST_BE}/${image}` : image}
+                                            alt="Ghi chú"
+                                            style={{ maxWidth: '100%', height: 'auto', minWidth: '150px' }}
+                                        />
+                                    ))}
+                                </Stack>
                             )}
                         </Collapse>
                         <Table size="small" aria-label="product details">

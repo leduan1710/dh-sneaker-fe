@@ -142,17 +142,6 @@ const InfoUser: React.FC<InfoUserProps> = (props) => {
         }
     };
     //
-    const toggleSex = () => {
-        if (!isNotEdit) {
-            setSex((prev) => {
-                if (prev == 'male') {
-                    return 'female';
-                } else {
-                    return 'male';
-                }
-            });
-        }
-    };
     const handleChangePassword = async () => {
         if (passwordNew != rePasswordNew) {
             toastWarning(t('auth.Password and Re-password do not match'));
@@ -170,9 +159,7 @@ const InfoUser: React.FC<InfoUserProps> = (props) => {
             toastWarning(t('auth.IncorrectPassword'));
         }
     };
-    const handleClickAddress = () => {
-        nav('/user/address');
-    };
+
     const handleUpdateImage = async () => {
         store.dispatch(change_is_loading(true));
 
@@ -307,7 +294,7 @@ const InfoUser: React.FC<InfoUserProps> = (props) => {
                     </div>
                     <div className="col-span-4 lg:col-span-3 mt-12 lg:mt-0 ">
                         <h1 className="text-2xl font-bold">{t('user.Profile')}</h1>
-                        <div className="bg-white p-6 rounded-lg box-shadow mt-4 relative border-light">
+                        <div className="bg-white p-6 rounded-lg box-shadow mt-4 relative">
                             <div className="absolute top-3 right-3 cursor-pointer rounded-full p-2 ">
                                 {isNotEdit ? (
                                     <EditIcon onClick={toggleIsNotEdit} />
@@ -444,75 +431,13 @@ const InfoUser: React.FC<InfoUserProps> = (props) => {
                                         </h1>
                                         <h1 className="p-2 font-bold flex  items-center overload-hidden"> {email}</h1>
                                     </div>
-                                
-                                    <span className="grid grid-cols-3 mt-6">
-                                        <h1 className="p-2 font-normal flex justify-start  items-center text-sm xl:text-lg">
-                                            {t('user.Birthday')}
-                                        </h1>
-                                        <div className="w-64">
-                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                <DemoContainer components={['DatePicker', 'DatePicker']}>
-                                                    <DatePicker
-                                                        disabled={isNotEdit}
-                                                        value={birthday}
-                                                        onChange={(newValue: any) => setBirthday(newValue)}
-                                                    />
-                                                </DemoContainer>
-                                            </LocalizationProvider>
-                                        </div>
-                                    </span>
                                 </div>
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="col-span-2 lg:col-span-1">
-                                <div className="grid grid-cols-3 flex justify-center items-center mt-6 box-shadow rounded pt-12 pb-12 p-6 relative">
-                                    <div className="col-span-2">
-                                        <div className="flex items-center">
-                                            <LocalPhoneIcon /> &nbsp; &nbsp;
-                                            <div className="text-xl">{t('user.Phone')}</div>
-                                        </div>
-                                        {!isShowChangePhone ? (
-                                            phone == null ? (
-                                                <div className="ml-3 mt-3">----------</div>
-                                            ) : (
-                                                <div className="ml-3 mt-3">{phone}</div>
-                                            )
-                                        ) : (
-                                            <div className="pl-4 pr-4">
-                                                <Input
-                                                    value={phone}
-                                                    onChange={(e) => filterInputNumber(e.target.value, setPhone)}
-                                                />
-                                            </div>
-                                        )}
-                                    </div>
-                                    {!isShowChangePhone ? (
-                                        <div className="cursor-pointer absolute top-3 right-5">
-                                            <EditIcon onClick={toggleIsShowPhone} />
-                                        </div>
-                                    ) : (
-                                        <div className="cursor-pointer absolute top-3 right-5">
-                                            <SaveIcon onClick={handleChangePhone} />
-                                            <div className="mt-3">
-                                                <ArrowBackIcon onClick={toggleIsShowPhone} />
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="grid grid-cols-3 flex justify-center items-center mt-6 box-shadow rounded pt-12 pb-12 p-6 relative">
-                                    <div className="col-span-2">
-                                        <div className="flex items-center">
-                                            <FestivalIcon /> &nbsp; &nbsp;
-                                            <div className="text-xl">{t('user.Address')}</div>
-                                        </div>
+                                
 
-                                        <div className="ml-3 mt-3">----------</div>
-                                    </div>
-                                    <div className="absolute right-5 top-3 cursor-pointer">
-                                        <EditIcon onClick={handleClickAddress} />
-                                    </div>
-                                </div>
                                 {localStorage.getItem('oauth2') == 'false' ? (
                                     <div className="grid grid-cols-3 flex justify-center items-center mt-6 box-shadow rounded pt-12 pb-12 p-6 relative">
                                         {!isShowChangePassword ? (
@@ -520,7 +445,7 @@ const InfoUser: React.FC<InfoUserProps> = (props) => {
                                                 <div className="col-span-2">
                                                     <div className="flex items-center">
                                                         <SecurityIcon /> &nbsp; &nbsp;
-                                                        <div className="text-xl">{t('user.Secure')}</div>
+                                                        <div className="text-xl">{"Mật khẩu"}</div>
                                                     </div>
                                                     <div className="ml-3 mt-3"> ***********</div>
                                                 </div>
@@ -533,14 +458,14 @@ const InfoUser: React.FC<InfoUserProps> = (props) => {
                                                 <div className="col-span-2">
                                                     <div className="flex items-center">
                                                         <SecurityIcon /> &nbsp; &nbsp;
-                                                        <div className="text-xl">{t('user.Secure')}</div>
+                                                        <div className="text-xl">{"Mật khẩu"}</div>
                                                     </div>
-                                                    <div className="mt-3">{t('auth.Password')}</div>
+                                                    <div className="mt-3">{"Đổi mật khẩu"}</div>
                                                     <div>
                                                         <span className="w-full relative">
                                                             <Input
                                                                 type={isHidePassword ? 'password' : 'text'}
-                                                                placeholder={t('auth.Password')}
+                                                                placeholder={"Mật khẩu cũ"}
                                                                 value={passwordOld}
                                                                 onChange={(e) => setPasswordOld(e.target.value)}
                                                             />
@@ -558,7 +483,7 @@ const InfoUser: React.FC<InfoUserProps> = (props) => {
                                                         <span className="w-full relative">
                                                             <Input
                                                                 type={isHidePassword ? 'password' : 'text'}
-                                                                placeholder={t('auth.Password')}
+                                                                placeholder={"Mật khẩu mới"}
                                                                 value={passwordNew}
                                                                 onChange={(e) => {
                                                                     filterPassword(
@@ -619,23 +544,40 @@ const InfoUser: React.FC<InfoUserProps> = (props) => {
                                     </div>
                                 ) : null}
                             </div>
-                            <div className="col-span-2 lg:col-span-1 ">
-                                <div className="mt-6 box-shadow rounded pt-6 pb-7 p-6 relative">
-                                    <div>
-                                        <InventoryIcon />
-                                        &nbsp; {t('user.Orders')} :
+                            <div className="grid grid-cols-3 flex justify-center items-center mt-6 box-shadow rounded pt-12 pb-12 p-6 relative">
+                                    <div className="col-span-2">
+                                        <div className="flex items-center">
+                                            <LocalPhoneIcon /> &nbsp; &nbsp;
+                                            <div className="text-xl">{t('user.Phone')}</div>
+                                        </div>
+                                        {!isShowChangePhone ? (
+                                            phone == null ? (
+                                                <div className="ml-3 mt-3">----------</div>
+                                            ) : (
+                                                <div className="ml-3 mt-3">{phone}</div>
+                                            )
+                                        ) : (
+                                            <div className="pl-4 pr-4">
+                                                <Input
+                                                    value={phone}
+                                                    onChange={(e) => filterInputNumber(e.target.value, setPhone)}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="text-center mt-6 mb-6 text-3xl">
-                                        {user.id ? user.orderIdList.length : null}
-                                    </div>
-                                    <div
-                                        onClick={() => nav('/user/order')}
-                                        className="absolute right-6 top-3 cursor-pointer hover:opacity-40 transition-all duration-500"
-                                    >
-                                        <KeyboardTabIcon />
-                                    </div>
+                                    {!isShowChangePhone ? (
+                                        <div className="cursor-pointer absolute top-3 right-5">
+                                            <EditIcon onClick={toggleIsShowPhone} />
+                                        </div>
+                                    ) : (
+                                        <div className="cursor-pointer absolute top-3 right-5">
+                                            <SaveIcon onClick={handleChangePhone} />
+                                            <div className="mt-3">
+                                                <ArrowBackIcon onClick={toggleIsShowPhone} />
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
                         </div>
                     </div>
                 </div>

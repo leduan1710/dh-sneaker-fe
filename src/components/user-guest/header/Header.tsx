@@ -30,6 +30,7 @@ const Header: React.FC<HeaderProps> = (props) => {
     const { t } = useTranslation();
     const Logo = require('../../../static/dhsneaker-logo.png');
     const numberCart = useSelector((state: ReducerProps) => state.numberCart);
+    const listCart = JSON.parse(localStorage.getItem('listCart') || '[]');
 
     const store = useStore();
     const [openMenu, setOpenMenu] = useState<boolean>(false);
@@ -258,7 +259,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                     <div className="flex items-center justify-end flex-grow">
                         <HeaderNotifications />
                         <span onClick={() => setOpenCart(true)} className="mr-3 cursor-pointer">
-                            <Badge badgeContent={numberCart} color="error">
+                            <Badge badgeContent={listCart.length} color="error">
                                 <LocalMallIcon sx={{ color: 'rgba(7, 110, 145, 0.89)' }} />
                             </Badge>
                         </span>
