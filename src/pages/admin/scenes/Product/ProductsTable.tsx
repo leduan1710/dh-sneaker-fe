@@ -123,7 +123,6 @@ const AlertChangeStatusDialog: React.FC<AlertChangeStatusDialogProps> = (props) 
 
 interface ProductsTableProps {
     className?: string;
-    initialProducts: any[];
     categories: Array<any>;
     sizes: Array<any>;
     styles: Array<any>;
@@ -135,7 +134,7 @@ const applyPagination = (products: any[], page: number, limit: number): any[] =>
     return products.slice(page * limit, page * limit + limit);
 };
 
-const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, sizes, styles, colors, types }) => {
+const ProductsTable: FC<ProductsTableProps> = ({ categories, sizes, styles, colors, types }) => {
     const { t } = useTranslation();
     const store = useStore();
     const user = useSelector((state: ReducerProps) => state.user);
@@ -145,17 +144,25 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
     const [openEdit, setOpenEdit] = useState(false);
     const [openDisable, setOpenDisable] = useState(false);
     const isLoading = useSelector((state: ReducerProps) => state.isLoading);
-    const [products, setProducts] = useState<any[]>(initialProducts);
+    const [products, setProducts] = useState<any[]>([]);
+    const [count, setCount] = useState(0);
     const [selectedProduct, setSelectedProduct] = useState<any>();
     const [page, setPage] = useState<number>(0);
     const [limit, setLimit] = useState<number>(5);
-
+    const [step, setStep] = useState<number>(1);
     const handlePageChange = (event: any, newPage: number): void => {
         setPage(newPage);
+        if (limit * (newPage + 1) > products.length && products.length < count) {
+            setStep((prev) => prev + 1);
+        }
     };
 
     const handleLimitChange = (event: ChangeEvent<HTMLInputElement>): void => {
         setLimit(parseInt(event.target.value));
+        setPage(0);
+        if (parseInt(event.target.value) > products.length && products.length < count) {
+            setStep((prev) => prev + 1);
+        }
     };
 
     const paginatedProducts = applyPagination(products, page, limit);
@@ -201,19 +208,25 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
             store.dispatch(change_is_loading(false));
         } else {
             store.dispatch(change_is_loading(true));
-            const resProducts = await GetApi(`/admin/get/products`, localStorage.getItem('token'));
+            const resProducts = await GetApi(`/admin/get/products/${20}/${step}`, localStorage.getItem('token'));
 
             if (resProducts.data.message == 'Success') {
-                setProducts(resProducts.data.products);
+                setProducts((prev) => [...prev, ...resProducts.data.products.products]);
+                setCount(resProducts.data.products.count);
             }
             store.dispatch(change_is_loading(false));
         }
     };
 
     useEffect(() => {
-        setProducts(initialProducts);
-    }, [initialProducts]);
-    // filter Id
+        getDataProduct();
+    }, [step]);
+    useEffect(() => {
+        if (products.length > 0 && count > 0 && name ==='')
+            if (limit * (page + 1) > products.length && products.length < count) {
+                setStep((prev) => prev + 1);
+            }
+    }, [products]);
     const [name, setSearchName] = useState<string>('');
     const typingTimeoutRef = useRef<any>(null);
     if (typingTimeoutRef.current) {
@@ -231,10 +244,11 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
             store.dispatch(change_is_loading(false));
         } else {
             store.dispatch(change_is_loading(true));
-            const resProducts = await GetApi(`/admin/get/products`, localStorage.getItem('token'));
+            const resProducts = await GetApi(`/admin/get/products/${20}/${step}`, localStorage.getItem('token'));
 
             if (resProducts.data.message == 'Success') {
-                setProducts(resProducts.data.products);
+                setProducts((prev) => [...prev, ...resProducts.data.products.products]);
+                setCount(resProducts.data.products.count);
             }
             store.dispatch(change_is_loading(false));
         }
@@ -542,7 +556,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
             <Box p={2}>
                 <TablePagination
                     component="div"
-                    count={products.length}
+                    count={count}
                     labelRowsPerPage="Số sản phẩm mỗi trang"
                     onPageChange={handlePageChange}
                     onRowsPerPageChange={handleLimitChange}
@@ -553,14 +567,6 @@ const ProductsTable: FC<ProductsTableProps> = ({ initialProducts, categories, si
             </Box>
         </Card>
     );
-};
-
-ProductsTable.propTypes = {
-    initialProducts: PropTypes.array.isRequired,
-};
-
-ProductsTable.defaultProps = {
-    initialProducts: [],
 };
 
 export default ProductsTable;

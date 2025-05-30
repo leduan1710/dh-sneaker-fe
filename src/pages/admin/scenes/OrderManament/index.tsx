@@ -13,10 +13,6 @@ import OrderTable from './OrderTable';
 import { OrderModel } from '../../../../models/order';
 
 function OrderManagement() {
-    const store = useStore();
-    const { t } = useTranslation();
-    const user = useSelector((state: ReducerProps) => state.user);
-    const [orders, setOrders] = useState<OrderModel[]>();
 
     return (
         <>

@@ -109,7 +109,7 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                 </BrowserRouter>
             </>
         );
-    } else if (role === typeRole.CTV || typeRole.ADMIN_CTV) {
+    } else if (role === typeRole.CTV) {
         return (
             <>
                 <BrowserRouter>
@@ -127,7 +127,25 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                 </BrowserRouter>
             </>
         );
-    } else if (role === typeRole.ADMIN) {
+    } else if (role === typeRole.ADMIN_CTV) {
+        return (
+            <>
+                <BrowserRouter>
+                    <Header />
+                    <Routes>
+                        {defaultPage}
+                        <Route path="/user/info-user" element={<InfoUser />}></Route>
+                        <Route path="/user/address" element={<AllAddress />}></Route>
+                        <Route path="/user/address/create" element={<AddressCreate />}></Route>
+                        <Route path="/user/address/edit/:addressId" element={<AddressEdit />}></Route>
+                        <Route path="/checkout" element={<Checkout />}></Route>
+                        <Route path="/user/order" element={<Order />}></Route>
+                        <Route path="/user/order/:orderId" element={<OrderDetail />}></Route>
+                    </Routes>
+                </BrowserRouter>
+            </>
+        );
+    }else if (role === typeRole.ADMIN) {
         return (
             <BrowserRouter>
                 <Routes>
@@ -136,7 +154,6 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                     <Route path="/admin" element={<AdminSidebarLayout />}>
                         {/* <Route path="" element={<DashboardAdmin />} /> */}
                         <Route path="" element={<DashboardAdmin />} />
-
                         <Route path="dashboard" element={<DashboardAdmin />} />
                         <Route path="management/categories" element={<CategoryManagement />} />
                         <Route path="management/products" element={<ProductManagement />} />

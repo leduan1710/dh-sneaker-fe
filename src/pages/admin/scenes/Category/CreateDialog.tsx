@@ -43,14 +43,12 @@ const CreateCateDialog: React.FC<CreateCateDialogProps> = (props) => {
     const { t } = useTranslation();
     const store = useStore();
     const { onClose, open, categories, onUpdate } = props;
-    const [selectImage, setSelectImage] = useState<File | null>(null);
 
     const handleClose = () => {
         onClose();
-        setSelectImage(null);
     };
 
-    const handleAddCategory = async (name: string, image: File) => {
+    const handleAddCategory = async (name: string) => {
         store.dispatch(change_is_loading(true));
         const formData = new FormData();
         formData.append('name', name);
@@ -59,11 +57,6 @@ const CreateCateDialog: React.FC<CreateCateDialogProps> = (props) => {
             toastWarning(t('toast.NameAlreadyExists'));
             store.dispatch(change_is_loading(false));
             return;
-        }
-        if (image) {
-            const uniqueFilename = `image_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            const imageBlob = await fetch(URL.createObjectURL(image)).then((response) => response.blob());
-            formData.append('file', imageBlob, uniqueFilename);
         }
         try {
             const res = await axios.post(`${HOST_BE}/admin/add/category`, formData, {
@@ -97,10 +90,8 @@ const CreateCateDialog: React.FC<CreateCateDialogProps> = (props) => {
                             const formData = new FormData(event.currentTarget);
                             const formJson = Object.fromEntries((formData as any).entries());
                             const name = formJson.name;
-                            const image = formJson.image;
 
-                            console.log(name, image);
-                            await handleAddCategory(name, image);
+                            await handleAddCategory(name);
                             handleClose();
                         },
                     }}
@@ -120,40 +111,6 @@ const CreateCateDialog: React.FC<CreateCateDialogProps> = (props) => {
                             variant="outlined"
                             sx={{ mb: 1 }}
                         />
-                        <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                            <Avatar
-                                variant="square"
-                                sx={{ minWidth: 200, minHeight: 200 }}
-                                src={selectImage ? URL.createObjectURL(selectImage) : undefined}
-                            />
-                            <label htmlFor="image" style={{ position: 'absolute', bottom: '8px', right: '8px' }}>
-                                <IconButton component="span" color="primary">
-                                    <UploadTwoToneIcon />
-                                </IconButton>
-                            </label>
-                            <Input
-                                required
-                                id="image"
-                                name="image"
-                                type="file"
-                                accept="image/*"
-                                style={{ display: 'none' }} // Ẩn input file
-                                onChange={(e: any) => {
-                                    const file = e.target.files[0];
-                                    console.log(file);
-                                    if (
-                                        file &&
-                                        (file.type === 'image/png' ||
-                                            file.type === 'image/jpeg' ||
-                                            file.type === 'image/webp')
-                                    ) {
-                                        setSelectImage(file);
-                                    } else {
-                                        toastWarning('File type is not allowed');
-                                    }
-                                }}
-                            />
-                        </Box>
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleClose}>Hủy</Button>

@@ -27,22 +27,7 @@ function ProductManagement() {
     const store = useStore();
     //
     const [open, setOpen] = useState(false);
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
 
-    const handleClose = () => {
-        setOpen(false);
-    };
-    //
-    const getDataProduct = async () => {
-        store.dispatch(change_is_loading(true));
-        const resProducts = await GetApi(`/admin/get/products`, localStorage.getItem('token'));
-        if (resProducts.data.message == 'Success') {
-            setProducts(resProducts.data.products);
-        }
-        store.dispatch(change_is_loading(false));
-    };
     const getDataCategory = async () => {
         store.dispatch(change_is_loading(true));
         const resCategories = await GetApi('/api/categories', null);
@@ -67,9 +52,7 @@ function ProductManagement() {
         }
         store.dispatch(change_is_loading(false));
     };
-    useEffect(() => {
-        if (user) getDataProduct();
-    }, [user]);
+
     useEffect(() => {
         getDataCategory();
     }, []);
@@ -89,7 +72,6 @@ function ProductManagement() {
                     <Grid item xs={12}>
                         <Card>
                             <ProductsTable
-                                initialProducts={products}
                                 categories={categories}
                                 sizes={sizes}
                                 styles={styles}

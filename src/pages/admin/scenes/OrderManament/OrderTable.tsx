@@ -280,6 +280,9 @@ export default function OrderTable() {
     // Pagination state
     const [page, setPage] = useState(0);
     const [limit, setLimit] = useState(5);
+    const [count, setCount] = useState(0);
+    const [step, setStep] = useState<number>(1);
+
     const [statusFilter, setStatusFilter] = useState<string>('ALL');
     const [shipMethodFilter, setShipMethodFilter] = useState<string>('ALL');
     const [ctvFilter, setCtvFilter] = useState('ALL');
@@ -287,12 +290,12 @@ export default function OrderTable() {
 
     const getDataOrder = async () => {
         store.dispatch(change_is_loading(true));
-        const res = await GetApi(`/admin/get-orders/${20}/1`, localStorage.getItem('token'));
+        const res = await GetApi(`/admin/get-orders/${20}/${step}`, localStorage.getItem('token'));
 
         if (res.data.message == 'Success') {
-            setOrders(res.data.orders);
-            await getOrderDetails(res.data.orders);
-            setPage(0);
+            setOrders((prev) => [...prev, ...res.data.orders.orders]);
+            setCount(res.data.orders.count);
+            await getOrderDetails(res.data.orders.orders);
         }
         store.dispatch(change_is_loading(false));
     };
@@ -316,14 +319,19 @@ export default function OrderTable() {
     };
 
     useEffect(() => {
-        if (user) getDataOrder();
-    }, [user]);
+        getDataOrder();
+    }, [step]);
+    useEffect(() => {
+        if (orders.length > 0 && count > 0 && searchTerm === '')
+            if (limit * (page + 1) > orders.length && orders.length < count) {
+                setStep((prev) => prev + 1);
+            }
+    }, [orders]);
 
     useEffect(() => {
         if (status) {
             getDataOrder();
             setStatusFilter(status);
-
             setPage(0);
             location.state = null;
         }
@@ -337,10 +345,16 @@ export default function OrderTable() {
     }, [orders]);
     const handlePageChange = (event: unknown, newPage: number) => {
         setPage(newPage);
+        if (limit * (newPage + 1) > orders.length && orders.length < count) {
+            setStep((prev) => prev + 1);
+        }
     };
 
     const handleLimitChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setLimit(parseInt(event.target.value, 10));
+        if (parseInt(event.target.value) > orders.length && orders.length < count) {
+            setStep((prev) => prev + 1);
+        }
         setPage(0);
     };
 
@@ -400,7 +414,7 @@ export default function OrderTable() {
     }, [searchTerm]);
     return (
         <>
-            <TableContainer className="relative" component={Paper}>
+            <TableContainer className="relative" component={Paper} sx={{}}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
                     <FormControl variant="outlined" sx={{ minWidth: 200 }}>
                         <InputLabel>Trạng thái</InputLabel>
@@ -478,7 +492,7 @@ export default function OrderTable() {
                     rowsPerPageOptions={[5, 10, 25]}
                     labelRowsPerPage="Số đơn mỗi trang"
                     component="div"
-                    count={filteredOrders.length}
+                    count={count}
                     rowsPerPage={limit}
                     page={page}
                     onPageChange={handlePageChange}

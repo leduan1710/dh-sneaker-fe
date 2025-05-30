@@ -187,6 +187,11 @@ function Row(props: RowProps) {
                                 borderRadius: '4px',
                             }}
                         >
+                            {order.adminNote && (
+                                <Typography variant="body1" gutterBottom component="div">
+                                    <strong>Ghi chú:</strong> {order.adminNote}
+                                </Typography>
+                            )}
                             <Table size="small" aria-label="product details">
                                 <TableHead>
                                     <TableRow>
@@ -261,15 +266,21 @@ export default function DetailCommissionTable() {
     const getDataOrder = async (ctvName: string) => {
         store.dispatch(change_is_loading(true));
         if (ctvName === 'ALL') {
-            const res = await GetApi(`/admin/get-orders-this-month`, localStorage.getItem('token'));
+            const res = await GetApi(
+                `/admin/get-orders-by-month/${selectedMonth}/${selectedYear}/${20}/${1}`,
+                localStorage.getItem('token'),
+            );
 
             if (res.data.message == 'Success') {
-                setOrders(res.data.orders);
-                await getOrderDetails(res.data.orders);
+                setOrders(res.data.orders.orders);
+                await getOrderDetails(res.data.orders.orders);
                 setPage(0);
             }
         } else {
-            const res = await GetApi(`/admin/get-orders-by-ctv/${ctvName}`, localStorage.getItem('token'));
+            const res = await GetApi(
+                `/admin/get-orders-by-ctv/${ctvName}/${selectedMonth}/${selectedYear}`,
+                localStorage.getItem('token'),
+            );
 
             if (res.data.message == 'Success') {
                 setOrders(res.data.orders);
@@ -305,11 +316,11 @@ export default function DetailCommissionTable() {
     };
 
     useEffect(() => {
-        if (user) {
-            getDataOrder('ALL');
+        if (selectedMonth && selectedYear) {
+            getDataOrder(ctvFilter);
             getDataCTVName();
         }
-    }, [user]);
+    }, [selectedMonth, selectedYear]);
 
     useEffect(() => {
         if (status) {

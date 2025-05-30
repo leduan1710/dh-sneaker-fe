@@ -164,30 +164,6 @@ const CategoriesTable: FC<CategoriesTableProps> = ({ initialCategories }) => {
         <Card className="relative">
             <CardHeader sx={{ minHeight: '50px' }} action={<Box width={150}></Box>} />
             <div className="absolute top-2 right-5 flex items-center">
-                <TextField
-                    value={filterId}
-                    variant="outlined"
-                    className="border-gray-300"
-                    style={{
-                        width: 280, // Kích thước chiều rộng
-                        borderRadius: '30px', // Độ tròn hơn
-                        padding: '0 10px', // Thêm padding
-                    }}
-                    placeholder={t('action.EnterID')}
-                    onChange={(e) => {
-                        filterSpecialInput(e.target.value, setFilterId);
-                    }}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <SearchIcon />
-                            </InputAdornment>
-                        ),
-                        sx: {
-                            height: '35px', // Chiều cao của thanh tìm kiếm
-                        },
-                    }}
-                />
                 <IconButton
                     sx={{
                         backgroundColor: '#fff9c4',

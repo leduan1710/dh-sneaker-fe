@@ -458,7 +458,7 @@ const CreateProductDialog: React.FC<CreateProductDialogProps> = (props) => {
             resetFields();
         }
     }, [open]);
-    console.log(selectedStyles);
+
     return (
         <React.Fragment>
             <Dialog onClose={handleClose} open={open}>
