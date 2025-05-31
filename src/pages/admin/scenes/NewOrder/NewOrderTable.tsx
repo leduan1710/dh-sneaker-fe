@@ -272,7 +272,10 @@ function Row(props: RowProps) {
             </TableRow>
             <DeliveryCodeDialog
                 open={showDeliveryDialog}
-                onClose={() => setShowDeliveryDialog(false)}
+                onClose={() => {
+                    handleUpdateOrderList();
+                    setShowDeliveryDialog(false);
+                }}
                 deliveryCode={deliveryCode}
             />
             <StatusUpdateDialog
@@ -280,7 +283,6 @@ function Row(props: RowProps) {
                 onClose={handleCloseUpdateStatusDialog}
                 order={order}
                 onUpdate={(deliveryCode) => {
-                    handleUpdateOrderList();
                     setDeliveryCode(deliveryCode);
                     setShowDeliveryDialog(true);
                 }}

@@ -14,10 +14,12 @@ interface DeliveryCodeDialogProps {
 
 const DeliveryCodeDialog: React.FC<DeliveryCodeDialogProps> = ({ open, onClose, deliveryCode }) => {
     return (
-        <Dialog open={open} onClose={onClose} maxWidth={'xs'} fullWidth={true}>
+        <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
             <DialogTitle>Mã Vận Đơn</DialogTitle>
             <DialogContent>
-                <Typography>Mã vận đơn: {deliveryCode}</Typography>
+                <Typography variant="body1" align="center" style={{ fontWeight: 'bold' }}>
+                    Mã vận đơn: {deliveryCode}
+                </Typography>
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose} color="primary">

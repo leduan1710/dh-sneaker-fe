@@ -156,9 +156,9 @@ const OrderDetail: React.FC = () => {
             setOrderNote(res.data.order.ctvNote);
             setShippingFee(formatCurrency(res.data.order.shipFee.toString()));
             setTotalCOD(formatCurrency(res.data.order.CODPrice.toString()));
-            setProvince(res.data.order.address.province);
-            setDistrict(res.data.order.address.district);
-            setWard(res.data.order.address.ward);
+            setProvince(res.data.order.address?.province);
+            setDistrict(res.data.order.address?.district);
+            setWard(res.data.order.address?.ward);
             setNoteImage(res.data.order.noteImageList);
             setOrderDetails(res.data.orderDetails);
         }
