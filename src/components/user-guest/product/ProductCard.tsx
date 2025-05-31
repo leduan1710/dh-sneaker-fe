@@ -24,7 +24,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ imageUrl, title, price, ratin
                 padding: 0,
                 boxShadow: 2,
                 maxWidth: '260px',
-                height: '460px',
+                height: {md: '460px', xs: '360px'},
                 position: 'relative',
                 transition: 'box-shadow 0.3s, transform 0.3s',
                 '&:hover': {
@@ -80,7 +80,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ imageUrl, title, price, ratin
                 <Typography variant="body2" sx={{ color: salePrice ? 'red':'#111111', fontWeight: 'bold' }}>
                     {formatPrice(price)}
                 </Typography>
-                {salePrice && (
+                {salePrice > 0 && (
                     <Typography
                         variant="body2"
                         sx={{

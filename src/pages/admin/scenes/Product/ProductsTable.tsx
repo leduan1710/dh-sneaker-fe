@@ -493,7 +493,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ categories, sizes, styles, colo
                                             </IconButton>
                                         </Tooltip>
                                         {product.active ? (
-                                            <Tooltip title={t('action.Delete')} arrow>
+                                            <Tooltip title={'Vô hiệu'} arrow>
                                                 <IconButton
                                                     sx={{
                                                         '&:hover': { background: theme.colors.error.lighter },
@@ -510,7 +510,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ categories, sizes, styles, colo
                                                 </IconButton>
                                             </Tooltip>
                                         ) : (
-                                            <Tooltip title={t('action.UnBan')} arrow>
+                                            <Tooltip title={'Kích hoạt'} arrow>
                                                 <IconButton
                                                     color="primary"
                                                     size="small"

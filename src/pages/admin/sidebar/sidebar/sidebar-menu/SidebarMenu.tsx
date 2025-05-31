@@ -15,6 +15,7 @@ import { SidebarContext } from '../../../../../contexts/SidebarContext';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { ReducerProps } from '../../../../../reducers/ReducersProps';
+import { Announcement } from '@mui/icons-material';
 
 const MenuWrapper = styled(Box)(
     ({ theme }) => `
@@ -163,31 +164,33 @@ function SidebarMenu() {
     return (
         <>
             <MenuWrapper>
-              {user.role === 'ADMIN' && (<List
-                    component="div"
-                    subheader={
-                        <ListSubheader component="div" disableSticky>
-                            Dashboards
-                        </ListSubheader>
-                    }
-                >
-                    <SubMenuWrapper>
-                        <List component="div">
-                            <ListItem component="div">
-                                <Button
-                                    disableRipple
-                                    component={RouterLink}
-                                    onClick={closeSidebar}
-                                    to="/admin/dashboard"
-                                    startIcon={<SpaceDashboardIcon />}
-                                >
-                                    Dashboard
-                                </Button>
-                            </ListItem>
-                        </List>
-                    </SubMenuWrapper>
-                </List>)}
-                
+                {user.role === 'ADMIN' && (
+                    <List
+                        component="div"
+                        subheader={
+                            <ListSubheader component="div" disableSticky>
+                                Dashboards
+                            </ListSubheader>
+                        }
+                    >
+                        <SubMenuWrapper>
+                            <List component="div">
+                                <ListItem component="div">
+                                    <Button
+                                        disableRipple
+                                        component={RouterLink}
+                                        onClick={closeSidebar}
+                                        to="/admin/dashboard"
+                                        startIcon={<SpaceDashboardIcon />}
+                                    >
+                                        Dashboard
+                                    </Button>
+                                </ListItem>
+                            </List>
+                        </SubMenuWrapper>
+                    </List>
+                )}
+
                 <List
                     component="div"
                     subheader={
@@ -259,28 +262,41 @@ function SidebarMenu() {
                                 </Button>
                             </ListItem>
                             {user.role === 'ADMIN' && (
-                              <><ListItem component="div">
-                                <Button
-                                    disableRipple
-                                    component={RouterLink}
-                                    onClick={closeSidebar}
-                                    to="/admin/management/detail-commission"
-                                    startIcon={<LocalOfferTwoToneIcon />}
-                                >
-                                    Quản lý hoa hồng chi tiết
-                                </Button>
-                            </ListItem>
-                            <ListItem component="div">
-                                <Button
-                                    disableRipple
-                                    component={RouterLink}
-                                    onClick={closeSidebar}
-                                    to="/admin/management/commission-statistics"
-                                    startIcon={<BarChartTwoToneIcon />}
-                                >
-                                    Thống kê hoa hồng
-                                </Button>
-                            </ListItem></>
+                                <>
+                                    <ListItem component="div">
+                                        <Button
+                                            disableRipple
+                                            component={RouterLink}
+                                            onClick={closeSidebar}
+                                            to="/admin/management/detail-commission"
+                                            startIcon={<LocalOfferTwoToneIcon />}
+                                        >
+                                            Quản lý hoa hồng chi tiết
+                                        </Button>
+                                    </ListItem>
+                                    <ListItem component="div">
+                                        <Button
+                                            disableRipple
+                                            component={RouterLink}
+                                            onClick={closeSidebar}
+                                            to="/admin/management/commission-statistics"
+                                            startIcon={<BarChartTwoToneIcon />}
+                                        >
+                                            Thống kê hoa hồng
+                                        </Button>
+                                    </ListItem>
+                                    <ListItem component="div">
+                                        <Button
+                                            disableRipple
+                                            component={RouterLink}
+                                            onClick={closeSidebar}
+                                            to="/admin/management/announcements"
+                                            startIcon={<Announcement />}
+                                        >
+                                            Thông báo
+                                        </Button>
+                                    </ListItem>
+                                </>
                             )}
                         </List>
                     </SubMenuWrapper>

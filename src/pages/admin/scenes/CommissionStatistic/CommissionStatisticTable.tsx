@@ -394,7 +394,7 @@ export default function CommissionStatisticTable() {
                 />
                 <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
-                    labelRowsPerPage="Số đơn mỗi trang"
+                    labelRowsPerPage="Số hàng mỗi trang"
                     component="div"
                     count={commissions.length}
                     rowsPerPage={limit}

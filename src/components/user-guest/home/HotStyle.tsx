@@ -72,7 +72,7 @@ const HotStyle = () => {
             >
                 {items.map((item) => (
                     <div key={item.id} style={{ display: 'flex', justifyContent: 'center' }}>
-                        <a href={item.href} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <a style={{ textDecoration: 'none', color: 'inherit' }}>
                             <div
                                 style={{
                                     height: '200px',

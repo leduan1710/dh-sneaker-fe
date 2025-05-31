@@ -42,6 +42,7 @@ import OrderManagement from '../pages/admin/scenes/OrderManament';
 import DetailCommissionManagement from '../pages/admin/scenes/DetailCommission';
 import CommissionStatistic from '../pages/admin/scenes/CommissionStatistic';
 import OrderDetail from '../pages/user-guest/order/OrderDetail';
+import Announcement from '../pages/admin/scenes/Announcement';
 
 //--------------------------------------------------------------
 //--------------------------------------------------------------
@@ -145,14 +146,13 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                 </BrowserRouter>
             </>
         );
-    }else if (role === typeRole.ADMIN) {
+    } else if (role === typeRole.ADMIN) {
         return (
             <BrowserRouter>
                 <Routes>
                     <Route path="/err404" element={<Page404 />}></Route>
                     <Route path="/" element={<IndexAdmin />}></Route>
                     <Route path="/admin" element={<AdminSidebarLayout />}>
-                        {/* <Route path="" element={<DashboardAdmin />} /> */}
                         <Route path="" element={<DashboardAdmin />} />
                         <Route path="dashboard" element={<DashboardAdmin />} />
                         <Route path="management/categories" element={<CategoryManagement />} />
@@ -161,11 +161,9 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                         <Route path="management/orders" element={<OrderManagement />} />
                         <Route path="management/detail-commission" element={<DetailCommissionManagement />} />
                         <Route path="management/commission-statistics" element={<CommissionStatistic />} />
+                        <Route path="management/announcements" element={<Announcement />} />
+
                         <Route path="management/user" element={<UserManagement />} />
-                        {/* <Route path="management/origin" element={<OriginManagement />} />
-                        <Route path="management/styles" element={<StylesManagement />} />
-                        <Route path="management/material" element={<MaterialManagement />} />
-                        <Route path="management/brand" element={<BrandManagement />} /> */}
                     </Route>
                 </Routes>
             </BrowserRouter>

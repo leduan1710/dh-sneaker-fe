@@ -17,7 +17,6 @@ import CloseTwoToneIcon from '@mui/icons-material/CloseTwoTone';
 
 import HeaderButtons from './buttons/Buttons';
 import HeaderUserbox from './userbox/Userbox';
-import HeaderMenu from './menu/Menu';
 
 import React from 'react';
 import { SidebarContext } from '../../../../contexts/SidebarContext';
@@ -71,7 +70,6 @@ function Header() {
         alignItems="center"
         spacing={2}
       >
-        <HeaderMenu />
       </Stack>
       <Box display="flex" alignItems="center">
         <HeaderButtons />

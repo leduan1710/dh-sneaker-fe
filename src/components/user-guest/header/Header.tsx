@@ -16,8 +16,10 @@ import { FEMALE_ID, MALE_ID, typeRole } from '../../../common/Common';
 import MenuUser from './MenuUser';
 import DrawerCart from './DrawerCart';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/swiper-bundle.css';
+import 'swiper/css';
+import { Autoplay } from 'swiper/modules';
 import HeaderNotifications from './Notification';
+import { GetApi } from '../../../untils/Api';
 
 interface HeaderProps {
     index?: number;
@@ -36,8 +38,8 @@ const Header: React.FC<HeaderProps> = (props) => {
     const [openMenu, setOpenMenu] = useState<boolean>(false);
     const [openSearch, setOpenSearch] = useState<boolean>(false);
     const [openCart, setOpenCart] = useState<boolean>(false);
-    const [openFavorite, setOpenFavorite] = useState<boolean>(false);
     const [showAnnouncement, setShowAnnouncement] = useState(true);
+    const [announcements, setAnnouncements] = useState([]);
 
     const [search, setSearch] = useState<string>('');
     const role = useSelector((state: ReducerProps) => state.role);
@@ -47,10 +49,15 @@ const Header: React.FC<HeaderProps> = (props) => {
     if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
     }
-    //
-    const toggleDrawerFavorite = (newOpen: boolean) => () => {
-        setOpenFavorite(newOpen);
+
+    const getAnnouncement = async () => {
+        const res = await GetApi('/api/announcements', null);
+        if (res.data.message == 'Success') {
+            setAnnouncements(res.data.announcements);
+        }
     };
+
+    //
     const toggleDrawerMenu = (newOpen: boolean) => () => {
         setOpenMenu(newOpen);
     };
@@ -86,17 +93,12 @@ const Header: React.FC<HeaderProps> = (props) => {
     useEffect(() => {
         setNumberCart();
     }, []);
-
-    const getDataSearch = async () => {
-        console.log('getApi');
-    };
     useEffect(() => {
-        typingTimeoutRef.current = setTimeout(() => {
-            if (search) {
-                getDataSearch();
-            }
-        }, 500);
-    }, [search]);
+        getAnnouncement();
+    }, []);
+    const leftAnnouncement = announcements.filter((announcement: any) => announcement.position === 'LEFT');
+    const rightAnnouncement = announcements.filter((announcement: any) => announcement.position === 'RIGHT');
+    const centerAnnouncement = announcements.filter((announcement: any) => announcement.position === 'CENTER');
 
     return (
         <div
@@ -122,7 +124,6 @@ const Header: React.FC<HeaderProps> = (props) => {
                         pointerEvents: showAnnouncement ? 'auto' : 'none',
                         maxHeight: showAnnouncement ? '35px' : '0px',
                         visibility: showAnnouncement ? 'visible' : 'hidden',
-                        overflow: 'hidden',
                     }}
                 >
                     <Box flex={1} sx={{ width: { xs: '100%', sm: '45%' } }}>
@@ -130,21 +131,23 @@ const Header: React.FC<HeaderProps> = (props) => {
                             spaceBetween={50}
                             slidesPerView={1}
                             loop={true}
-                            autoplay={{ delay: 2000, disableOnInteraction: true }}
+                            autoplay={{
+                                delay: 3000,
+                                disableOnInteraction: false,
+                                waitForTransition: true,
+                            }}
                             style={{ padding: '5px 0' }}
+                            modules={[Autoplay]}
                         >
+                            {leftAnnouncement.map((announcement: any) => (
+                                <SwiperSlide key={announcement.id}>
+                                    <a style={{ color: 'white', textAlign: 'center', textDecoration: 'none' }}>
+                                        <p>{announcement.content}</p>
+                                    </a>
+                                </SwiperSlide>
+                            ))}
                             <SwiperSlide>
-                                <div style={{ color: 'white', textAlign: 'center' }}>
-                                    <p>
-                                        <strong>🚚 Miễn phí giao hàng</strong> cho đơn từ 500.000đ
-                                    </p>
-                                </div>
-                            </SwiperSlide>
-                            <SwiperSlide>
-                                <a
-                                    href="/collections/hang-moi"
-                                    style={{ color: 'white', textAlign: 'center', textDecoration: 'none' }}
-                                >
+                                <a style={{ color: 'white', textAlign: 'center', textDecoration: 'none' }}>
                                     <p>
                                         Đón đầu xu hướng với giày dép{' '}
                                         <span style={{ textDecoration: 'underline' }}>
@@ -153,31 +156,36 @@ const Header: React.FC<HeaderProps> = (props) => {
                                     </p>
                                 </a>
                             </SwiperSlide>
-                            <SwiperSlide>
-                                <a
-                                    href="/pages/loyalty-page"
-                                    style={{ color: 'white', textAlign: 'center', textDecoration: 'none' }}
-                                >
-                                    <p>
-                                        Khám phá đặc quyền thành viên với{' '}
-                                        <span style={{ textDecoration: 'underline' }}>
-                                            <strong>DH Sneaker</strong>
-                                        </span>{' '}
-                                        ♥️
-                                    </p>
-                                </a>
-                            </SwiperSlide>
                         </Swiper>
                     </Box>
                     <Box flex={1} maxWidth="25%" textAlign="center" sx={{ display: { xs: 'none', sm: 'block' } }}></Box>
 
                     <Box flex={1} maxWidth="30%" textAlign="center" sx={{ display: { xs: 'none', sm: 'block' } }}>
-                        <Typography
-                            variant="h6"
-                            style={{ color: 'white', margin: 0, fontWeight: 'bold', fontSize: 16 }}
+                        <Swiper
+                            spaceBetween={50}
+                            slidesPerView={1}
+                            loop={true}
+                            autoplay={{
+                                delay: 3000,
+                                disableOnInteraction: false,
+                                waitForTransition: true,
+                            }}
+                            style={{ padding: '5px 0' }}
+                            modules={[Autoplay]}
                         >
-                            Mua ngay để nhận nhiều ưu đãi hấp dẫn! 🤩
-                        </Typography>
+                            {rightAnnouncement.map((announcement: any) => (
+                                <SwiperSlide key={announcement.id}>
+                                    <a style={{ color: 'white', textAlign: 'center', textDecoration: 'none' }}>
+                                        <p>{announcement.content}</p>
+                                    </a>
+                                </SwiperSlide>
+                            ))}
+                            <SwiperSlide>
+                                <a style={{ color: 'white', textAlign: 'center', textDecoration: 'none' }}>
+                                    <p>Mua ngay để nhận nhiều ưu đãi hấp dẫn! 🤩</p>
+                                </a>
+                            </SwiperSlide>
+                        </Swiper>
                     </Box>
                 </Box>
                 {/* )} */}
@@ -226,7 +234,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                         >
                             MLB
                         </a>
-                                                <a
+                        <a
                             href={`collections?category=Adidas`}
                             style={{ fontSize: '19px' }}
                             className={`hover:border-blue-300 border-b-2 border-white mr-5 cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
@@ -235,7 +243,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                         >
                             ADIDAS
                         </a>
-                                                <a
+                        <a
                             href={`collections?category=Trẻ em`}
                             style={{ fontSize: '19px' }}
                             className={`hover:border-blue-300 border-b-2 border-white mr-5 cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
@@ -253,7 +261,6 @@ const Header: React.FC<HeaderProps> = (props) => {
                         >
                             JIBBITZ
                         </a>
-                        
                     </div>
 
                     <div className="flex items-center justify-end flex-grow">
@@ -296,37 +303,19 @@ const Header: React.FC<HeaderProps> = (props) => {
                         spaceBetween={50}
                         slidesPerView={1}
                         loop={true}
-                        autoplay={{ delay: 1000, disableOnInteraction: true }}
+                        autoplay={{ delay: 3000, disableOnInteraction: false }}
                         style={{ padding: '10px 0' }}
+                        modules={[Autoplay]}
                     >
-                        <SwiperSlide>
-                            <div style={{ color: 'black', textAlign: 'center' }}>
-                                <p>
-                                    {' '}
-                                    🎀 Nhận ngay <b>Voucher 100K</b> khi tham gia Crocs Club 🤩{' '}
-                                    <u>
-                                        <b>Đăng ký ngay!</b>
-                                    </u>
-                                </p>
-                            </div>
-                        </SwiperSlide>
+                        {centerAnnouncement.map((announcement: any) => (
+                            <SwiperSlide key={announcement.id}>
+                                <a style={{ color: 'black', textAlign: 'center', textDecoration: 'none' }}>
+                                    <p>{announcement.content}</p>
+                                </a>
+                            </SwiperSlide>
+                        ))}
                         <SwiperSlide>
                             <a
-                                href="/collections/hang-moi"
-                                style={{ color: 'black', textAlign: 'center', textDecoration: 'none' }}
-                            >
-                                <p>
-                                    Bạn là <b>💚Loyalty</b>? Nhớ{' '}
-                                    <b>
-                                        <u>Đăng nhập</u>
-                                    </b>{' '}
-                                    khi mua hàng để được ưu đãi <b>GIẢM THÊM ĐẾN 7%</b> trên hoá đơn nhé! 🤩
-                                </p>
-                            </a>
-                        </SwiperSlide>
-                        <SwiperSlide>
-                            <a
-                                href="/pages/loyalty-page"
                                 style={{ color: 'black', textAlign: 'center', textDecoration: 'none' }}
                             >
                                 <p>
@@ -335,22 +324,6 @@ const Header: React.FC<HeaderProps> = (props) => {
                                     <b>
                                         <u>Khám phá ngay!</u>
                                     </b>
-                                </p>
-                            </a>
-                        </SwiperSlide>
-                        <SwiperSlide>
-                            <a
-                                href="/pages/loyalty-page"
-                                style={{ color: 'black', textAlign: 'center', textDecoration: 'none' }}
-                            >
-                                <p>
-                                    {' '}
-                                    🌼 Biến hoá phong cách của bạn với deal <b>MUA 2 TẶNG 1</b> dành cho{' '}
-                                    <b>Jibbitz Set</b> -{' '}
-                                    <b>
-                                        <u>Mua Ngay</u>
-                                    </b>
-                                    💛
                                 </p>
                             </a>
                         </SwiperSlide>
