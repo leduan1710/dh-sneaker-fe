@@ -70,7 +70,15 @@ const ProductDetail: React.FC = () => {
         window.scrollTo(0, 0);
         getData();
     }, [productId]);
+    const sortedProductDetails = [...productDetails? productDetails : []].sort((a, b) => {
+    const sizeAMatch = a.sizeName.match(/\d+/);
+    const sizeBMatch = b.sizeName.match(/\d+/);
 
+    const sizeA = sizeAMatch ? parseInt(sizeAMatch[0], 10) : Infinity; // Nếu không tìm thấy, coi như lớn nhất
+    const sizeB = sizeBMatch ? parseInt(sizeBMatch[0], 10) : Infinity; // Nếu không tìm thấy, coi như lớn nhất
+
+    return sizeA - sizeB;
+    });
     return (
         <>
             <Container sx={{ marginTop: { xs: '210px', md: '160px' } }}>
@@ -204,14 +212,15 @@ const ProductDetail: React.FC = () => {
                             <SizeGuideDialog open={openDialog} onClose={handleCloseDialog} />
 
                             <Box display="flex" flexWrap="wrap" mt={1}>
-                                {productDetails?.map((productDetail: any) => (
+                                {sortedProductDetails?.map((productDetail: any) => (
                                     <Button
                                         key={productDetail.sizeName}
                                         variant="outlined"
                                         sx={{
                                             margin: '4px',
-                                            width: '95px',
+                                            minWidth: '95px',
                                             height: '36px',
+                                            px: 1,
                                             backgroundColor:
                                                 selectedProductDetail === productDetail
                                                     ? 'rgba(7, 110, 145, 0.89)'
