@@ -77,33 +77,11 @@ const DetailDialog: React.FC<DetailDialogProps> = (props) => {
                                 {t('user.Phone')}: {user?.phone || '...'}
                             </div>
 
-                            <div style={{ width: 400 }} className="grid grid-cols-2 gap-4 mt-2 pl-6 pr-6">
-                                <div className="p-2 flex items-center box-shadow rounded-xl">
-                                    {t('user.Rank')}:&nbsp;
-                                    <div className="font-bold text-blue-500">
-                                        {' '}
-                                        {user?.point < 1000
-                                            ? t('user.Bronze')
-                                            : user?.point < 2000
-                                            ? t('user.Silver')
-                                            : user?.point < 3000
-                                            ? t('user.Gold')
-                                            : t('user.Diamond')}
-                                    </div>
-                                </div>
+                            <div style={{ width: 400 }} className="grid grid-cols-2 gap-4 mt-2 pl-6 pr-6">                      
                                 <div className="p-2 flex items-center box-shadow rounded-xl">
                                     {t('user.Orders')}:&nbsp;
                                     <div className="font-bold text-blue-500">{user?.orderIdList.length}</div>
                                 </div>
-                                <div className="p-2 flex items-center box-shadow rounded-xl">
-                                    {t('admin.Point')} :&nbsp;
-                                    <div className="font-bold text-blue-500">{user?.point}</div>
-                                </div>
-                                {/* <div className="p-3 flex items-center box-shadow rounded-xl">
-                                    <FollowTheSignsIcon />
-                                    {t('admin.Follow')} :&nbsp;
-                                    <div className="font-bold text-blue-500">{category?.userFollowIdList.length}</div>
-                                </div> */}
                             </div>
                             <Box
                                 sx={{

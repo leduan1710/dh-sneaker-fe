@@ -13,11 +13,12 @@ import { GetApi, PostApi } from '../../../../untils/Api';
 import { toastError, toastSuccess } from '../../../../untils/Logic';
 import { TextField } from '@mui/material';
 import axios from 'axios';
+import DeliveryCodeDialog from './DeliveryCodeDialog';
 
 interface StatusUpdateDialogProps {
     open: boolean;
     onClose: () => void;
-    onUpdate: () => void;
+    onUpdate: (deliveryCode: any) => void;
     order: any;
     selection: string;
 }
@@ -64,7 +65,7 @@ const StatusUpdateDialog: React.FC<StatusUpdateDialogProps> = ({ open, onClose, 
                     });
                     if (resOrder.data.message == 'Success') {
                         toastSuccess(t('toast.Success'));
-                        onUpdate();
+                        onUpdate(resOrder.data.data.data.ORDER_NUMBER);
                     } else toastError('Thất bại');
                 } else {
                     const resOrder = await PostApi(
@@ -74,7 +75,7 @@ const StatusUpdateDialog: React.FC<StatusUpdateDialogProps> = ({ open, onClose, 
                     );
                     if (resOrder.data.message == 'Success') {
                         toastSuccess(t('toast.Success'));
-                        onUpdate();
+                        onUpdate('');
                     } else toastError('Thất bại');
                 }
 
@@ -90,7 +91,7 @@ const StatusUpdateDialog: React.FC<StatusUpdateDialogProps> = ({ open, onClose, 
                 );
                 if (resOrder.data.message == 'Success') {
                     toastSuccess(t('toast.Success'));
-                    onUpdate();
+                    onUpdate('');
                 } else toastError('Thất bại');
                 store.dispatch(change_is_loading(false));
             }
@@ -148,6 +149,7 @@ const StatusUpdateDialog: React.FC<StatusUpdateDialogProps> = ({ open, onClose, 
                     </Button>
                 </DialogActions>
             </Dialog>
+
         </React.Fragment>
     );
 };

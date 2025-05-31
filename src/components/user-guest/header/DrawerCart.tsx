@@ -78,24 +78,26 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
     const getTotalPriceAndItem = () => {
         const list_cart = JSON.parse(localStorage.getItem('listCart') || '[]');
         //total item
-        const totalItem = listCart.reduce((accumulator: any, currentValue: any) => {
-            if (currentValue.isCheck) {
-                return accumulator + currentValue.quantity;
-            } else {
-                return accumulator;
-            }
-        }, 0);
-        setTotalItem(totalItem);
-        //total price
-        const totalPrice = listItemInCart.reduce((accumulator: any, currentValue: any) => {
-            const inx = list_cart.findIndex((item: any) => item.productDetailId == currentValue.id);
-            if (list_cart[inx].isCheck) {
-                return accumulator + list_cart[inx].quantity * currentValue.sellPrice;
-            } else {
-                return accumulator;
-            }
-        }, 0);
-        setTotalPrice(totalPrice);
+        if (listCart.length > 0) {
+            const totalItem = listCart.reduce((accumulator: any, currentValue: any) => {
+                if (currentValue.isCheck) {
+                    return accumulator + currentValue.quantity;
+                } else {
+                    return accumulator;
+                }
+            }, 0);
+            setTotalItem(totalItem);
+            //total price
+            const totalPrice = listItemInCart.reduce((accumulator: any, currentValue: any) => {
+                const inx = list_cart.findIndex((item: any) => item.productDetailId == currentValue.id);
+                if (list_cart[inx].isCheck) {
+                    return accumulator + list_cart[inx].quantity * currentValue.sellPrice;
+                } else {
+                    return accumulator;
+                }
+            }, 0);
+            setTotalPrice(totalPrice);
+        }
     };
 
     const getIsCheck = () => {

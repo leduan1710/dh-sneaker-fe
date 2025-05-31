@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { checkIsFavorite, convertToPercentage, formatNumber, formatPrice, shortedString } from '../../../untils/Logic';
+import { convertToPercentage, formatNumber, formatPrice, shortedString } from '../../../untils/Logic';
 
 import { useSelector, useStore } from 'react-redux';
 
@@ -37,11 +37,7 @@ const ProductItem: React.FC<ProductItemProps> = (props) => {
     const getDiscountTop = async () => {
         setDiscountTop(productCurrent.percentDiscountTop);
     };
-    useEffect(() => {
-        if (user.id) {
-            setIsFavorite(checkIsFavorite(user, productCurrent.id));
-        }
-    }, [user]);
+
     useEffect(() => {
         if (product.percentDiscountTop) {
             getDiscountTop();

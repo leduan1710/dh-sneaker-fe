@@ -7,9 +7,9 @@ export const formatTitle = (title: string) => {
         return '';
     }
     return title
-        .toLowerCase() 
+        .toLowerCase()
         .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
 };
 export const formatPrice = (amount: any) => {
@@ -20,7 +20,13 @@ export const formatPrice = (amount: any) => {
         return amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
     }
 };
-//shorted
+export const validatePhoneNumber = (phone: string) => {
+    const phoneRegex = /^0[0-9]{9}$/;
+    return phoneRegex.test(phone);
+};
+export const formatCurrency = (value: any) => {
+    return value.replace(/\D/g, '').replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+};
 export const shortedString = (input: string, length: number = 4) => {
     if (input.length <= length) {
         return input;
@@ -140,14 +146,20 @@ export const toastWarning = (text: string) => {
     toast.warning(text, { position: 'top-right', autoClose: 3000, pauseOnHover: false, closeOnClick: true });
 };
 
-export const addToListCartStore = (productDetailId: string, quantity: number, productDetail: any, isCheck: boolean, isJibbitz: boolean) => {
+export const addToListCartStore = (
+    productDetailId: string,
+    quantity: number,
+    productDetail: any,
+    isCheck: boolean,
+    isJibbitz: boolean,
+) => {
     const existingCart = JSON.parse(localStorage.getItem('listCart') || '[]');
     const productIndex = existingCart.findIndex(
         (productDetail: any) => productDetail.productDetailId === productDetailId,
     );
     if (productIndex != -1) {
         if (productDetail.quantity > existingCart[productIndex].quantity) {
-            existingCart[productIndex].quantity = parseInt(existingCart[productIndex].quantity) + quantity ;
+            existingCart[productIndex].quantity = parseInt(existingCart[productIndex].quantity) + quantity;
             localStorage.setItem('listCart', JSON.stringify(existingCart));
         } else {
             toastWarning('Không đủ số lượng');
@@ -155,7 +167,10 @@ export const addToListCartStore = (productDetailId: string, quantity: number, pr
     } else {
         localStorage.setItem(
             'listCart',
-            JSON.stringify([...existingCart, { productDetailId: productDetailId, quantity: quantity, isCheck: isCheck, isJibbitz: isJibbitz }]),
+            JSON.stringify([
+                ...existingCart,
+                { productDetailId: productDetailId, quantity: quantity, isCheck: isCheck, isJibbitz: isJibbitz },
+            ]),
         );
     }
 };
@@ -241,20 +256,6 @@ export const removeItemFromCart = (id: string) => {
     localStorage.setItem('listCart', JSON.stringify(updatedCart));
 };
 
-export const checkIsFollow = (shop: any, userId: string) => {
-    if (shop.userFollowIdList.length > 0) {
-        return shop.userFollowIdList.includes(userId);
-    } else {
-        return false;
-    }
-};
-export const checkIsFavorite = (user: any, productId: string) => {
-    if (user.productFavoriteIdList.length > 0) {
-        return user.productFavoriteIdList.includes(productId);
-    } else {
-        return false;
-    }
-};
 export function formatNumber(num: number) {
     if (num >= 1e6) {
         return (num / 1e6).toFixed(1) + 'M'; // Triệu
@@ -268,7 +269,10 @@ export function formatNumber(num: number) {
 export const addCheckout = (productDetail: any, quantity: number, isJibbitz: boolean) => {
     try {
         sessionStorage.setItem('checkout', '');
-        sessionStorage.setItem('checkout', JSON.stringify([{ productDetailId: productDetail.id, quantity: quantity, isJibbitz: isJibbitz }]));
+        sessionStorage.setItem(
+            'checkout',
+            JSON.stringify([{ productDetailId: productDetail.id, quantity: quantity, isJibbitz: isJibbitz }]),
+        );
         return true;
     } catch {
         return false;

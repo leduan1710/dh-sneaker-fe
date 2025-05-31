@@ -217,12 +217,17 @@ const ProductsTable: FC<ProductsTableProps> = ({ categories, sizes, styles, colo
             store.dispatch(change_is_loading(false));
         }
     };
-
+    const handleUpdateData = () => {
+        setProducts([]);
+        setPage(0);
+        setCount(0);
+        getDataProduct();
+    };
     useEffect(() => {
         getDataProduct();
     }, [step]);
     useEffect(() => {
-        if (products.length > 0 && count > 0 && name ==='')
+        if (products.length > 0 && count > 0 && name === '')
             if (limit * (page + 1) > products.length && products.length < count) {
                 setStep((prev) => prev + 1);
             }
@@ -324,7 +329,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ categories, sizes, styles, colo
                     open={openCreate}
                     onClose={handleCloseCreate}
                     categories={categories}
-                    onUpdate={getDataProduct}
+                    onUpdate={handleUpdateData}
                 />
             </div>
             <Divider />
@@ -426,7 +431,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ categories, sizes, styles, colo
                                                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
                                             }}
                                             src={
-                                                product.imageList
+                                                product.imageList.length > 0
                                                     ? product.imageList[0].startsWith('uploads')
                                                         ? `${HOST_BE}/${product.imageList[0]}`
                                                         : product.imageList[0]
@@ -544,7 +549,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ categories, sizes, styles, colo
                 types={types}
                 sizes={sizes}
                 product={selectedProduct}
-                onUpdate={getDataProduct}
+                onUpdate={handleUpdateData}
             />
             <AlertChangeStatusDialog
                 open={openDisable}

@@ -29,12 +29,14 @@ import UploadTwoToneIcon from '@mui/icons-material/UploadTwoTone';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import axios from 'axios';
 import {
+    formatCurrency,
     formatPrice,
     formatTitle,
     removeItemFromCart,
     toastError,
     toastSuccess,
     toastWarning,
+    validatePhoneNumber,
 } from '../../../untils/Logic';
 import { useSelector, useStore } from 'react-redux';
 import { ReducerProps } from '../../../reducers/ReducersProps';
@@ -152,8 +154,8 @@ const OrderDetail: React.FC = () => {
             setCustomerAddress(res.data.order.addressDetail);
             setShippingMethod(res.data.order.shipMethod);
             setOrderNote(res.data.order.ctvNote);
-            setShippingFee(res.data.order.shipFee);
-            setTotalCOD(res.data.order.CODPrice);
+            setShippingFee(formatCurrency(res.data.order.shipFee.toString()));
+            setTotalCOD(formatCurrency(res.data.order.CODPrice.toString()));
             setProvince(res.data.order.address.province);
             setDistrict(res.data.order.address.district);
             setWard(res.data.order.address.ward);
@@ -196,7 +198,6 @@ const OrderDetail: React.FC = () => {
 
     const handleSaveClick = () => {
         handleEdit();
-        setIsEdit(false);
     };
 
     const handleCancelClick = () => {
@@ -236,7 +237,7 @@ const OrderDetail: React.FC = () => {
             formData.append('customerName', customerName);
             formData.append('shipMethod', shippingMethod);
             formData.append('paid', 'true');
-            formData.append('CODPrice', totalCOD.toString());
+            formData.append('CODPrice', totalCOD.replace(',', '').toString());
             formData.append('oldNoteImageList', JSON.stringify(noteImage));
 
             formData.append('shipFee', '0');
@@ -260,12 +261,18 @@ const OrderDetail: React.FC = () => {
                 if (res.data.message === 'Success') {
                     setOrder(res.data.order);
                     toastSuccess('Chỉnh sửa thành công');
+                    setIsEdit(false);
                 }
             } catch (error) {
                 console.error('Thất bại', error);
             }
         } else {
             // Đơn hàng online
+            if (!validatePhoneNumber(customerPhone)) {
+                toastWarning('Số điện thoại không hợp lệ');
+                return;
+            }
+
             const formData = new FormData();
 
             // Thêm thông tin đơn hàng vào FormData
@@ -286,8 +293,8 @@ const OrderDetail: React.FC = () => {
             );
             formData.append('shipMethod', shippingMethod);
             formData.append('paid', 'true');
-            formData.append('CODPrice', totalCOD.toString());
-            formData.append('shipFee', shippingFee.toString());
+            formData.append('CODPrice', totalCOD.replace(',', '').toString());
+            formData.append('shipFee', shippingFee.replace(',', '').toString());
             formData.append('oldNoteImageList', JSON.stringify(noteImage));
 
             // Upload hình ảnh nếu có
@@ -306,13 +313,17 @@ const OrderDetail: React.FC = () => {
                 });
 
                 if (res.data.message === 'Success') {
+                    setOrder(res.data.order);
+
                     toastSuccess('Chỉnh sửa thành công');
+                    setIsEdit(false);
                 }
             } catch (error) {
                 console.error('Failed to place order:', error);
             }
         }
     };
+
     useEffect(() => {
         let total = 0;
 
@@ -361,7 +372,7 @@ const OrderDetail: React.FC = () => {
                             )
                         )}
                     </Box>
-
+                    
                     <TextField
                         label="Tên Khách Hàng"
                         variant="outlined"
@@ -383,10 +394,10 @@ const OrderDetail: React.FC = () => {
                         variant="outlined"
                         fullWidth
                         required
-                        type="number"
+                        type="text"
                         helperText="Tổng tiền thu khách cộng cả phí ship"
                         value={totalCOD}
-                        onChange={(e) => setTotalCOD(e.target.value)}
+                        onChange={(e) => setTotalCOD(formatCurrency(e.target.value))}
                         sx={{ mb: 1 }}
                         InputProps={{
                             sx: {
@@ -502,8 +513,8 @@ const OrderDetail: React.FC = () => {
                                     variant="outlined"
                                     fullWidth
                                     value={shippingFee}
-                                    type="number"
-                                    onChange={(e) => setShippingFee(e.target.value)}
+                                    type="text"
+                                    onChange={(e) => setShippingFee(formatCurrency(e.target.value))}
                                     sx={{ mt: 1 }}
                                     InputProps={{
                                         sx: {

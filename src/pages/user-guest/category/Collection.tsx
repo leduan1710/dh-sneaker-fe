@@ -265,9 +265,6 @@ const ProductCollection = () => {
                 setExpand={setExpandColor}
             />
         ) : null;
-    console.log(selectedSizes);
-    console.log(selectedTypes);
-    console.log(selectedStyles);
 
     console.log(listProduct.length, Math.ceil(listProduct.length / limit));
     return (
@@ -553,7 +550,7 @@ const ProductCollection = () => {
                         </Grid>
                         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
                             <Pagination
-                                count={Math.ceil(listProduct.length / 2)}
+                                count={Math.ceil(listProduct.length / 20)}
                                 page={currentPage}
                                 onChange={handlePageChange}
                                 variant="outlined"

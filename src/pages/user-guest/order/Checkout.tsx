@@ -23,7 +23,16 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import UploadTwoToneIcon from '@mui/icons-material/UploadTwoTone';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import axios from 'axios';
-import { formatPrice, formatTitle, removeItemFromCart, toastSuccess, toastWarning } from '../../../untils/Logic';
+import {
+    formatCurrency,
+    formatPrice,
+    formatTitle,
+    removeItemFromCart,
+    toastError,
+    toastSuccess,
+    toastWarning,
+    validatePhoneNumber,
+} from '../../../untils/Logic';
 import { useSelector, useStore } from 'react-redux';
 import { ReducerProps } from '../../../reducers/ReducersProps';
 import { HOST_BE, typeRole } from '../../../common/Common';
@@ -124,15 +133,35 @@ const Checkout: React.FC = () => {
         const address = e.target.value;
         setCustomerAddress(address);
     };
+    
     const removeFromCart = () => {
         let list_cart = JSON.parse(localStorage.getItem('listCart') || '[]');
         listCheckout.map((item_store: any) => {
             list_cart = list_cart.filter((item: any) => item.productDetailId !== item_store.productDetailId);
         });
         localStorage.setItem('listCart', JSON.stringify(list_cart));
+        sessionStorage.removeItem('checkout');
     };
+
+    const validateInputs = () => {
+        const missingFields = [];
+
+        if (!customerName) missingFields.push('Tên khách hàng');
+        if (!totalCOD) missingFields.push('Tiền thu khách');
+        if (!customerPhone) missingFields.push('Số điện thoại');
+        if (!customerAddress) missingFields.push('Địa chỉ');
+        if (!province) missingFields.push('Tỉnh/Thành phố');
+        if (!district) missingFields.push('Quận/Huyện');
+        if (!ward) missingFields.push('Phường/Xã');
+
+        if (missingFields.length > 0) {
+            toastWarning(`Vui lòng nhập đủ thông tin: ${missingFields.join(', ')}`);
+            return false;
+        }
+        return true;
+    };
+
     const handleBuy = async () => {
-        store.dispatch(change_is_loading(true));
         // Tạo danh sách chi tiết đơn hàng
         const listOrderDetail = listItemInCart
             .filter((item: any) => {
@@ -160,10 +189,12 @@ const Checkout: React.FC = () => {
             });
 
         if (shippingMethod === 'OFFLINE') {
-            if (!(orderNote && customerName && shippingMethod && totalCOD)) {
+            if (!(customerName && shippingMethod && totalCOD)) {
                 toastWarning('Vui lòng nhập đủ thông tin');
                 return;
             }
+            store.dispatch(change_is_loading(true));
+
             const formData = new FormData();
 
             // Thêm thông tin đơn hàng vào FormData
@@ -179,16 +210,13 @@ const Checkout: React.FC = () => {
                 formData.append('ctvName', user.name);
             }
 
-            formData.append('userId', user.id);
-            formData.append('ctvName', user.name);
             formData.append('ctvNote', orderNote);
             formData.append('customerName', customerName);
             formData.append('shipMethod', shippingMethod);
             formData.append('paid', 'true');
-            formData.append('CODPrice', totalCOD.toString());
+            formData.append('CODPrice', totalCOD.replace(/,/g, '').toString());
             formData.append('shipFee', '0');
             formData.append('listOrderDetail', JSON.stringify(listOrderDetail));
-
             // Upload hình ảnh nếu có
             const images = uploadedImages || [];
             for (const image of images) {
@@ -207,16 +235,28 @@ const Checkout: React.FC = () => {
 
                 if (res.data.message === 'Success') {
                     toastSuccess('Đặt hàng thành công');
-                    sessionStorage.removeItem('checkout');
 
                     removeFromCart();
+                    
                     navigate('/user/order');
+                    store.dispatch(change_is_loading(false));
+                } else {
+                    toastError('Thất bại');
                     store.dispatch(change_is_loading(false));
                 }
             } catch (error) {
                 console.error('Failed to place order:', error);
             }
         } else {
+            if (!validateInputs()) {
+                return;
+            }
+            if (!validatePhoneNumber(customerPhone)) {
+                toastWarning('Số điện thoại không hợp lệ');
+                return;
+            }
+            store.dispatch(change_is_loading(true));
+
             // Đơn hàng online
             const formData = new FormData();
 
@@ -246,8 +286,8 @@ const Checkout: React.FC = () => {
             );
             formData.append('shipMethod', shippingMethod);
             formData.append('paid', 'true');
-            formData.append('CODPrice', totalCOD.toString());
-            formData.append('shipFee', shippingFee.toString());
+            formData.append('CODPrice', totalCOD.replace(/,/g, '').toString());
+            formData.append('shipFee', shippingFee.replace(/,/g, '').toString());
             formData.append('listOrderDetail', JSON.stringify(listOrderDetail));
 
             // Upload hình ảnh nếu có
@@ -268,10 +308,13 @@ const Checkout: React.FC = () => {
 
                 if (res.data.message === 'Success') {
                     toastSuccess('Đặt hàng thành công');
-                    sessionStorage.removeItem('checkout');
 
                     removeFromCart();
+
                     navigate('/user/order');
+                    store.dispatch(change_is_loading(false));
+                } else {
+                    toastError('Thất bại');
                     store.dispatch(change_is_loading(false));
                 }
             } catch (error) {
@@ -353,10 +396,10 @@ const Checkout: React.FC = () => {
                     variant="outlined"
                     fullWidth
                     required
-                    type="number"
+                    type="text"
                     helperText="Tổng tiền thu khách cộng cả phí ship"
                     value={totalCOD}
-                    onChange={(e) => setTotalCOD(e.target.value)}
+                    onChange={(e) => setTotalCOD(formatCurrency(e.target.value))}
                     sx={{ mb: 1 }}
                     InputProps={{
                         sx: {
@@ -512,8 +555,8 @@ const Checkout: React.FC = () => {
                                 variant="outlined"
                                 fullWidth
                                 value={shippingFee}
-                                type="number"
-                                onChange={(e) => setShippingFee(e.target.value)}
+                                type="text"
+                                onChange={(e) => setShippingFee(formatCurrency(e.target.value))}
                                 sx={{ mb: 1 }}
                                 InputProps={{
                                     sx: {
@@ -764,7 +807,7 @@ const Checkout: React.FC = () => {
                             </Typography>
 
                             <Typography variant="h6" sx={{ fontSize: 19, fontWeight: 600 }}>
-                                {formatPrice(totalAmount + Number(shippingFee))}
+                                {formatPrice(totalAmount + Number(shippingFee.replace(',', '')))}
                             </Typography>
                         </Box>
                     </Box>

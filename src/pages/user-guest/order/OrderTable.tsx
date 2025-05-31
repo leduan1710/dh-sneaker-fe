@@ -121,7 +121,7 @@ export default function OrderTable() {
     };
 
     useEffect(() => {
-        if (user) getDataOrder();
+        if (user.id && selectedMonth) getDataOrder();
     }, [selectedMonth, user]);
 
     const handlePageChange = (event: unknown, newPage: number) => {
@@ -184,9 +184,14 @@ export default function OrderTable() {
             <Grid container spacing={1} sx={{ p: 1 }}>
                 <Grid xs={6} sm={6} md={3} item>
                     <Card>
-                        <CardContent sx={{paddingTop: '8px', ":last-child": {
-                            paddingBottom: '8px'
-                        }}}>
+                        <CardContent
+                            sx={{
+                                paddingTop: '8px',
+                                ':last-child': {
+                                    paddingBottom: '8px',
+                                },
+                            }}
+                        >
                             <Grid container spacing={1}>
                                 <Grid xs={4} sm={4} item display="flex" justifyContent="center" alignItems="center">
                                     <AvatarWrapper>
@@ -195,10 +200,10 @@ export default function OrderTable() {
                                 </Grid>
                                 <Grid xs={8} sm={8} item display="flex" alignItems="center">
                                     <Box>
-                                        <Typography variant="h5" sx={{fontSize: 16}} noWrap>
+                                        <Typography variant="h5" sx={{ fontSize: 16 }} noWrap>
                                             Hoa hồng
                                         </Typography>
-                                        <Typography variant="body2" sx={{fontSize: 14}} noWrap>
+                                        <Typography variant="body2" sx={{ fontSize: 14 }} noWrap>
                                             {formatPrice(totalCommission)}
                                         </Typography>
                                     </Box>
@@ -209,9 +214,14 @@ export default function OrderTable() {
                 </Grid>
                 <Grid xs={6} sm={6} md={3} item>
                     <Card>
-                        <CardContent sx={{paddingTop: '8px', ":last-child": {
-                            paddingBottom:'8px'
-                        }}}>
+                        <CardContent
+                            sx={{
+                                paddingTop: '8px',
+                                ':last-child': {
+                                    paddingBottom: '8px',
+                                },
+                            }}
+                        >
                             <Grid container spacing={1}>
                                 <Grid xs={4} sm={4} item display="flex" justifyContent="center" alignItems="center">
                                     <AvatarWrapper>
@@ -220,10 +230,10 @@ export default function OrderTable() {
                                 </Grid>
                                 <Grid xs={8} sm={8} item display="flex" alignItems="center">
                                     <Box>
-                                        <Typography variant="h5" sx={{fontSize: 16}} gutterBottom noWrap>
+                                        <Typography variant="h5" sx={{ fontSize: 16 }} gutterBottom noWrap>
                                             Số lượng
                                         </Typography>
-                                        <Typography variant="body2" sx={{fontSize: 14}} noWrap>
+                                        <Typography variant="body2" sx={{ fontSize: 14 }} noWrap>
                                             {totalQuantity || 0}
                                         </Typography>
                                     </Box>
@@ -234,9 +244,14 @@ export default function OrderTable() {
                 </Grid>
                 <Grid xs={6} sm={6} md={3} item>
                     <Card>
-                        <CardContent sx={{paddingTop: '8px', ":last-child": {
-                            paddingBottom: '8px'
-                        }}}>
+                        <CardContent
+                            sx={{
+                                paddingTop: '8px',
+                                ':last-child': {
+                                    paddingBottom: '8px',
+                                },
+                            }}
+                        >
                             <Grid container spacing={1}>
                                 <Grid xs={4} sm={4} item display="flex" justifyContent="center" alignItems="center">
                                     <AvatarWrapper>
@@ -245,10 +260,10 @@ export default function OrderTable() {
                                 </Grid>
                                 <Grid xs={8} sm={8} item display="flex" alignItems="center">
                                     <Box>
-                                        <Typography variant="h5" sx={{fontSize: 16}} gutterBottom noWrap>
+                                        <Typography variant="h5" sx={{ fontSize: 16 }} gutterBottom noWrap>
                                             Thưởng
                                         </Typography>
-                                        <Typography variant="body2" sx={{fontSize: 14}} noWrap>
+                                        <Typography variant="body2" sx={{ fontSize: 14 }} noWrap>
                                             {formatPrice(bonus)}
                                         </Typography>
                                     </Box>
@@ -259,9 +274,14 @@ export default function OrderTable() {
                 </Grid>
                 <Grid xs={6} sm={6} md={3} item>
                     <Card>
-                        <CardContent sx={{paddingTop: '8px', ":last-child": {
-                            paddingBottom: '8px'
-                        }}}>
+                        <CardContent
+                            sx={{
+                                paddingTop: '8px',
+                                ':last-child': {
+                                    paddingBottom: '8px',
+                                },
+                            }}
+                        >
                             <Grid container spacing={1}>
                                 <Grid xs={4} sm={4} item display="flex" justifyContent="center" alignItems="center">
                                     <AvatarWrapper>
@@ -270,10 +290,10 @@ export default function OrderTable() {
                                 </Grid>
                                 <Grid xs={8} sm={8} item display="flex" alignItems="center">
                                     <Box>
-                                        <Typography variant="h5" sx={{fontSize: 16}} gutterBottom noWrap>
+                                        <Typography variant="h5" sx={{ fontSize: 16 }} gutterBottom noWrap>
                                             Tổng
                                         </Typography>
-                                        <Typography variant="body2" sx={{fontSize: 14}} noWrap>
+                                        <Typography variant="body2" sx={{ fontSize: 14 }} noWrap>
                                             {formatPrice(totalCommission + bonus)}
                                         </Typography>
                                     </Box>
@@ -352,6 +372,9 @@ export default function OrderTable() {
                                             day: '2-digit',
                                             month: '2-digit',
                                             year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: false,
                                         })}
                                     </TableCell>
                                     <TableCell>{order.customerName}</TableCell>

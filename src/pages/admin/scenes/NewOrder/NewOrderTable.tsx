@@ -47,6 +47,7 @@ import TablePagination from '@mui/material/TablePagination';
 import StatusUpdateDialog from './StatusUpdateDialog';
 import { useLocation } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
+import DeliveryCodeDialog from './DeliveryCodeDialog';
 
 interface RowProps {
     order: any;
@@ -62,6 +63,8 @@ function Row(props: RowProps) {
     const [openUpdateStatus, setOpenUpdateStatus] = useState(false);
     const [selection, setSelection] = useState('');
     const [showImage, setShowImage] = useState(false);
+    const [showDeliveryDialog, setShowDeliveryDialog] = useState(false);
+    const [deliveryCode, setDeliveryCode] = useState('');
 
     const handleToggleImage = () => {
         setShowImage((prev) => !prev);
@@ -97,6 +100,9 @@ function Row(props: RowProps) {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
                     })}
                 </TableCell>
                 <TableCell>{order.ctvName}</TableCell>
@@ -264,11 +270,20 @@ function Row(props: RowProps) {
                     </Box>
                 </TableCell>
             </TableRow>
+            <DeliveryCodeDialog
+                open={showDeliveryDialog}
+                onClose={() => setShowDeliveryDialog(false)}
+                deliveryCode={deliveryCode}
+            />
             <StatusUpdateDialog
                 open={openUpdateStatus}
                 onClose={handleCloseUpdateStatusDialog}
                 order={order}
-                onUpdate={handleUpdateOrderList}
+                onUpdate={(deliveryCode) => {
+                    handleUpdateOrderList();
+                    setDeliveryCode(deliveryCode);
+                    setShowDeliveryDialog(true);
+                }}
                 selection={selection}
             />
         </React.Fragment>
