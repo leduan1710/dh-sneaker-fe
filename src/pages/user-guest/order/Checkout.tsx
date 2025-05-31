@@ -312,7 +312,7 @@ const Checkout: React.FC = () => {
                     <FormControl fullWidth sx={{ mb: 1 }}>
                         <InputLabel>Chọn CTV</InputLabel>
                         <Select
-                            value={ctv.id}
+                            value={ctv?.id}
                             onChange={(e) => {
                                 const selectedCTV = ctvList.find((c: any) => c.id === e.target.value);
                                 setCTV(selectedCTV);
@@ -665,7 +665,7 @@ const Checkout: React.FC = () => {
                         Tóm tắt đơn hàng
                     </Typography>
                     <Divider sx={{ my: 1 }}></Divider>
-                    <Box sx={{ p: 3 }}>
+                    <Box sx={{ p: 2 }}>
                         {listItemInCart
                             .filter((item: any) => {
                                 const cartItem = listCart.find((cartItem: any) => cartItem.productDetailId === item.id);
@@ -685,7 +685,7 @@ const Checkout: React.FC = () => {
                                                 boxShadow: 1,
                                             }}
                                         >
-                                            <Box sx={{ position: 'relative', mr: 2 }}>
+                                            <Box sx={{ position: 'relative', mr: 1 }}>
                                                 <img
                                                     src={
                                                         item.image.startsWith('uploads')
@@ -693,7 +693,7 @@ const Checkout: React.FC = () => {
                                                             : item.image
                                                     }
                                                     alt={item.name}
-                                                    style={{ width: 80, height: 80, borderRadius: '4px' }}
+                                                    style={{ width: 100, height: 'auto', borderRadius: '4px' }}
                                                 />
                                                 <Box
                                                     sx={{
@@ -723,10 +723,10 @@ const Checkout: React.FC = () => {
                                                         alignItems: 'center',
                                                     }}
                                                 >
-                                                    <Typography variant="h6" sx={{ fontSize: 17 }}>
+                                                    <Typography variant="h6" sx={{ fontSize: 16 }}>
                                                         {item.name}
                                                     </Typography>
-                                                    <Typography variant="body1" sx={{ fontSize: 15 }} color="#111">
+                                                    <Typography variant="body1" sx={{ fontSize: 14 }} color="#111">
                                                         {formatPrice(item.sellPrice)}
                                                     </Typography>
                                                 </Box>

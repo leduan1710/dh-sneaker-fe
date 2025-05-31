@@ -272,7 +272,7 @@ const ProductCollection = () => {
     console.log(listProduct.length, Math.ceil(listProduct.length / limit));
     return (
         <>
-            <Container sx={{ pt: 1, mt: '165px' }} maxWidth="xl">
+            <Container sx={{ pt: 1, mt: {xs: '190px', md: '165px'} }} maxWidth="xl">
                 <Typography
                     variant="h4"
                     sx={{
