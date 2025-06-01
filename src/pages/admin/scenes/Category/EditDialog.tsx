@@ -47,35 +47,28 @@ const EditCateDialog: React.FC<EditCateDialogProps> = (props) => {
     const { onClose, open, categories, category, onUpdate } = props;
     const [categoryName, setCategoryName] = useState('');
 
-
     const handleClose = () => {
         onClose();
     };
 
-    const handleEditCategory = async (name: string, image: File, previousId: string) => {
-        const formData = new FormData();
-        formData.append('id', category ? category.id : '');
-        formData.append('name', name);
-        if (image) {
-            const uniqueFilename = `image_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            const imageBlob = await fetch(URL.createObjectURL(image)).then((response) => response.blob());
-            formData.append('file', imageBlob, uniqueFilename);
-        }
+    const handleEditCategory = async (name: string) => {
         try {
-            const res = await axios.post(`${HOST_BE}/admin/update/category`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${localStorage.getItem('token')}`, // Nếu cần token
+            const res = await axios.post(
+                `${HOST_BE}/admin/add/category`,
+                { id: category?.id, name: name },
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`, // Nếu cần token
+                    },
                 },
-            });
+            );
 
             if (res.data.message === 'Success') {
                 toastSuccess(t('toast.EditSuccess'));
                 onUpdate();
                 handleClose(); // Đóng dialog
             }
-        } catch (error) {
-        }
+        } catch (error) {}
     };
 
     return (
@@ -91,16 +84,14 @@ const EditCateDialog: React.FC<EditCateDialogProps> = (props) => {
                         const formData = new FormData(event.currentTarget);
                         const formJson = Object.fromEntries((formData as any).entries());
                         const name = formJson.name;
-                        const image = formJson.image;
-
+                        handleEditCategory(name);
                         handleClose();
                     },
                 }}
             >
-                <DialogTitle sx={{ textTransform: 'capitalize'}}>{t('category.Admin.EditCategory')}</DialogTitle>
+                <DialogTitle sx={{ textTransform: 'capitalize' }}>{t('category.Admin.EditCategory')}</DialogTitle>
                 <DialogContent>
-                    <DialogContentText sx={{ mb: 1 }}>{t('category.Admin.FormEditCategory')}
-                    </DialogContentText>
+                    <DialogContentText sx={{ mb: 1 }}>{t('category.Admin.FormEditCategory')}</DialogContentText>
                     <TextField
                         autoFocus
                         required
@@ -114,7 +105,6 @@ const EditCateDialog: React.FC<EditCateDialogProps> = (props) => {
                         variant="outlined"
                         sx={{ mb: 1 }}
                     />
-                    
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>{t('action.Cancel')}</Button>

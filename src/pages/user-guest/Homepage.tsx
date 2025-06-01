@@ -41,111 +41,26 @@ const HomePage: React.FC<HomePageProps> = (props) => {
     const theme = useTheme();
     const isMediumScreen = useMediaQuery('(max-width:1025px)');
     const { t } = useTranslation();
-    const [category, setCategory] = useState<any>(undefined);
-    const [isGetStart, setIsGetStart] = useState<boolean>(false);
-    const [categorys, setCategorys] = useState<any>([]);
-    const [listCategoryChild, setListCategoryChild] = useState<any>(undefined);
-    const [listCategoryChildWomen, setListCategoryChildWomen] = useState<any>(undefined);
-    const [req, setReq] = useState<boolean>(true);
-    const [categoryIdCurrent, setCategoryIdCurrent] = useState<any>('66eacadad7db49389c698067');
-    const [listProductCurrent, setListProductCurrent] = useState<any>(undefined);
-    const [optionsFilter, setOptionsFilter] = useState<optionsFilterProps>({
-        sort: null,
-        materialId: null,
-        brandId: null,
-        styleId: null,
-        originId: null,
-    });
-    const getDataCategory = async () => {
-        const res = await GetGuestApi('/api/get-categories');
+    const [banners, setBanners] = useState<any>(undefined);
+
+    const getDataBanner = async () => {
+        const res = await GetGuestApi('/api/banners');
         if (res.data.message == 'Success') {
-            setCategory(res.data.categories.slice(0, 8));
+            setBanners(res.data.banners);
         }
     };
-    const getDataCategoryFull = async () => {
-        const resCategorys = await GetGuestApi('/api/get-category');
-        if (resCategorys.data.message == 'Success') {
-            setCategorys(resCategorys.data.categories);
-        }
-    };
-    const handleReq = () => {
-        setReq(true);
-    };
-    const getDataCategoryChild = async () => {
-        const categoryChilds = await PostGuestApi(`/api/category-many`, {
-            // listCategoryId: resCategory.data.category.categoryIdClIST,
-            categoryPId: '66eac5c7f7adcbed07e215bd',
-        });
-        if (categoryChilds.data.message == 'Success') {
-            const categoryMap: any = {};
-            categoryChilds.data.categories.forEach((category: any) => {
-                categoryMap[category.id] = category;
-            });
 
-            // Bước 2: Tạo mảng kết quả
-            const result: any = [];
-            categoryChilds.data.categories.forEach((category: any) => {
-                if (category.categoryIdClIST.length > 0) {
-                    result.push({
-                        parent: category,
-                        children: category.categoryIdClIST.map((childId: any) => categoryMap[childId]),
-                    });
-                }
-            });
-
-            setListCategoryChild(result);
-        }
-        //
-        const categoryChildsWomen = await PostGuestApi(`/api/category-many`, {
-            // listCategoryId: resCategory.data.category.categoryIdClIST,
-            categoryPId: '66eac608a9606d68cd102d21',
-        });
-        if (categoryChildsWomen.data.message == 'Success') {
-            const categoryMap: any = {};
-            categoryChildsWomen.data.categories.forEach((category: any) => {
-                categoryMap[category.id] = category;
-            });
-
-            // Bước 2: Tạo mảng kết quả
-            const result: any = [];
-            categoryChildsWomen.data.categories.forEach((category: any) => {
-                if (category.categoryIdClIST.length > 0) {
-                    result.push({
-                        parent: category,
-                        children: category.categoryIdClIST.map((childId: any) => categoryMap[childId]),
-                    });
-                }
-            });
-
-            setListCategoryChildWomen(result);
-        }
-    };
-    const getProductByCategory = async () => {
-        const resProducts = await PostGuestApi(`/api/get-product-by-category/${categoryIdCurrent}/24/1`, {
-            options: optionsFilter,
-        });
-        if (resProducts.data.message == 'Success') {
-            setListProductCurrent(resProducts.data.products);
-        }
-        setReq(false);
-    };
     useEffect(() => {
-        // getDataCategory();
-        // getDataCategoryFull();
-        // getDataCategoryChild();
+        getDataBanner();
     }, []);
-    // useEffect(() => {
-    //     if (req) {
-    //         getProductByCategory();
-    //     }
-    // }, [req]);
+    const banner1 = banners?.find((b: any) => b.position === 1);
     return (
         <>
-            <div style={{ width: '100%', marginTop: isMediumScreen ? '165px' : '150px' }}>
+            <div style={{ width: '100%', marginTop: isMediumScreen ? '190px' : '150px' }}>
                 <div className="rounded-lg">
                     <img
                         style={{ objectFit: 'cover', height: 'auto', width: '100%' }}
-                        src={require('../../static/dhsneaker-banner.png')}
+                        src={banner1 ? banner1.image.startsWith('uploads') ? `${HOST_BE}/${banner1.image}` : banner1.image : undefined}
                     />
                 </div>
             </div>
@@ -209,94 +124,6 @@ const HomePage: React.FC<HomePageProps> = (props) => {
                 />
             </Container>
             <Jibbitz></Jibbitz>
-            {/* <div style={{ marginTop: 100 }} className="">
-                {!isGetStart ? (
-                    <div className="container" style={{ width: '100%', overflow: 'hidden' }}>
-                        <div className="rounded-lg">
-                            <img
-                                className="rounded-lg"
-                                style={{ objectFit: 'cover', height: 550, width: '100%' }}
-                                src={require('../../static/dhsneaker-banner.png')}
-                            />
-                        </div>
-                        {/* <div className="col-span-2 mt-3">
-                            <BannerShop />
-                        </div>
-                        <div className="mt-12 select-none">
-                            <Divider>
-                                <Chip label={t('homepage.Category')} size="small" />
-                            </Divider>
-                        </div>
-                        {categorys.length > 0 ? (
-                            <div className="mt-12">
-                                <MultiCaroselCategory listCategory={categorys} />
-                            </div>
-                        ) : null}
-                        <div className="mt-12 grid grid-cols-5">
-                            <div className="col-span-1 p-1 box-shadow rounded-xl mt-1 hidden lg:block">
-                                {listCategoryChild ? (
-                                    <div>
-                                        <div className="font-bold p-3">{t('homepage.Men Fashion')}</div>
-                                        <DrawMore
-                                            setCategoryIdCurrent={setCategoryIdCurrent}
-                                            listCategoryChild={listCategoryChild}
-                                            handleReq={handleReq}
-                                            categoryPId={categoryIdCurrent}
-                                            setPageCurrent={() => {}}
-                                        />
-                                    </div>
-                                ) : null}
-                                {listCategoryChildWomen ? (
-                                    <div>
-                                        <div className="font-bold p-3">{t('homepage.Women Fashion')}</div>
-                                        <DrawMore
-                                            setCategoryIdCurrent={setCategoryIdCurrent}
-                                            listCategoryChild={listCategoryChildWomen}
-                                            handleReq={handleReq}
-                                            categoryPId={categoryIdCurrent}
-                                            setPageCurrent={() => {}}
-                                        />
-                                    </div>
-                                ) : null}
-                            </div>
-                            <div className="col-span-5 lg:col-span-4">
-                                {listProductCurrent ? <ListProduct listProduct={listProductCurrent} /> : null}
-                            </div>
-                        </div> */}
-            {/* --------------- */}
-
-            {/* <div className="mt-6">
-                            <div className=" border-b border-gray-300 flex mt-6">
-                                <div
-                                    style={{
-                                        borderBottomWidth: 3,
-                                    }}
-                                    className="font-bold text-2xl border-b border-solid  border-blue-500"
-                                >
-                                    {t('product.ProductTop')}
-                                </div>
-                            </div>
-                            <ProductTop />
-                        </div>
-                        <div id="product-new-id" className="mt-12">
-                            <div className=" border-b border-gray-300 flex mt-6">
-                                <div
-                                    style={{
-                                        borderBottomWidth: 3,
-                                    }}
-                                    className="font-bold text-2xl border-b border-solid  border-blue-500"
-                                >
-                                    {t('homepage.New Product')}
-                                </div>
-                            </div>
-                            <ProductNew />
-                        </div>
-                        <MultiCaroselProductJV />
-                    </div>
-                ) : (
-                    <div></div>
-                )}
-            </div> */}
             <Footer />
         </>
     );

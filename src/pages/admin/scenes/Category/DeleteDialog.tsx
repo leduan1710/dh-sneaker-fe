@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from "react-i18next";
 import { toastSuccess } from "../../../../untils/Logic";
-import { PostApi } from "../../../../untils/Api";
+import { GetApi, PostApi } from "../../../../untils/Api";
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 
 interface DeleteDialogProps {
@@ -20,8 +20,7 @@ const DeleteDialog: React.FC<DeleteDialogProps> = (props) => {
     };
     const handleDelete = async () => {
         try {
-            console.log('delete');
-            const res = await PostApi(`/admin/delete/category/${categoryId}`, localStorage.getItem('token'), {});
+            const res = await GetApi(`/admin/delete/category/${categoryId}`, localStorage.getItem('token'), {});
 
             if (res.data.message === 'Success') {
                 toastSuccess(t('toast.DeleteSuccess'));

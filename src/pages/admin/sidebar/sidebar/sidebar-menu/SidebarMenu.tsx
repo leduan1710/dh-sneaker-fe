@@ -15,7 +15,7 @@ import { SidebarContext } from '../../../../../contexts/SidebarContext';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { ReducerProps } from '../../../../../reducers/ReducersProps';
-import { Announcement } from '@mui/icons-material';
+import { Announcement, BrandingWatermark } from '@mui/icons-material';
 
 const MenuWrapper = styled(Box)(
     ({ theme }) => `
@@ -294,6 +294,17 @@ function SidebarMenu() {
                                             startIcon={<Announcement />}
                                         >
                                             Thông báo
+                                        </Button>
+                                    </ListItem>
+                                    <ListItem component="div">
+                                        <Button
+                                            disableRipple
+                                            component={RouterLink}
+                                            onClick={closeSidebar}
+                                            to="/admin/management/banners"
+                                            startIcon={<BrandingWatermark />}
+                                        >
+                                            Banner
                                         </Button>
                                     </ListItem>
                                 </>

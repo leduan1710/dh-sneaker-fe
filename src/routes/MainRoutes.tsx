@@ -43,6 +43,7 @@ import DetailCommissionManagement from '../pages/admin/scenes/DetailCommission';
 import CommissionStatistic from '../pages/admin/scenes/CommissionStatistic';
 import OrderDetail from '../pages/user-guest/order/OrderDetail';
 import Announcement from '../pages/admin/scenes/Announcement';
+import Banner from '../pages/admin/scenes/Banner';
 
 //--------------------------------------------------------------
 //--------------------------------------------------------------
@@ -162,7 +163,7 @@ const MainRouters: React.FC<MainRoutersProps> = (props) => {
                         <Route path="management/detail-commission" element={<DetailCommissionManagement />} />
                         <Route path="management/commission-statistics" element={<CommissionStatistic />} />
                         <Route path="management/announcements" element={<Announcement />} />
-
+                        <Route path="management/banners" element={<Banner />} />
                         <Route path="management/user" element={<UserManagement />} />
                     </Route>
                 </Routes>

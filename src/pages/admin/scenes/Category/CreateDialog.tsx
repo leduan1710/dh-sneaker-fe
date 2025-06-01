@@ -50,21 +50,17 @@ const CreateCateDialog: React.FC<CreateCateDialogProps> = (props) => {
 
     const handleAddCategory = async (name: string) => {
         store.dispatch(change_is_loading(true));
-        const formData = new FormData();
-        formData.append('name', name);
-        const resCheck = await PostApi('/admin/check-name-category', localStorage.getItem('token'), { name: name });
-        if (resCheck.data.message == 'Already exists') {
-            toastWarning(t('toast.NameAlreadyExists'));
-            store.dispatch(change_is_loading(false));
-            return;
-        }
+
         try {
-            const res = await axios.post(`${HOST_BE}/admin/add/category`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${localStorage.getItem('token')}`, // Nếu cần token
+            const res = await axios.post(
+                `${HOST_BE}/admin/add/category`,
+                { name: name },
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
                 },
-            });
+            );
 
             if (res.data.message === 'Success') {
                 toastSuccess(t('toast.CreateSuccess'));
