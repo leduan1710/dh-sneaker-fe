@@ -179,6 +179,13 @@ export default function OrderTable() {
     const bonus = calculateBonus(totalQuantity);
     const paginatedOrders = filteredOrders.slice(page * limit, page * limit + limit);
 
+    const columnColors = [
+        'rgba(203, 254, 242, 0.69)',
+        'rgb(249, 255, 234)',
+        'rgba(203, 254, 242, 0.69)',
+        'rgb(249, 255, 234)',
+    ];
+
     return (
         <Paper sx={{ width: '100%', overflow: 'hidden' }}>
             <Grid container spacing={1} sx={{ p: 1 }}>
@@ -336,23 +343,29 @@ export default function OrderTable() {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>Mã đơn hàng</TableCell>
-                            <TableCell>Ngày tạo đơn</TableCell>
-                            <TableCell>Tên khách</TableCell>
-                            <TableCell>SĐT</TableCell>
-                            <TableCell sx={{ minWidth: 120 }}>Địa chỉ</TableCell>
-                            <TableCell>Hình thức ship</TableCell>
-                            <TableCell>Mã vận đơn</TableCell>
-                            <TableCell>Giá CTV</TableCell>
-                            <TableCell>Giá bán</TableCell>
-                            <TableCell>Phí ship</TableCell>
-                            <TableCell>Hoa hồng</TableCell>
-                            <TableCell>Số lượng</TableCell>
-                            <TableCell>Trạng thái đơn</TableCell>
+                            {[
+                                'Mã đơn hàng',
+                                'Ngày tạo đơn',
+                                'Tên khách',
+                                'SĐT',
+                                'Địa chỉ',
+                                'Hình thức ship',
+                                'Mã vận đơn',
+                                'Tiền Cod',
+                                'Giá CTV',
+                                'Phí ship',
+                                'Hoa hồng',
+                                'Số lượng',
+                                'Trạng thái đơn',
+                            ].map((header, index) => (
+                                <TableCell key={index} sx={{ fontWeight: 'bold', color: '#333' }}>
+                                    {header}
+                                </TableCell>
+                            ))}
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {paginatedOrders.map((order: any, index: number) => {
+                        {paginatedOrders.map((order: any) => {
                             const orderDet = orderDetails.filter((od) => od.orderId === order.id);
                             const totalCtvPrice = orderDet.reduce((total, detail) => {
                                 return total + detail.ctvPrice * detail.quantity;
@@ -365,61 +378,76 @@ export default function OrderTable() {
                                         navigate(`/user/order/${order.id}`);
                                     }}
                                 >
-                                    <TableCell>{order.orderCode}</TableCell>
-                                    <TableCell>
-                                        {' '}
-                                        {new Date(order.createDate).toLocaleDateString('vi-VN', {
+                                    {[
+                                        order.orderCode,
+                                        new Date(order.createDate).toLocaleDateString('vi-VN', {
                                             day: '2-digit',
                                             month: '2-digit',
                                             year: 'numeric',
                                             hour: '2-digit',
                                             minute: '2-digit',
                                             hour12: false,
-                                        })}
-                                    </TableCell>
-                                    <TableCell>{order.customerName}</TableCell>
-                                    <TableCell>{order.customerPhone}</TableCell>
-                                    <TableCell>{order.addressDetail}</TableCell>
-                                    <TableCell>
-                                        {order.shipMethod === 'GRAB'
+                                        }), 
+                                        order.customerName,
+                                        order.customerPhone, 
+                                        order.addressDetail,
+                                        order.shipMethod === 'GRAB'
                                             ? 'Grab/Kho khác'
                                             : order.shipMethod === 'VIETTELPOST'
                                             ? 'Viettelpost'
-                                            : 'Offline'}
-                                    </TableCell>
-                                    <TableCell>{order.deliveryCode}</TableCell>
+                                            : 'Offline', 
+                                        order.deliveryCode, 
+                                        formatPrice(order.CODPrice),
 
-                                    <TableCell>{formatPrice(totalCtvPrice)}</TableCell>
-                                    <TableCell>
-                                        {formatPrice(
-                                            orderDet.reduce((total, detail) => {
-                                                return total + detail.sellPrice * detail.quantity;
-                                            }, 0),
-                                        )}
-                                    </TableCell>
-                                    <TableCell>{formatPrice(order.shipFee)}</TableCell>
-                                    <TableCell>
-                                        {order.status === 'PROCESSING' || order.status === 'CANCEL'
+                                        formatPrice(totalCtvPrice),
+                                        formatPrice(order.shipFee),
+                                        order.status === 'PROCESSING' || order.status === 'CANCEL'
                                             ? formatPrice(0)
                                             : order.status === 'BOOM'
                                             ? formatPrice(-60000)
-                                            : formatPrice(order.CODPrice - order.shipFee - totalCtvPrice)}
-                                    </TableCell>
-                                    <TableCell align="center">
-                                        {order.status === 'SUCCESS'
+                                            : formatPrice(order.CODPrice - order.shipFee - totalCtvPrice),
+                                        order.status === 'SUCCESS'
                                             ? orderDetails
                                                   .filter((detail) => detail.orderId === order.id)
-                                                  .reduce((total, detail) => {
-                                                      return detail.isJibbitz ? total : total + detail.quantity;
-                                                  }, 0)
-                                            : 0}
-                                    </TableCell>
-                                    <TableCell>
-                                        {order.status === 'PROCESSING' && 'Đang chờ'}
-                                        {order.status === 'SUCCESS' && 'Thành công'}
-                                        {order.status === 'CANCEL' && 'Đã hủy'}
-                                        {order.status === 'BOOM' && 'Boom'}
-                                    </TableCell>
+                                                  .reduce(
+                                                      (total, detail) =>
+                                                          detail.isJibbitz ? total : total + detail.quantity,
+                                                      0,
+                                                  )
+                                            : 0, // Cột 12
+                                        order.status === 'PROCESSING'
+                                            ? 'Đang chờ'
+                                            : order.status === 'SUCCESS'
+                                            ? 'Thành công'
+                                            : order.status === 'CANCEL'
+                                            ? 'Đã hủy'
+                                            : order.status === 'BOOM'
+                                            ? 'Boom'
+                                            : '',
+                                    ].map((cell, cellIndex) => {
+                                        let backgroundColor;
+                                        if (cellIndex < 5) {
+                                            backgroundColor = columnColors[0]; 
+                                        } else if (cellIndex < 7) {
+                                            backgroundColor = columnColors[1];
+                                        } else if (cellIndex < 11) {
+                                            backgroundColor = columnColors[2];
+                                        } else {
+                                            backgroundColor = columnColors[3];
+                                        }
+                                        return (
+                                            <TableCell
+                                                key={cellIndex}
+                                                sx={{
+                                                    backgroundColor,
+                                                    padding: '16px',
+                                                    borderBottom: '1px solid #e0e0e0',
+                                                }}
+                                            >
+                                                {cell}
+                                            </TableCell>
+                                        );
+                                    })}
                                 </TableRow>
                             );
                         })}

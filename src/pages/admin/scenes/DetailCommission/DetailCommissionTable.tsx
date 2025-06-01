@@ -117,15 +117,9 @@ function Row(props: RowProps) {
                 </TableCell>
 
                 <TableCell>{order.ctvName}</TableCell>
-
+                <TableCell>{formatPrice(order.CODPrice)}</TableCell>
                 <TableCell>{formatPrice(totalCtvPrice)}</TableCell>
-                <TableCell>
-                    {formatPrice(
-                        orderDetails.reduce((total, detail) => {
-                            return total + detail.sellPrice * detail.quantity;
-                        }, 0),
-                    )}
-                </TableCell>
+
                 <TableCell>
                     {formatPrice(
                         orderDetails.reduce((total, detail) => {
@@ -251,10 +245,14 @@ export default function DetailCommissionTable() {
     // Pagination state
     const [page, setPage] = useState(0);
     const [limit, setLimit] = useState(5);
+    const [count, setCount] = useState(0);
+    const [step, setStep] = useState<number>(1);
+
     const [statusFilter, setStatusFilter] = useState<string>('ALL');
     const [shipMethodFilter, setShipMethodFilter] = useState<string>('ALL');
     const [ctvFilter, setCtvFilter] = useState('ALL');
     const [ctvNames, setCtvNames] = useState<string[]>([]);
+    const [searchTerm, setSearchTerm] = useState<string>('');
 
     const getDataCTVName = async () => {
         const res = await GetApi(`/admin/get/ctvNameList`, localStorage.getItem('token'));
@@ -270,14 +268,14 @@ export default function DetailCommissionTable() {
         store.dispatch(change_is_loading(true));
         if (ctvName === 'ALL') {
             const res = await GetApi(
-                `/admin/get-orders-by-month/${selectedMonth}/${selectedYear}/${20}/${1}`,
+                `/admin/get-orders-by-month/${selectedMonth}/${selectedYear}/${20}/${step}`,
                 localStorage.getItem('token'),
             );
 
             if (res.data.message == 'Success') {
-                setOrders(res.data.orders.orders);
+                setOrders((prev) => [...prev, ...res.data.orders.orders]);
+                setCount(res.data.orders.count);
                 await getOrderDetails(res.data.orders.orders);
-                setPage(0);
             }
         } else {
             const res = await GetApi(
@@ -319,6 +317,16 @@ export default function DetailCommissionTable() {
     };
 
     useEffect(() => {
+        if (step != 1) getDataOrder(ctvFilter);
+    }, [step]);
+    useEffect(() => {
+        if (orders.length > 0 && count > 0 && searchTerm === '')
+            if (limit * (page + 1) > orders.length && orders.length < count) {
+                setStep((prev) => prev + 1);
+            }
+    }, [orders]);
+
+    useEffect(() => {
         if (selectedMonth && selectedYear) {
             getDataOrder(ctvFilter);
             getDataCTVName();
@@ -337,6 +345,9 @@ export default function DetailCommissionTable() {
 
     const handlePageChange = (event: unknown, newPage: number) => {
         setPage(newPage);
+        if (limit * (newPage + 1) > orders.length && orders.length < count) {
+            setStep((prev) => prev + 1);
+        }
     };
 
     const handleLimitChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -370,7 +381,6 @@ export default function DetailCommissionTable() {
 
     const paginatedOrders = filteredOrders.slice(page * limit, page * limit + limit);
     // filter Id
-    const [filterId, setFilterId] = useState<string>('');
     const typingTimeoutRef = useRef<any>(null);
     if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
@@ -396,9 +406,9 @@ export default function DetailCommissionTable() {
 
     useEffect(() => {
         typingTimeoutRef.current = setTimeout(() => {
-            filterByPhoneOrDeliveringCode(filterId);
+            filterByPhoneOrDeliveringCode(searchTerm);
         }, 500);
-    }, [filterId]);
+    }, [searchTerm]);
     const totalCommission = orders.reduce((total, order) => {
         return total + order.commission;
     }, 0);
@@ -678,12 +688,12 @@ export default function DetailCommissionTable() {
 
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <Input
-                            value={filterId}
+                            value={searchTerm}
                             className="border border-gray-300 rounded-lg p-1"
                             sx={{ display: 'block', width: 270, marginRight: 2 }}
                             placeholder={'Tìm kiếm'}
                             onChange={(e) => {
-                                filterSpecialInput(e.target.value, setFilterId);
+                                filterSpecialInput(e.target.value, setSearchTerm);
                             }}
                         />
                         <IconButton color="primary">
@@ -697,9 +707,9 @@ export default function DetailCommissionTable() {
                             <TableCell align="center">STT</TableCell>
                             <TableCell>Mã đơn hàng</TableCell>
                             <TableCell>Ngày tạo đơn</TableCell>
-                            <TableCell>CTV</TableCell>
+                            <TableCell>CTV</TableCell> 
+                            <TableCell>Tiền Cod</TableCell>
                             <TableCell>Giá CTV</TableCell>
-                            <TableCell>Giá bán</TableCell>
                             <TableCell>Giá nhập</TableCell>
                             <TableCell>Hoa hồng</TableCell>
                             <TableCell>Số lượng</TableCell>
@@ -710,7 +720,14 @@ export default function DetailCommissionTable() {
                         {paginatedOrders.map((order: any, index: number) => {
                             const orderDet = orderDetails.filter((od) => od.orderId === order.id);
 
-                            return <Row index={index} key={order.id} order={order} orderDetails={orderDet} />;
+                            return (
+                                <Row
+                                    index={page * limit + index}
+                                    key={order.id}
+                                    order={order}
+                                    orderDetails={orderDet}
+                                />
+                            );
                         })}
                     </TableBody>
                 </Table>
@@ -718,7 +735,13 @@ export default function DetailCommissionTable() {
                     rowsPerPageOptions={[5, 10, 25]}
                     labelRowsPerPage="Số đơn mỗi trang"
                     component="div"
-                    count={filteredOrders.length}
+                    count={
+                        ctvFilter === 'ALL'
+                            ? searchTerm === ''
+                                ? count
+                                : filteredOrders.length
+                            : filteredOrders.length
+                    }
                     rowsPerPage={limit}
                     page={page}
                     onPageChange={handlePageChange}

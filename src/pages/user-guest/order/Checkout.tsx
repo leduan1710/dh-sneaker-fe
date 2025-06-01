@@ -810,6 +810,15 @@ const Checkout: React.FC = () => {
                                 {formatPrice(totalAmount + Number(shippingFee.replace(',', '')))}
                             </Typography>
                         </Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
+                            <Typography variant="h6" sx={{ fontSize: 19, fontWeight: 600 }}>
+                                Hoa hồng
+                            </Typography>
+
+                            <Typography variant="h6" sx={{ fontSize: 19, fontWeight: 600 }}>
+                                {formatPrice(Number(totalCOD.replace(',', '')) -  totalAmount + Number(shippingFee.replace(',', '')))}
+                            </Typography>
+                        </Box>
                     </Box>
                 </Box>
                 <Button

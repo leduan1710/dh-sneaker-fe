@@ -217,7 +217,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                             TRANG CHỦ
                         </a>
                         <a
-                            href="collections?category=Crocs"
+                            href="/collections?category=Crocs"
                             style={{ fontSize: '19px' }}
                             className={`hover:border-blue-300 border-b-2 border-white mr-5 cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
                                 index === 1 ? 'font-bold text-blue-400' : ''
@@ -226,7 +226,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                             CROCS
                         </a>
                         <a
-                            href={`collections?category=MLB`}
+                            href={`/collections?category=MLB`}
                             style={{ fontSize: '19px' }}
                             className={`hover:border-blue-300 border-b-2 border-white mr-5 cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
                                 index === 2 ? 'font-bold text-blue-400' : ''
@@ -235,7 +235,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                             MLB
                         </a>
                         <a
-                            href={`collections?category=Adidas`}
+                            href={`/collections?category=Adidas`}
                             style={{ fontSize: '19px' }}
                             className={`hover:border-blue-300 border-b-2 border-white mr-5 cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
                                 index === 2 ? 'font-bold text-blue-400' : ''
@@ -244,7 +244,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                             ADIDAS
                         </a>
                         <a
-                            href={`collections?category=Trẻ em`}
+                            href={`/collections?category=Trẻ em`}
                             style={{ fontSize: '19px' }}
                             className={`hover:border-blue-300 border-b-2 border-white mr-5 cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
                                 index === 2 ? 'font-bold text-blue-400' : ''
@@ -253,7 +253,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                             TRẺ EM
                         </a>
                         <a
-                            href={`collections?category=Jibbitz`}
+                            href={`/collections?category=Jibbitz`}
                             style={{ fontSize: '19px' }}
                             className={`hover:border-blue-300 border-b-2 border-white  cursor-pointer text-3xl hover:text-blue-500 transition-all duration-800 ${
                                 index === 3 ? 'font-bold text-blue-400' : ''

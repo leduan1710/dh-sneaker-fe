@@ -39,7 +39,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                                 variant="outlined"
                                 sx={{
                                     width: '100%',
-                                    height: '36px',
+                                    height: 'auto',
                                     backgroundColor: selectedOptions.includes(option)
                                         ? 'rgba(7, 110, 145, 0.89)'
                                         : 'white',

@@ -372,7 +372,7 @@ const OrderDetail: React.FC = () => {
                             )
                         )}
                     </Box>
-                    
+
                     <TextField
                         label="Tên Khách Hàng"
                         variant="outlined"
@@ -781,7 +781,16 @@ const OrderDetail: React.FC = () => {
                                 </Typography>
 
                                 <Typography variant="h6" sx={{ fontSize: 19, fontWeight: 600 }}>
-                                    {formatPrice(totalAmount + Number(shippingFee))}
+                                    {formatPrice(totalAmount + Number(shippingFee.replace(',', '')))}
+                                </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
+                                <Typography variant="h6" sx={{ fontSize: 19, fontWeight: 600 }}>
+                                    Hoa hồng
+                                </Typography>
+
+                                <Typography variant="h6" sx={{ fontSize: 19, fontWeight: 600 }}>
+                                    {formatPrice(Number(totalCOD.replace(',', '')) - totalAmount + Number(shippingFee.replace(',', '')))}
                                 </Typography>
                             </Box>
                         </Box>

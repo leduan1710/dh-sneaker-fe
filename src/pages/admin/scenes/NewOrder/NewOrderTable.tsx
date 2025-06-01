@@ -62,7 +62,7 @@ function Row(props: RowProps) {
     const [open, setOpen] = useState(true);
     const [openUpdateStatus, setOpenUpdateStatus] = useState(false);
     const [selection, setSelection] = useState('');
-    const [showImage, setShowImage] = useState(false);
+    const [showImage, setShowImage] = useState(true);
     const [showDeliveryDialog, setShowDeliveryDialog] = useState(false);
     const [deliveryCode, setDeliveryCode] = useState('');
 
@@ -191,7 +191,7 @@ function Row(props: RowProps) {
                             )}
 
                             <Typography variant="body1" gutterBottom component="div">
-                                <strong>Ghi chú:</strong> {order.ctvNote}
+                                <strong>Ghi chú:</strong> <span style={{ fontWeight: 'bold', color: '#C0392B' }}>{order.ctvNote}</span>
                                 {order.noteImageList.length > 0 && (
                                     <span
                                         style={{ cursor: 'pointer', color: 'blue', marginLeft: '10px' }}
@@ -359,46 +359,48 @@ export default function NewOrderTable() {
 
     return (
         <>
-            <TableContainer className="relative" component={Paper}>
-                <Table aria-label="collapsible table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell />
-                            <TableCell>Mã đơn hàng</TableCell>
-                            <TableCell>Ngày tạo đơn</TableCell>
-                            <TableCell>CTV</TableCell>
-                            <TableCell>Hình thức ship</TableCell>
-                            <TableCell>Phí ship</TableCell>
-                            <TableCell>Tiền COD</TableCell>
-                            <TableCell align="right">Thao tác</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {paginatedOrders.map((order) => {
-                            const orderDet = orderDetails.filter((od) => od.orderId === order.id);
+            <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+                <TableContainer >
+                    <Table >
+                        <TableHead>
+                            <TableRow>
+                                <TableCell />
+                                <TableCell>Mã đơn hàng</TableCell>
+                                <TableCell>Ngày tạo đơn</TableCell>
+                                <TableCell>CTV</TableCell>
+                                <TableCell>Hình thức ship</TableCell>
+                                <TableCell>Phí ship</TableCell>
+                                <TableCell>Tiền COD</TableCell>
+                                <TableCell align="right">Thao tác</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {paginatedOrders.map((order) => {
+                                const orderDet = orderDetails.filter((od) => od.orderId === order.id);
 
-                            return (
-                                <Row
-                                    key={order.id}
-                                    order={order}
-                                    orderDetails={orderDet}
-                                    onUpdateOrder={getDataOrder}
-                                />
-                            );
-                        })}
-                    </TableBody>
-                </Table>
-                <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    labelRowsPerPage="Số đơn mỗi trang"
-                    component="div"
-                    count={orders.length}
-                    rowsPerPage={limit}
-                    page={page}
-                    onPageChange={handlePageChange}
-                    onRowsPerPageChange={handleLimitChange}
-                />
-            </TableContainer>
+                                return (
+                                    <Row
+                                        key={order.id}
+                                        order={order}
+                                        orderDetails={orderDet}
+                                        onUpdateOrder={getDataOrder}
+                                    />
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
+                    <TablePagination
+                        rowsPerPageOptions={[5, 10, 25]}
+                        labelRowsPerPage="Số đơn mỗi trang"
+                        component="div"
+                        count={orders.length}
+                        rowsPerPage={limit}
+                        page={page}
+                        onPageChange={handlePageChange}
+                        onRowsPerPageChange={handleLimitChange}
+                    />
+                </TableContainer>
+            </Paper>
         </>
     );
 }

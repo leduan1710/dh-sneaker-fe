@@ -65,7 +65,6 @@ const ProductCollection = () => {
 
     const [limit, setLimit] = useState<number>(60);
     const [step, setStep] = useState<number>(1);
-    const [hasMore, setHasMore] = useState<boolean>(true);
     const [listProduct, setListProduct] = useState<any>([]);
     // const [listProductCurrent, setListProductCurrent] = useState<any>(undefined);
     const [req, setReq] = useState<boolean>(true);
@@ -90,15 +89,15 @@ const ProductCollection = () => {
         if (resTypes.data.message == 'Success') {
             setOptionType(resTypes.data.types);
         }
-        const resSizes = await GetGuestApi('/api/all-size');
+        const resSizes = await GetGuestApi(`/api/size-by-category-name/${categoryName}`);
         if (resSizes.data.message == 'Success') {
             setOptionSize(resSizes.data.sizes);
         }
-        const resStyles = await GetGuestApi('/api/all-style');
+        const resStyles = await GetGuestApi(`/api/style-by-category-name/${categoryName}`);
         if (resStyles.data.message == 'Success') {
             setOptionStyle(resStyles.data.styles);
         }
-        const resColors = await GetGuestApi('/api/all-color');
+        const resColors = await GetGuestApi(`/api/color-by-category-name/${categoryName}`);
         if (resColors.data.message == 'Success') {
             setOptionColor(resColors.data.colors);
         }
@@ -113,12 +112,7 @@ const ProductCollection = () => {
                 },
             );
             if (resProducts.data.message == 'Success') {
-                const filterProduct = resProducts.data.products.filter((product: any) => product != null);
-                if (filterProduct.length < limit || optionsFilter.sort == 'desc' || optionsFilter.sort == 'asc') {
-                    setHasMore(false);
-                } else {
-                    setHasMore(true);
-                }
+                const filterProduct = resProducts.data.products.products.filter((product: any) => product != null);
                 if (step == 1) {
                     setListProduct(filterProduct);
                 } else {
@@ -524,7 +518,7 @@ const ProductCollection = () => {
                         {/* Danh sách sản phẩm */}
                         <Grid container spacing={2}>
                             {filteredProducts
-                                .slice((currentPage - 1) * 2, currentPage * 2)
+                                .slice((currentPage - 1) * 20, currentPage * 20)
                                 .map((product: any, index: number) => {
                                     const colorInfo =
                                         optionColor && optionColor.length > 0

@@ -106,18 +106,10 @@ const HomePage: React.FC<HomePageProps> = (props) => {
                     style={{ objectFit: 'cover', height: 'auto', width: '100%' }}
                     src="https://www.crocs.com.vn/cdn/shop/files/DRAGON_PC_VN_9f4c3945-a2ec-4448-8f90-477790e012db_1190x.webp?v=1740472835"
                 />
-                <img
-                    style={{ objectFit: 'cover', height: 'auto', width: '100%', marginTop: '5px' }}
-                    src="https://www.crocs.com.vn/cdn/shop/files/BAE_PC_VN_1190x.webp?v=1737080006"
-                />
             </Container>
 
             <NewProducts />
             <Container>
-                <img
-                    style={{ objectFit: 'cover', height: 'auto', width: '100%' }}
-                    src="https://www.crocs.com.vn/cdn/shop/files/ECHOWAVE_PC_VN_1190x.webp?v=1736937324"
-                />
                 <img
                     style={{ objectFit: 'cover', height: 'auto', width: '100%', marginTop: '5px' }}
                     src="https://www.crocs.com.vn/cdn/shop/files/FLORAL_PC_VN_e1db6f5b-44fb-4e1c-a2ba-06d3b914d3ad_1190x.webp?v=1737605505"

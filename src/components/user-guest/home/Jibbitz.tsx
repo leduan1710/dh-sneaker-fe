@@ -20,7 +20,7 @@ const Jibbitz = () => {
             },
         });
         if (resProducts.data.message == 'Success') {
-            const filterProduct = resProducts.data.products.filter((product: any) => product != null);
+            const filterProduct = resProducts.data.products.products.filter((product: any) => product != null);
             setListProduct(filterProduct);
         }
     };
