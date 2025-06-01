@@ -7,6 +7,8 @@ const initialState = {
     listItemInCart: [],
     colorTheme: 'dark',
     numberFavorite: 0,
+    totalItem: 0,
+    totalAmount: 0,
     listProductJustView: [],
     socketIdClient: '',
     lng: sessionStorage.getItem('lng') == 'en' ? 'en' : 'vn',
@@ -42,6 +44,16 @@ const myReducer = (state = initialState, action: any) => {
             return {
                 ...state,
                 numberCart: state.numberCart + action.payload,
+            };
+        case 'SET_TOTAL_ITEM':
+            return {
+                ...state,
+                totalItem: action.payload,
+            };
+        case 'SET_TOTAL_AMOUNT':
+            return {
+                ...state,
+                totalAmount: action.payload,
             };
         case 'SET_NUMBER_CART_FROM_ZERO':
             return {

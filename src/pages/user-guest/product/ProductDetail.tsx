@@ -7,7 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import HomeIcon from '@mui/icons-material/Home';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
-import { addCheckout, addToListCartStore, formatPrice, toastSuccess } from '../../../untils/Logic';
+import { addCheckout, addCheckoutBuyAll, addToListCartStore, formatPrice, toastSuccess } from '../../../untils/Logic';
 import SizeGuideDialog from './SizeGuideDialog';
 import { HOST_BE } from '../../../common/Common';
 import RelatedProducts from '../../../components/user-guest/home/RelatedProduct';
@@ -63,6 +63,7 @@ const ProductDetail: React.FC = () => {
         addToListCartStore(selectedProductDetail.id, quantity, selectedProductDetail, true, isJibbitz);
         store.dispatch(set_number_cart(quantity));
         store.dispatch(add_list_item_in_cart(selectedProductDetail));
+        addCheckoutBuyAll();
         nav('/checkout');
     };
 

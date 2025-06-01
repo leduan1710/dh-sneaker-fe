@@ -7,6 +7,8 @@ export interface ReducerProps {
     listItemInCart: any;
     colorTheme: string;
     numberFavorite: number;
+    totalItem: number;
+    totalAmount: number;
     listProductJustView: any;
     socketIdClient: String;
     lng: any;

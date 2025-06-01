@@ -133,12 +133,13 @@ const Checkout: React.FC = () => {
         const address = e.target.value;
         setCustomerAddress(address);
     };
-    
+
     const removeFromCart = () => {
         let list_cart = JSON.parse(localStorage.getItem('listCart') || '[]');
         listCheckout.map((item_store: any) => {
             list_cart = list_cart.filter((item: any) => item.productDetailId !== item_store.productDetailId);
         });
+
         localStorage.setItem('listCart', JSON.stringify(list_cart));
         sessionStorage.removeItem('checkout');
     };
@@ -237,7 +238,7 @@ const Checkout: React.FC = () => {
                     toastSuccess('Đặt hàng thành công');
 
                     removeFromCart();
-                    
+
                     navigate('/user/order');
                     store.dispatch(change_is_loading(false));
                 } else {
@@ -816,7 +817,11 @@ const Checkout: React.FC = () => {
                             </Typography>
 
                             <Typography variant="h6" sx={{ fontSize: 19, fontWeight: 600 }}>
-                                {formatPrice(Number(totalCOD.replace(',', '')) -  totalAmount + Number(shippingFee.replace(',', '')))}
+                                {formatPrice(
+                                    Number(totalCOD.replace(',', '')) -
+                                        totalAmount +
+                                        Number(shippingFee.replace(',', '')),
+                                )}
                             </Typography>
                         </Box>
                     </Box>

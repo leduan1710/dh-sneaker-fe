@@ -266,7 +266,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                     <div className="flex items-center justify-end flex-grow">
                         <HeaderNotifications />
                         <span onClick={() => setOpenCart(true)} className="mr-3 cursor-pointer">
-                            <Badge badgeContent={listCart.length} color="error">
+                            <Badge badgeContent={numberCart} color="error">
                                 <LocalMallIcon sx={{ color: 'rgba(7, 110, 145, 0.89)' }} />
                             </Badge>
                         </span>

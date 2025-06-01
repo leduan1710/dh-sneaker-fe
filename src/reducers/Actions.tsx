@@ -26,6 +26,18 @@ export const set_number_cart = (payload: number) => {
         payload,
     };
 };
+export const set_total_item = (payload: number) => {
+    return {
+        type: 'SET_TOTAL_ITEM',
+        payload,
+    };
+};
+export const set_total_amount = (payload: number) => {
+    return {
+        type: 'SET_TOTAL_AMOUNT',
+        payload,
+    };
+};
 export const change_role = (payload: any) => {
     return {
         type: 'CHANGE_ROLE',
