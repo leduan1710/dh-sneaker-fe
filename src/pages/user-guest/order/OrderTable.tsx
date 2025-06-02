@@ -122,7 +122,7 @@ export default function OrderTable() {
 
     useEffect(() => {
         if (user.id && selectedMonth) getDataOrder();
-    }, [selectedMonth, user]);
+    }, [selectedMonth, user, selectedYear]);
 
     const handlePageChange = (event: unknown, newPage: number) => {
         setPage(newPage);
@@ -178,13 +178,6 @@ export default function OrderTable() {
     };
     const bonus = calculateBonus(totalQuantity);
     const paginatedOrders = filteredOrders.slice(page * limit, page * limit + limit);
-
-    const columnColors = [
-        'rgba(203, 254, 242, 0.69)',
-        'rgb(249, 255, 234)',
-        'rgba(203, 254, 242, 0.69)',
-        'rgb(249, 255, 234)',
-    ];
 
     return (
         <Paper sx={{ width: '100%', overflow: 'hidden' }}>
@@ -310,8 +303,8 @@ export default function OrderTable() {
                     </Card>
                 </Grid>
             </Grid>
-            <TableContainer>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
+                <Box>
                     <FormControl variant="outlined" sx={{ minWidth: 120, marginRight: 2 }}>
                         <InputLabel>Chọn tháng</InputLabel>
                         <Select
@@ -326,21 +319,37 @@ export default function OrderTable() {
                             ))}
                         </Select>
                     </FormControl>
-
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Input
-                            value={searchTerm}
-                            className="border border-gray-300 rounded-lg p-1"
-                            sx={{ display: 'block', width: 300, marginRight: 2 }}
-                            placeholder={'Nhập vào SDT hoặc mã vận đơn'}
-                            onChange={handleChange}
-                        />
-                        <IconButton color="primary">
-                            <SearchIcon />
-                        </IconButton>
-                    </Box>
+                    <FormControl variant="outlined" sx={{ minWidth: 120 }}>
+                        <InputLabel>Năm</InputLabel>
+                        <Select
+                            value={selectedYear}
+                            onChange={(e) => setSetlectedYear(Number(e.target.value))}
+                            label={'Năm'}
+                        >
+                            {Array.from({ length: 2 }, (_, index) => (
+                                <MenuItem key={currentYear - index} value={currentYear - index}>
+                                    {currentYear - index}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                 </Box>
-                <Table>
+
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Input
+                        value={searchTerm}
+                        className="border border-gray-300 rounded-lg p-1"
+                        sx={{ display: 'block', width: 300, marginRight: 2 }}
+                        placeholder={'Nhập vào SDT hoặc mã vận đơn'}
+                        onChange={handleChange}
+                    />
+                    <IconButton color="primary">
+                        <SearchIcon />
+                    </IconButton>
+                </Box>
+            </Box>
+            <TableContainer sx={{ height: 400 }}>
+                <Table stickyHeader>
                     <TableHead>
                         <TableRow>
                             {[
@@ -348,7 +357,6 @@ export default function OrderTable() {
                                 'Ngày tạo đơn',
                                 'Tên khách',
                                 'SĐT',
-                                'Địa chỉ',
                                 'Hình thức ship',
                                 'Mã vận đơn',
                                 'Tiền Cod',
@@ -358,24 +366,38 @@ export default function OrderTable() {
                                 'Số lượng',
                                 'Trạng thái đơn',
                             ].map((header, index) => (
-                                <TableCell key={index} sx={{ fontWeight: 'bold', color: '#333' }}>
+                                <TableCell
+                                    key={index}
+                                    sx={{ backgroundColor: 'rgb(12, 89, 96)', fontWeight: 'bold', color: '#FFFFFF' }}
+                                >
                                     {header}
                                 </TableCell>
                             ))}
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {paginatedOrders.map((order: any) => {
+                        {paginatedOrders.map((order: any, index: number) => {
                             const orderDet = orderDetails.filter((od) => od.orderId === order.id);
                             const totalCtvPrice = orderDet.reduce((total, detail) => {
                                 return total + detail.ctvPrice * detail.quantity;
                             }, 0);
+
+                            const backgroundColor =
+                                index % 2 === 0 ? 'rgba(195, 241, 246, 0.63)' : 'rgba(211, 249, 229, 0.63)';
+
                             return (
                                 <TableRow
                                     hover
                                     key={order.id}
                                     onClick={() => {
                                         navigate(`/user/order/${order.id}`);
+                                    }}
+                                    sx={{
+                                        backgroundColor,
+
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(13, 131, 29, 0.93)',
+                                        },
                                     }}
                                 >
                                     {[
@@ -387,18 +409,16 @@ export default function OrderTable() {
                                             hour: '2-digit',
                                             minute: '2-digit',
                                             hour12: false,
-                                        }), 
+                                        }),
                                         order.customerName,
-                                        order.customerPhone, 
-                                        order.addressDetail,
+                                        order.customerPhone,
                                         order.shipMethod === 'GRAB'
                                             ? 'Grab/Kho khác'
                                             : order.shipMethod === 'VIETTELPOST'
-                                            ? 'Viettelpost'
-                                            : 'Offline', 
-                                        order.deliveryCode, 
+                                            ? 'Viettelpost' : order.shipMethod === 'GGDH' ? 'Đổi hàng'
+                                            : 'Offline',
+                                        order.deliveryCode,
                                         formatPrice(order.CODPrice),
-
                                         formatPrice(totalCtvPrice),
                                         formatPrice(order.shipFee),
                                         order.status === 'PROCESSING' || order.status === 'CANCEL'
@@ -414,7 +434,7 @@ export default function OrderTable() {
                                                           detail.isJibbitz ? total : total + detail.quantity,
                                                       0,
                                                   )
-                                            : 0, // Cột 12
+                                            : 0,
                                         order.status === 'PROCESSING'
                                             ? 'Đang chờ'
                                             : order.status === 'SUCCESS'
@@ -424,30 +444,17 @@ export default function OrderTable() {
                                             : order.status === 'BOOM'
                                             ? 'Boom'
                                             : '',
-                                    ].map((cell, cellIndex) => {
-                                        let backgroundColor;
-                                        if (cellIndex < 5) {
-                                            backgroundColor = columnColors[0]; 
-                                        } else if (cellIndex < 7) {
-                                            backgroundColor = columnColors[1];
-                                        } else if (cellIndex < 11) {
-                                            backgroundColor = columnColors[2];
-                                        } else {
-                                            backgroundColor = columnColors[3];
-                                        }
-                                        return (
-                                            <TableCell
-                                                key={cellIndex}
-                                                sx={{
-                                                    backgroundColor,
-                                                    padding: '16px',
-                                                    borderBottom: '1px solid #e0e0e0',
-                                                }}
-                                            >
-                                                {cell}
-                                            </TableCell>
-                                        );
-                                    })}
+                                    ].map((cell, cellIndex) => (
+                                        <TableCell
+                                            key={cellIndex}
+                                            sx={{
+                                                padding: '16px',
+                                                borderBottom: '1px solid #e0e0e0',
+                                            }}
+                                        >
+                                            {cell}
+                                        </TableCell>
+                                    ))}
                                 </TableRow>
                             );
                         })}

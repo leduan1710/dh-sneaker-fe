@@ -52,7 +52,7 @@ const StatusUpdateDialog: React.FC<StatusUpdateDialogProps> = ({ open, onClose, 
             let tokenVTP;
             store.dispatch(change_is_loading(true));
             if (selection == 'SUCCESS') {
-                if (order.shipMethod === 'VIETTELPOST') {
+                if (order.shipMethod === 'VIETTELPOST' || order.shipMethod === 'GGDH') {
                     if (!checkTokenExpiration()) {
                         tokenVTP = await fetchNewToken();
                     } else {

@@ -80,6 +80,7 @@ const Checkout: React.FC = () => {
 
     const handleShippingMethodChange = (event: any) => {
         if (event.target.value === 'VIETTELPOST') setShippingFee('30000');
+        if (event.target.value === 'GGDH') setShippingFee('60000');
         else setShippingFee('0');
         setShippingMethod(event.target.value);
     };
@@ -408,6 +409,11 @@ const Checkout: React.FC = () => {
                             borderRadius: '3px',
                         },
                     }}
+                    FormHelperTextProps={{
+                        sx: {
+                            color: '#b71c1c',
+                        },
+                    }}
                 />
 
                 <TextField
@@ -547,9 +553,35 @@ const Checkout: React.FC = () => {
                                 </div>
                             }
                         />
+                        <FormControlLabel
+                            value="GGDH"
+                            control={<Radio sx={{ '&.Mui-checked': { color: 'red' } }} />}
+                            label={
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        border: '1px solid #ccc',
+                                        borderRadius: '4px',
+                                        padding: '10px',
+                                        margin: '5px 0',
+                                        width: '200px',
+                                        backgroundColor: shippingMethod === 'Viettelpost' ? '#f5f5f5' : 'transparent',
+                                        transition: 'background-color 0.3s',
+                                    }}
+                                >
+                                    <img
+                                        src={require('../../../static/Logo-Viettel-Post-Red.png')}
+                                        alt="Viettelpost"
+                                        style={{ width: 40, marginRight: 8 }}
+                                    />
+                                    Đổi hàng
+                                </div>
+                            }
+                        />
                     </RadioGroup>
                 </FormControl>
-                {(shippingMethod === 'VIETTELPOST' || shippingMethod === 'GRAB') && (
+                {(shippingMethod === 'VIETTELPOST' || shippingMethod === 'GRAB' ||shippingMethod === 'GGDH') && (
                     <>
                         {shippingMethod === 'GRAB' && (
                             <TextField

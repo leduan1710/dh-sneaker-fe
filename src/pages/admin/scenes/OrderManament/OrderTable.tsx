@@ -293,12 +293,38 @@ export default function OrderTable() {
 
     const getDataOrder = async () => {
         store.dispatch(change_is_loading(true));
-        const res = await GetApi(`/admin/get-orders/${20}/${step}`, localStorage.getItem('token'));
+        if (ctvFilter === 'ALL') {
+            const res = await PostApi(`/admin/get-orders/${30}/${step}`, localStorage.getItem('token'), {
+                status: statusFilter,
+                shipMethod: shipMethodFilter,
+            });
 
-        if (res.data.message == 'Success') {
-            setOrders((prev) => [...prev, ...res.data.orders.orders]);
-            setCount(res.data.orders.count);
-            await getOrderDetails(res.data.orders.orders);
+            if (res.data.message == 'Success') {
+                if (step != 1) setOrders((prev) => [...prev, ...res.data.orders.orders]);
+                else {
+                    setOrders(res.data.orders.orders);
+                }
+                setCount(res.data.orders.count);
+                await getOrderDetails(res.data.orders.orders);
+            }
+        } else {
+            const res = await PostApi(
+                `/admin/get-orders-by-ctv/${ctvFilter}/${15}/${step}`,
+                localStorage.getItem('token'),
+                {
+                    status: statusFilter,
+                    shipMethod: shipMethodFilter,
+                },
+            );
+
+            if (res.data.message == 'Success') {
+                if (step != 1) setOrders((prev) => [...prev, ...res.data.orders.orders]);
+                else {
+                    setOrders(res.data.orders.orders);
+                }
+                setCount(res.data.orders.count);
+                await getOrderDetails(res.data.orders.orders);
+            }
         }
         store.dispatch(change_is_loading(false));
     };
@@ -320,16 +346,38 @@ export default function OrderTable() {
         }
         setOrderDetails(fetchedOrderDetails);
     };
+    const getDataCTVName = async () => {
+        const res = await GetApi(`/admin/get/ctvNameList`, localStorage.getItem('token'));
 
+        if (res.data.message == 'Success') {
+            const names = res.data.ctvNameList.map((ctv: any) => ctv.name);
+            setCtvNames(names);
+        }
+    };
+
+    const resetFilter = () => {
+        setCtvFilter('ALL');
+        setShipMethodFilter('ALL');
+        setStatusFilter('ALL');
+    };
     useEffect(() => {
         getDataOrder();
+    }, [ctvFilter, statusFilter, shipMethodFilter]);
+
+    useEffect(() => {
+        if (step != 1) getDataOrder();
     }, [step]);
+
     useEffect(() => {
         if (orders.length > 0 && count > 0 && searchTerm === '')
             if (limit * (page + 1) > orders.length && orders.length < count) {
                 setStep((prev) => prev + 1);
             }
     }, [orders]);
+
+    useEffect(() => {
+        getDataCTVName();
+    }, []);
 
     useEffect(() => {
         if (status) {
@@ -340,15 +388,9 @@ export default function OrderTable() {
         }
     }, [status]);
 
-    useEffect(() => {
-        const uniqueCtvNames = orders
-            .map((order) => order.ctvName)
-            .filter((name, index, self) => name && self.indexOf(name) === index); // Lọc tên CTV duy nhất
-        setCtvNames(uniqueCtvNames);
-    }, [orders]);
     const handlePageChange = (event: unknown, newPage: number) => {
         setPage(newPage);
-        if (limit * (newPage + 1) > orders.length && orders.length < count) {
+        if (limit * (newPage + 1) > orders.length && orders.length < count && searchTerm === '') {
             setStep((prev) => prev + 1);
         }
     };
@@ -363,35 +405,30 @@ export default function OrderTable() {
 
     const handleStatusChange = (event: SelectChangeEvent<string>) => {
         setStatusFilter(event.target.value as string);
+        setStep(1);
         setPage(0);
     };
 
     const handleShipMethodChange = (event: SelectChangeEvent<string>) => {
         setShipMethodFilter(event.target.value as string);
+        setStep(1);
         setPage(0);
     };
 
     const handleCtvChange = (event: SelectChangeEvent<string>) => {
         setCtvFilter(event.target.value as string);
+        setStep(1);
         setPage(0);
     };
 
-    const filteredOrders = orders.filter((order) => {
-        const matchesStatus = statusFilter === 'ALL' || order.status === statusFilter;
-        const matchesCtv = ctvFilter === 'ALL' || order.ctvName === ctvFilter;
-        const matchesShipMethod = shipMethodFilter === 'ALL' || order.shipMethod === shipMethodFilter;
-
-        return matchesStatus && matchesCtv && matchesShipMethod;
-    });
-
-    const paginatedOrders = filteredOrders.slice(page * limit, page * limit + limit);
+    const paginatedOrders = orders.slice(page * limit, page * limit + limit);
     // filter Id
     const [searchTerm, setSearchTerm] = useState<string>('');
     const typingTimeoutRef = useRef<any>(null);
     if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
     }
-    const filterById = async (searchTerm: string) => {
+    const filterByPhoneOrDeliveringCode = async (searchTerm: string) => {
         if (searchTerm != '') {
             store.dispatch(change_is_loading(true));
             const res = await PostApi(
@@ -400,6 +437,7 @@ export default function OrderTable() {
                 { searchTerm: searchTerm },
             );
             if (res.data.message == 'Success') {
+                resetFilter();
                 setOrders(res.data.order);
                 await getOrderDetails(res.data.order);
                 setPage(0);
@@ -412,58 +450,59 @@ export default function OrderTable() {
 
     useEffect(() => {
         typingTimeoutRef.current = setTimeout(() => {
-            filterById(searchTerm);
+            filterByPhoneOrDeliveringCode(searchTerm);
         }, 500);
     }, [searchTerm]);
     return (
         <>
-            <TableContainer className="relative" component={Paper} sx={{}}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
-                    <FormControl variant="outlined" sx={{ minWidth: 200 }}>
-                        <InputLabel>Trạng thái</InputLabel>
-                        <Select value={statusFilter} onChange={handleStatusChange} label="Trạng thái">
-                            <MenuItem value="ALL">Tất cả</MenuItem>
-                            <MenuItem value="SUCCESS">Thành công</MenuItem>
-                            <MenuItem value="BOOM">Boom</MenuItem>
-                            <MenuItem value="CANCEL">Đã hủy</MenuItem>
-                        </Select>
-                    </FormControl>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
+                <FormControl variant="outlined" sx={{ minWidth: 200 }}>
+                    <InputLabel>Trạng thái</InputLabel>
+                    <Select value={statusFilter} onChange={handleStatusChange} label="Trạng thái">
+                        <MenuItem value="ALL">Tất cả</MenuItem>
+                        <MenuItem value="SUCCESS">Thành công</MenuItem>
+                        <MenuItem value="BOOM">Boom</MenuItem>
+                        <MenuItem value="CANCEL">Đã hủy</MenuItem>
+                    </Select>
+                </FormControl>
 
-                    <FormControl variant="outlined" sx={{ minWidth: 200 }}>
-                        <InputLabel>Hình thức ship</InputLabel>
-                        <Select value={shipMethodFilter} onChange={handleShipMethodChange} label="Hình thức ship">
-                            <MenuItem value="ALL">Tất cả</MenuItem>
-                            <MenuItem value="VIETTELPOST">Viettelpost</MenuItem>
-                            <MenuItem value="GRAB">Grab/Kho khác</MenuItem>
-                            <MenuItem value="OFFLINE">Offline</MenuItem>
-                        </Select>
-                    </FormControl>
-                    <FormControl variant="outlined" sx={{ minWidth: 200 }}>
-                        <InputLabel>Tên CTV</InputLabel>
-                        <Select value={ctvFilter} onChange={handleCtvChange} label="Tên CTV">
-                            <MenuItem value="ALL">Tất cả</MenuItem>
-                            {ctvNames.map((ctvName, index) => (
-                                <MenuItem key={index} value={ctvName}>
-                                    {ctvName}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Input
-                            value={searchTerm}
-                            className="border border-gray-300 rounded-lg p-1"
-                            sx={{ display: 'block', width: 350, marginRight: 2 }}
-                            placeholder={'Tìm kiếm'}
-                            onChange={(e) => {
-                                filterSpecialInput(e.target.value, setSearchTerm);
-                            }}
-                        />
-                        <IconButton color="primary">
-                            <SearchIcon />
-                        </IconButton>
-                    </Box>
+                <FormControl variant="outlined" sx={{ minWidth: 200 }}>
+                    <InputLabel>Hình thức ship</InputLabel>
+                    <Select value={shipMethodFilter} onChange={handleShipMethodChange} label="Hình thức ship">
+                        <MenuItem value="ALL">Tất cả</MenuItem>
+                        <MenuItem value="VIETTELPOST">Viettelpost</MenuItem>
+                        <MenuItem value="GRAB">Grab/Kho khác</MenuItem>
+                        <MenuItem value="OFFLINE">Offline</MenuItem>
+                        <MenuItem value="GGDH">Đổi hàng</MenuItem>
+                    </Select>
+                </FormControl>
+                <FormControl variant="outlined" sx={{ minWidth: 200 }}>
+                    <InputLabel>Tên CTV</InputLabel>
+                    <Select value={ctvFilter} onChange={handleCtvChange} label="Tên CTV">
+                        <MenuItem value="ALL">Tất cả</MenuItem>
+                        {ctvNames.map((ctvName, index) => (
+                            <MenuItem key={index} value={ctvName}>
+                                {ctvName}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Input
+                        value={searchTerm}
+                        className="border border-gray-300 rounded-lg p-1"
+                        sx={{ display: 'block', width: 350, marginRight: 2 }}
+                        placeholder={'Tìm kiếm'}
+                        onChange={(e) => {
+                            filterSpecialInput(e.target.value, setSearchTerm);
+                        }}
+                    />
+                    <IconButton color="primary">
+                        <SearchIcon />
+                    </IconButton>
                 </Box>
+            </Box>
+            <TableContainer className="relative" component={Paper} sx={{ height: 640 }}>
                 <Table stickyHeader aria-label="collapsible table">
                     <TableHead>
                         <TableRow>
@@ -491,17 +530,17 @@ export default function OrderTable() {
                         })}
                     </TableBody>
                 </Table>
-                <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    labelRowsPerPage="Số đơn mỗi trang"
-                    component="div"
-                    count={count}
-                    rowsPerPage={limit}
-                    page={page}
-                    onPageChange={handlePageChange}
-                    onRowsPerPageChange={handleLimitChange}
-                />
             </TableContainer>
+            <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                labelRowsPerPage="Số đơn mỗi trang"
+                component="div"
+                count={searchTerm === '' ? count : orders.length}
+                rowsPerPage={limit}
+                page={page}
+                onPageChange={handlePageChange}
+                onRowsPerPageChange={handleLimitChange}
+            />
         </>
     );
 }

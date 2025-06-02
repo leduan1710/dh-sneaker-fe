@@ -111,6 +111,8 @@ function Row(props: RowProps) {
                         ? 'Grab/Kho khác'
                         : order.shipMethod === 'VIETTELPOST'
                         ? 'Viettelpost'
+                        : order.shipMethod === 'GGDH'
+                        ? 'Đổi hàng'
                         : 'Offline'}
                 </TableCell>
                 <TableCell>{formatPrice(order.shipFee)}</TableCell>
@@ -297,12 +299,14 @@ export default function NewOrderTable() {
     const { t } = useTranslation();
     const store = useStore();
     const location = useLocation();
-    const { status } = location.state ? location.state : 'all';
+    const { status } = location.state ? location.state : 'ALL';
     const user = useSelector((state: ReducerProps) => state.user);
-    const [orders, setOrders] = useState<OrderModel[]>([]);
+    const [orders, setOrders] = useState<any[]>([]);
     const [orderDetails, setOrderDetails] = useState<OrderDetail[]>([]);
     const [searchTerm, setSearchTerm] = useState<string>('');
-
+    const [shipMethodFilter, setShipMethodFilter] = useState<string>('ALL');
+    const [ctvFilter, setCtvFilter] = useState('ALL');
+    const [ctvNames, setCtvNames] = useState<string[]>([]);
     // Pagination state
     const [page, setPage] = useState(0);
     const [limit, setLimit] = useState(5);
@@ -336,11 +340,20 @@ export default function NewOrderTable() {
         }
         setOrderDetails(fetchedOrderDetails);
     };
+    const getDataCTVName = async () => {
+        const res = await GetApi(`/admin/get/ctvNameList`, localStorage.getItem('token'));
 
+        if (res.data.message == 'Success') {
+            const names = res.data.ctvNameList.map((ctv: any) => ctv.name);
+            setCtvNames(names);
+        }
+    };
     useEffect(() => {
         if (user) getDataOrder();
     }, [user]);
-
+    useEffect(() => {
+        getDataCTVName();
+    }, []);
     useEffect(() => {
         if (status) {
             getDataOrder();
@@ -354,10 +367,28 @@ export default function NewOrderTable() {
 
     const handleLimitChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setLimit(parseInt(event.target.value, 10));
-        setPage(0); // Reset to first page when changing limit
+        setPage(0);
     };
 
-    const paginatedOrders = orders.slice(page * limit, page * limit + limit);
+    const handleShipMethodChange = (event: SelectChangeEvent<string>) => {
+        setShipMethodFilter(event.target.value as string);
+        setPage(0);
+    };
+
+    const handleCtvChange = (event: SelectChangeEvent<string>) => {
+        setCtvFilter(event.target.value as string);
+        setPage(0);
+    };
+
+    const filteredOrders = orders.filter((order) => {
+        const matchesCtv = ctvFilter === 'ALL' || order.ctvName === ctvFilter;
+        const matchesShipMethod = shipMethodFilter === 'ALL' || order.shipMethod === shipMethodFilter;
+
+        return matchesCtv && matchesShipMethod;
+    });
+
+    const paginatedOrders = filteredOrders.slice(page * limit, page * limit + limit);
+
     const typingTimeoutRef = useRef<any>(null);
     if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
@@ -365,11 +396,9 @@ export default function NewOrderTable() {
     const filterById = async (searchTerm: string) => {
         if (searchTerm != '') {
             store.dispatch(change_is_loading(true));
-            const res = await PostApi(
-                `/admin/search/new-order-by-phone`,
-                localStorage.getItem('token'),
-                { searchTerm: searchTerm },
-            );
+            const res = await PostApi(`/admin/search/new-order-by-phone`, localStorage.getItem('token'), {
+                searchTerm: searchTerm,
+            });
             if (res.data.message == 'Success') {
                 setOrders(res.data.order);
                 await getOrderDetails(res.data.order);
@@ -389,24 +418,47 @@ export default function NewOrderTable() {
     return (
         <>
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-                <TableContainer>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Input
-                                value={searchTerm}
-                                className="border border-gray-300 rounded-lg p-1"
-                                sx={{ display: 'block', width: 350, marginRight: 2 }}
-                                placeholder={'Tìm kiếm'}
-                                onChange={(e) => {
-                                    filterSpecialInput(e.target.value, setSearchTerm);
-                                }}
-                            />
-                            <IconButton color="primary">
-                                <SearchIcon />
-                            </IconButton>
-                        </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
+                    <Box>
+                        <FormControl variant="outlined" sx={{ minWidth: 200, marginRight: 2 }}>
+                            <InputLabel>Hình thức ship</InputLabel>
+                            <Select value={shipMethodFilter} onChange={handleShipMethodChange} label="Hình thức ship">
+                                <MenuItem value="ALL">Tất cả</MenuItem>
+                                <MenuItem value="VIETTELPOST">Viettelpost</MenuItem>
+                                <MenuItem value="GRAB">Grab/Kho khác</MenuItem>
+                                <MenuItem value="OFFLINE">Offline</MenuItem>
+                                <MenuItem value="GGDH">Đổi hàng</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <FormControl variant="outlined" sx={{ minWidth: 200 }}>
+                            <InputLabel>Tên CTV</InputLabel>
+                            <Select value={ctvFilter} onChange={handleCtvChange} label="Tên CTV">
+                                <MenuItem value="ALL">Tất cả</MenuItem>
+                                {ctvNames.map((ctvName, index) => (
+                                    <MenuItem key={index} value={ctvName}>
+                                        {ctvName}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                     </Box>
-                    <Table>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Input
+                            value={searchTerm}
+                            className="border border-gray-300 rounded-lg p-1"
+                            sx={{ display: 'block', width: 350, marginRight: 2 }}
+                            placeholder={'Tìm kiếm'}
+                            onChange={(e) => {
+                                filterSpecialInput(e.target.value, setSearchTerm);
+                            }}
+                        />
+                        <IconButton color="primary">
+                            <SearchIcon />
+                        </IconButton>
+                    </Box>
+                </Box>
+                <TableContainer sx={{ height: 640 }}>
+                    <Table stickyHeader>
                         <TableHead>
                             <TableRow>
                                 <TableCell />
@@ -434,17 +486,17 @@ export default function NewOrderTable() {
                             })}
                         </TableBody>
                     </Table>
-                    <TablePagination
-                        rowsPerPageOptions={[5, 10, 25]}
-                        labelRowsPerPage="Số đơn mỗi trang"
-                        component="div"
-                        count={orders.length}
-                        rowsPerPage={limit}
-                        page={page}
-                        onPageChange={handlePageChange}
-                        onRowsPerPageChange={handleLimitChange}
-                    />
                 </TableContainer>
+                <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    labelRowsPerPage="Số đơn mỗi trang"
+                    component="div"
+                    count={orders.length}
+                    rowsPerPage={limit}
+                    page={page}
+                    onPageChange={handlePageChange}
+                    onRowsPerPageChange={handleLimitChange}
+                />
             </Paper>
         </>
     );

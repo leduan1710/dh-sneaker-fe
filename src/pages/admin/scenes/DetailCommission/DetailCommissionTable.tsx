@@ -272,29 +272,40 @@ export default function DetailCommissionTable() {
     const getDataOrder = async (ctvName: string) => {
         store.dispatch(change_is_loading(true));
         if (ctvName === 'ALL') {
-            const res = await GetApi(
-                `/admin/get-orders-by-month/${selectedMonth}/${selectedYear}/${20}/${step}`,
+            const res = await PostApi(
+                `/admin/get-orders-by-month/${selectedMonth}/${selectedYear}/${30}/${step}`,
                 localStorage.getItem('token'),
+                {
+                    status: statusFilter,
+                    shipMethod: shipMethodFilter,
+                },
             );
 
             if (res.data.message == 'Success') {
                 if (step != 1) setOrders((prev) => [...prev, ...res.data.orders.orders]);
                 else {
-                    setOrders(res.data.orders.orders)
+                    setOrders(res.data.orders.orders);
                 }
                 setCount(res.data.orders.count);
                 await getOrderDetails(res.data.orders.orders);
             }
         } else {
-            const res = await GetApi(
-                `/admin/get-orders-by-ctv/${ctvName}/${selectedMonth}/${selectedYear}`,
+            const res = await PostApi(
+                `/admin/get-orders-by-ctv-and-month/${ctvName}/${selectedMonth}/${selectedYear}/${30}/${step}`,
                 localStorage.getItem('token'),
+                {
+                    status: statusFilter,
+                    shipMethod: shipMethodFilter,
+                },
             );
 
             if (res.data.message == 'Success') {
-                setOrders(res.data.orders);
-                await getOrderDetails(res.data.orders);
-                setPage(0);
+                if (step != 1) setOrders((prev) => [...prev, ...res.data.orders.orders]);
+                else {
+                    setOrders(res.data.orders.orders);
+                }
+                setCount(res.data.orders.count);
+                await getOrderDetails(res.data.orders.orders);
             }
         }
         store.dispatch(change_is_loading(false));
@@ -318,15 +329,28 @@ export default function DetailCommissionTable() {
         setOrderDetails(fetchedOrderDetails);
     };
     const getDataRevenueCommissionAndBonus = async () => {
-        const res = await GetApi(
-            `/admin/get/revenue-commission/${selectedMonth}/${selectedYear}`,
-            localStorage.getItem('token'),
-        );
-        if (res.data.message === 'Success') {
-            setRevenue(res.data.data.revenue);
-            setCommission(res.data.data.commission);
-            setBonus(res.data.data.bonus);
-            setQuantity(res.data.data.quantity);
+        if (ctvFilter === 'ALL') {
+            const res = await GetApi(
+                `/admin/get/revenue-commission/${selectedMonth}/${selectedYear}`,
+                localStorage.getItem('token'),
+            );
+            if (res.data.message === 'Success') {
+                setRevenue(res.data.data.revenue);
+                setCommission(res.data.data.commission);
+                setBonus(res.data.data.bonus);
+                setQuantity(res.data.data.quantity);
+            }
+        } else {
+            const res = await GetApi(
+                `/admin/get/revenue-commission-by-ctvName/${ctvFilter}/${selectedMonth}/${selectedYear}`,
+                localStorage.getItem('token'),
+            );
+            if (res.data.message === 'Success') {
+                setRevenue(res.data.data.revenue);
+                setCommission(res.data.data.commission);
+                setBonus(res.data.data.bonus);
+                setQuantity(res.data.data.quantity);
+            }
         }
     };
 
@@ -349,11 +373,13 @@ export default function DetailCommissionTable() {
     useEffect(() => {
         if (selectedMonth && selectedYear) {
             getDataOrder(ctvFilter);
-            getDataCTVName();
             getDataRevenueCommissionAndBonus();
         }
-    }, [selectedMonth, selectedYear]);
+    }, [selectedMonth, selectedYear, ctvFilter, statusFilter, shipMethodFilter]);
 
+    useEffect(() => {
+        getDataCTVName();
+    }, []);
     useEffect(() => {
         if (status) {
             getDataOrder('ALL');
@@ -366,7 +392,7 @@ export default function DetailCommissionTable() {
 
     const handlePageChange = (event: unknown, newPage: number) => {
         setPage(newPage);
-        if (limit * (newPage + 1) > orders.length && orders.length < count) {
+        if (limit * (newPage + 1) > orders.length && orders.length < count && searchTerm === '') {
             setStep((prev) => prev + 1);
         }
     };
@@ -378,29 +404,23 @@ export default function DetailCommissionTable() {
 
     const handleStatusChange = (event: SelectChangeEvent<string>) => {
         setStatusFilter(event.target.value as string);
+        setStep(1);
         setPage(0);
     };
 
     const handleShipMethodChange = (event: SelectChangeEvent<string>) => {
         setShipMethodFilter(event.target.value as string);
         setPage(0);
+        setStep(1);
     };
 
     const handleCtvChange = (event: SelectChangeEvent<string>) => {
         setCtvFilter(event.target.value as string);
-        getDataOrder(event.target.value as string);
         setPage(0);
+        setStep(1);
     };
 
-    const filteredOrders = orders.filter((order) => {
-        const matchesStatus = statusFilter === 'ALL' || order.status === statusFilter;
-        const matchesCtv = ctvFilter === 'ALL' || order.ctvName === ctvFilter;
-        const matchesShipMethod = shipMethodFilter === 'ALL' || order.shipMethod === shipMethodFilter;
-
-        return matchesStatus && matchesCtv && matchesShipMethod;
-    });
-
-    let paginatedOrders = filteredOrders.slice(page * limit, page * limit + limit);
+    let paginatedOrders = orders.slice(page * limit, page * limit + limit);
     // filter Id
     const typingTimeoutRef = useRef<any>(null);
     if (typingTimeoutRef.current) {
@@ -430,302 +450,228 @@ export default function DetailCommissionTable() {
             filterByPhoneOrDeliveringCode(searchTerm);
         }, 500);
     }, [searchTerm]);
-    const totalCommission = orders.reduce((total, order) => {
-        return total + order.commission;
-    }, 0);
-    const totalQuantity = orders
-        .filter((order) => order.status === 'SUCCESS')
-        .reduce((total, order) => {
-            const orderDetailsForOrder = orderDetails.filter((detail) => detail.orderId === order.id);
-            const filteredDetails = orderDetailsForOrder.filter((detail) => !detail.isJibbitz);
-            return total + filteredDetails.reduce((sum, detail) => sum + detail.quantity, 0);
-        }, 0);
-    const calculateBonus = (totalQuantity: number) => {
-        if (totalQuantity >= 300) return 700000;
-        if (totalQuantity >= 200) return 400000;
-        if (totalQuantity >= 150) return 250000;
-        if (totalQuantity >= 100) return 150000;
-        if (totalQuantity >= 50) return 60000;
-        if (totalQuantity >= 30) return 300000;
-        return 0; // Không có thưởng
-    };
 
-    const totalRevenue = orders
-        .filter((order) => order.status === 'SUCCESS')
-        .reduce((total, order) => {
-            const orderDetailsForOrder = orderDetails.filter((detail) => detail.orderId === order.id);
-            return (
-                total +
-                orderDetailsForOrder.reduce(
-                    (sum, detail) => sum + (detail.ctvPrice - detail.importPrice) * detail.quantity,
-                    0,
-                )
-            );
-        }, 0);
-
-    const totalBonus = calculateBonus(totalQuantity);
     return (
         <>
-            <TableContainer className="relative" component={Paper}>
-                <Grid container spacing={3} sx={{ p: 2 }}>
-                    <Grid xs={12} sm={6} md={2.4} item>
-                        <Card>
-                            <CardContent>
-                                <Grid container spacing={0}>
-                                    <Grid
-                                        xs={12}
-                                        sm={4}
-                                        item
-                                        display="flex"
-                                        justifyContent="center"
-                                        alignItems="center"
-                                    >
-                                        <AvatarWrapper>
-                                            <img
-                                                alt="commission"
-                                                src={require('../../../../static/order-commission.png')}
-                                            />
-                                        </AvatarWrapper>
-                                    </Grid>
-                                    <Grid xs={12} sm={8} item display="flex" alignItems="center">
-                                        <Box
-                                            sx={{
-                                                pt: 2,
-                                            }}
-                                        >
-                                            <Typography variant="h6" gutterBottom noWrap>
-                                                Hoa hồng
-                                            </Typography>
-                                            <Typography variant="body2" noWrap>
-                                                {ctvFilter === 'ALL'
-                                                    ? formatPrice(commission)
-                                                    : formatPrice(totalCommission)}
-                                            </Typography>
-                                        </Box>
-                                    </Grid>
+            <Grid container spacing={3} sx={{ p: 2 }}>
+                <Grid xs={12} sm={6} md={2.4} item>
+                    <Card>
+                        <CardContent>
+                            <Grid container spacing={0}>
+                                <Grid xs={12} sm={4} item display="flex" justifyContent="center" alignItems="center">
+                                    <AvatarWrapper>
+                                        <img
+                                            alt="commission"
+                                            src={require('../../../../static/order-commission.png')}
+                                        />
+                                    </AvatarWrapper>
                                 </Grid>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    <Grid xs={12} sm={6} md={2.4} item>
-                        <Card>
-                            <CardContent>
-                                <Grid container spacing={0}>
-                                    <Grid
-                                        xs={12}
-                                        sm={4}
-                                        item
-                                        display="flex"
-                                        justifyContent="center"
-                                        alignItems="center"
+                                <Grid xs={12} sm={8} item display="flex" alignItems="center">
+                                    <Box
+                                        sx={{
+                                            pt: 2,
+                                        }}
                                     >
-                                        <AvatarWrapper>
-                                            <img
-                                                alt="order-count"
-                                                src={require('../../../../static/order-count.png')}
-                                            />
-                                        </AvatarWrapper>
-                                    </Grid>
-                                    <Grid xs={12} sm={8} item display="flex" alignItems="center">
-                                        <Box
-                                            sx={{
-                                                pt: 2,
-                                            }}
-                                        >
-                                            <Typography variant="h6" gutterBottom noWrap>
-                                                Số lượng
-                                            </Typography>
-                                            <Typography variant="body2" noWrap>
-                                                {ctvFilter === 'ALL' ? quantity : totalQuantity || 0}
-                                            </Typography>
-                                        </Box>
-                                    </Grid>
+                                        <Typography variant="h6" gutterBottom noWrap>
+                                            Hoa hồng
+                                        </Typography>
+                                        <Typography variant="body2" noWrap>
+                                            {formatPrice(commission)}
+                                        </Typography>
+                                    </Box>
                                 </Grid>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    <Grid xs={12} sm={6} md={2.4} item>
-                        <Card>
-                            <CardContent>
-                                <Grid container spacing={0}>
-                                    <Grid
-                                        xs={12}
-                                        sm={4}
-                                        item
-                                        display="flex"
-                                        justifyContent="center"
-                                        alignItems="center"
-                                    >
-                                        <AvatarWrapper>
-                                            <img alt="revenue" src={require('../../../../static/bonus.png')} />
-                                        </AvatarWrapper>
-                                    </Grid>
-                                    <Grid xs={12} sm={8} item display="flex" alignItems="center">
-                                        <Box
-                                            sx={{
-                                                pt: 2,
-                                            }}
-                                        >
-                                            <Typography variant="h6" gutterBottom noWrap>
-                                                Thưởng
-                                            </Typography>
-                                            <Typography variant="body2" noWrap>
-                                                {ctvFilter === 'ALL' ? formatPrice(bonus) : formatPrice(totalBonus)}
-                                            </Typography>
-                                        </Box>
-                                    </Grid>
-                                </Grid>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    <Grid xs={12} sm={6} md={2.4} item>
-                        <Card>
-                            <CardContent>
-                                <Grid container spacing={0}>
-                                    <Grid
-                                        xs={12}
-                                        sm={4}
-                                        item
-                                        display="flex"
-                                        justifyContent="center"
-                                        alignItems="center"
-                                    >
-                                        <AvatarWrapper>
-                                            <img alt="revenue" src={require('../../../../static/budget.png')} />
-                                        </AvatarWrapper>
-                                    </Grid>
-                                    <Grid xs={12} sm={8} item display="flex" alignItems="center">
-                                        <Box
-                                            sx={{
-                                                pt: 2,
-                                            }}
-                                        >
-                                            <Typography variant="h6" gutterBottom noWrap>
-                                                Tổng
-                                            </Typography>
-                                            <Typography variant="body2" noWrap>
-                                                {ctvFilter === 'ALL'
-                                                    ? formatPrice(commission + bonus)
-                                                    : formatPrice(totalCommission + totalBonus)}
-                                            </Typography>
-                                        </Box>
-                                    </Grid>
-                                </Grid>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    <Grid xs={12} sm={6} md={2.4} item>
-                        <Card>
-                            <CardContent>
-                                <Grid container spacing={0}>
-                                    <Grid
-                                        xs={12}
-                                        sm={4}
-                                        item
-                                        display="flex"
-                                        justifyContent="center"
-                                        alignItems="center"
-                                    >
-                                        <AvatarWrapper>
-                                            <img alt="revenue" src={require('../../../../static/revenue.png')} />
-                                        </AvatarWrapper>
-                                    </Grid>
-                                    <Grid xs={12} sm={8} item display="flex" alignItems="center">
-                                        <Box
-                                            sx={{
-                                                pt: 2,
-                                            }}
-                                        >
-                                            <Typography variant="h6" gutterBottom noWrap>
-                                                Doanh thu
-                                            </Typography>
-                                            <Typography variant="body2" noWrap>
-                                                {ctvFilter === 'ALL' ? formatPrice(revenue) : formatPrice(totalRevenue)}
-                                            </Typography>
-                                        </Box>
-                                    </Grid>
-                                </Grid>
-                            </CardContent>
-                        </Card>
-                    </Grid>
+                            </Grid>
+                        </CardContent>
+                    </Card>
                 </Grid>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
-                    <FormControl variant="outlined" sx={{ minWidth: 120 }}>
-                        <InputLabel>Tháng</InputLabel>
-                        <Select
-                            value={selectedMonth}
-                            onChange={(e) => setSetlectedMonth(Number(e.target.value))}
-                            label={'Năm'}
-                        >
-                            {Array.from({ length: 12 }, (_, index) => (
-                                <MenuItem key={index + 1} value={index + 1}>
-                                    {`Tháng ${index + 1}`}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                    <FormControl variant="outlined" sx={{ minWidth: 120 }}>
-                        <InputLabel>Năm</InputLabel>
-                        <Select
-                            value={selectedYear}
-                            onChange={(e) => setSetlectedYear(Number(e.target.value))}
-                            label={'Năm'}
-                        >
-                            {Array.from({ length: 2 }, (_, index) => (
-                                <MenuItem key={currentYear - index} value={currentYear - index}>
-                                    {currentYear - index}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                    <FormControl variant="outlined" sx={{ minWidth: 180 }}>
-                        <InputLabel>Tên CTV</InputLabel>
-                        <Select value={ctvFilter} onChange={handleCtvChange} label="Tên CTV">
-                            <MenuItem value="ALL">{t('orther.All')}</MenuItem>
-                            {ctvNames.map((ctvName, index) => (
-                                <MenuItem key={index} value={ctvName}>
-                                    {ctvName}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                    <FormControl variant="outlined" sx={{ minWidth: 180 }}>
-                        <InputLabel>Trạng thái</InputLabel>
-                        <Select value={statusFilter} onChange={handleStatusChange} label="Trạng thái">
-                            <MenuItem value="ALL">{t('orther.All')}</MenuItem>
-                            <MenuItem value="PROCESSING">Đang chờ</MenuItem>
-                            <MenuItem value="SUCCESS">Thành công</MenuItem>
-                            <MenuItem value="BOOM">Boom</MenuItem>
-                            <MenuItem value="CANCEL">Đã hủy</MenuItem>
-                        </Select>
-                    </FormControl>
+                <Grid xs={12} sm={6} md={2.4} item>
+                    <Card>
+                        <CardContent>
+                            <Grid container spacing={0}>
+                                <Grid xs={12} sm={4} item display="flex" justifyContent="center" alignItems="center">
+                                    <AvatarWrapper>
+                                        <img alt="order-count" src={require('../../../../static/order-count.png')} />
+                                    </AvatarWrapper>
+                                </Grid>
+                                <Grid xs={12} sm={8} item display="flex" alignItems="center">
+                                    <Box
+                                        sx={{
+                                            pt: 2,
+                                        }}
+                                    >
+                                        <Typography variant="h6" gutterBottom noWrap>
+                                            Số lượng
+                                        </Typography>
+                                        <Typography variant="body2" noWrap>
+                                            {quantity}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid xs={12} sm={6} md={2.4} item>
+                    <Card>
+                        <CardContent>
+                            <Grid container spacing={0}>
+                                <Grid xs={12} sm={4} item display="flex" justifyContent="center" alignItems="center">
+                                    <AvatarWrapper>
+                                        <img alt="revenue" src={require('../../../../static/bonus.png')} />
+                                    </AvatarWrapper>
+                                </Grid>
+                                <Grid xs={12} sm={8} item display="flex" alignItems="center">
+                                    <Box
+                                        sx={{
+                                            pt: 2,
+                                        }}
+                                    >
+                                        <Typography variant="h6" gutterBottom noWrap>
+                                            Thưởng
+                                        </Typography>
+                                        <Typography variant="body2" noWrap>
+                                            {formatPrice(bonus)}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid xs={12} sm={6} md={2.4} item>
+                    <Card>
+                        <CardContent>
+                            <Grid container spacing={0}>
+                                <Grid xs={12} sm={4} item display="flex" justifyContent="center" alignItems="center">
+                                    <AvatarWrapper>
+                                        <img alt="revenue" src={require('../../../../static/budget.png')} />
+                                    </AvatarWrapper>
+                                </Grid>
+                                <Grid xs={12} sm={8} item display="flex" alignItems="center">
+                                    <Box
+                                        sx={{
+                                            pt: 2,
+                                        }}
+                                    >
+                                        <Typography variant="h6" gutterBottom noWrap>
+                                            Tổng
+                                        </Typography>
+                                        <Typography variant="body2" noWrap>
+                                            {formatPrice(commission + bonus)}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid xs={12} sm={6} md={2.4} item>
+                    <Card>
+                        <CardContent>
+                            <Grid container spacing={0}>
+                                <Grid xs={12} sm={4} item display="flex" justifyContent="center" alignItems="center">
+                                    <AvatarWrapper>
+                                        <img alt="revenue" src={require('../../../../static/revenue.png')} />
+                                    </AvatarWrapper>
+                                </Grid>
+                                <Grid xs={12} sm={8} item display="flex" alignItems="center">
+                                    <Box
+                                        sx={{
+                                            pt: 2,
+                                        }}
+                                    >
+                                        <Typography variant="h6" gutterBottom noWrap>
+                                            Doanh thu
+                                        </Typography>
+                                        <Typography variant="body2" noWrap>
+                                            {formatPrice(revenue)}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                    </Card>
+                </Grid>
+            </Grid>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
+                <FormControl variant="outlined" sx={{ minWidth: 120 }}>
+                    <InputLabel>Tháng</InputLabel>
+                    <Select
+                        value={selectedMonth}
+                        onChange={(e) => setSetlectedMonth(Number(e.target.value))}
+                        label={'Năm'}
+                    >
+                        {Array.from({ length: 12 }, (_, index) => (
+                            <MenuItem key={index + 1} value={index + 1}>
+                                {`Tháng ${index + 1}`}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                <FormControl variant="outlined" sx={{ minWidth: 120 }}>
+                    <InputLabel>Năm</InputLabel>
+                    <Select
+                        value={selectedYear}
+                        onChange={(e) => setSetlectedYear(Number(e.target.value))}
+                        label={'Năm'}
+                    >
+                        {Array.from({ length: 2 }, (_, index) => (
+                            <MenuItem key={currentYear - index} value={currentYear - index}>
+                                {currentYear - index}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                <FormControl variant="outlined" sx={{ minWidth: 180 }}>
+                    <InputLabel>Tên CTV</InputLabel>
+                    <Select value={ctvFilter} onChange={handleCtvChange} label="Tên CTV">
+                        <MenuItem value="ALL">{t('orther.All')}</MenuItem>
+                        {ctvNames.map((ctvName, index) => (
+                            <MenuItem key={index} value={ctvName}>
+                                {ctvName}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                <FormControl variant="outlined" sx={{ minWidth: 180 }}>
+                    <InputLabel>Trạng thái</InputLabel>
+                    <Select value={statusFilter} onChange={handleStatusChange} label="Trạng thái">
+                        <MenuItem value="ALL">{t('orther.All')}</MenuItem>
+                        <MenuItem value="PROCESSING">Đang chờ</MenuItem>
+                        <MenuItem value="SUCCESS">Thành công</MenuItem>
+                        <MenuItem value="BOOM">Boom</MenuItem>
+                        <MenuItem value="CANCEL">Đã hủy</MenuItem>
+                    </Select>
+                </FormControl>
 
-                    <FormControl variant="outlined" sx={{ minWidth: 180 }}>
-                        <InputLabel>Hình thức ship</InputLabel>
-                        <Select value={shipMethodFilter} onChange={handleShipMethodChange} label="Hình thức ship">
-                            <MenuItem value="ALL">{t('orther.All')}</MenuItem>
-                            <MenuItem value="VIETTELPOST">Viettelpost</MenuItem>
-                            <MenuItem value="GRAB">Grab/Kho khác</MenuItem>
-                            <MenuItem value="OFFLINE">Offline</MenuItem>
-                        </Select>
-                    </FormControl>
+                <FormControl variant="outlined" sx={{ minWidth: 180 }}>
+                    <InputLabel>Hình thức ship</InputLabel>
+                    <Select value={shipMethodFilter} onChange={handleShipMethodChange} label="Hình thức ship">
+                        <MenuItem value="ALL">{t('orther.All')}</MenuItem>
+                        <MenuItem value="VIETTELPOST">Viettelpost</MenuItem>
+                        <MenuItem value="GRAB">Grab/Kho khác</MenuItem>
+                        <MenuItem value="OFFLINE">Offline</MenuItem>
+                        <MenuItem value="GGDH">Đổi hàng</MenuItem>
+                    </Select>
+                </FormControl>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Input
-                            value={searchTerm}
-                            className="border border-gray-300 rounded-lg p-1"
-                            sx={{ display: 'block', width: 270, marginRight: 2 }}
-                            placeholder={'Tìm kiếm'}
-                            onChange={(e) => {
-                                filterSpecialInput(e.target.value, setSearchTerm);
-                            }}
-                        />
-                        <IconButton color="primary">
-                            <SearchIcon />
-                        </IconButton>
-                    </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Input
+                        value={searchTerm}
+                        className="border border-gray-300 rounded-lg p-1"
+                        sx={{ display: 'block', width: 270, marginRight: 2 }}
+                        placeholder={'Tìm kiếm'}
+                        onChange={(e) => {
+                            filterSpecialInput(e.target.value, setSearchTerm);
+                        }}
+                    />
+                    <IconButton color="primary">
+                        <SearchIcon />
+                    </IconButton>
                 </Box>
-                <Table aria-label="collapsible table">
+            </Box>
+            <TableContainer className="relative" component={Paper} sx={{ height: 640 }}>
+                <Table stickyHeader aria-label="collapsible table">
                     <TableHead>
                         <TableRow>
                             <TableCell align="center">STT</TableCell>
@@ -755,23 +701,17 @@ export default function DetailCommissionTable() {
                         })}
                     </TableBody>
                 </Table>
-                <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    labelRowsPerPage="Số đơn mỗi trang"
-                    component="div"
-                    count={
-                        ctvFilter === 'ALL' && statusFilter === 'ALL' && shipMethodFilter === 'ALL'
-                            ? searchTerm === ''
-                                ? count
-                                : filteredOrders.length
-                            : filteredOrders.length
-                    }
-                    rowsPerPage={limit}
-                    page={page}
-                    onPageChange={handlePageChange}
-                    onRowsPerPageChange={handleLimitChange}
-                />
             </TableContainer>
+            <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                labelRowsPerPage="Số đơn mỗi trang"
+                component="div"
+                count={searchTerm === '' ? count : orders.length}
+                rowsPerPage={limit}
+                page={page}
+                onPageChange={handlePageChange}
+                onRowsPerPageChange={handleLimitChange}
+            />
         </>
     );
 }
