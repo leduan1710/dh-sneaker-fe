@@ -242,6 +242,11 @@ export default function DetailCommissionTable() {
     const [selectedMonth, setSetlectedMonth] = useState(currentMonth);
     const [selectedYear, setSetlectedYear] = useState(currentYear);
 
+    const [revenue, setRevenue] = useState(0);
+    const [commission, setCommission] = useState(0);
+    const [bonus, setBonus] = useState(0);
+    const [quantity, setQuantity] = useState(0);
+
     // Pagination state
     const [page, setPage] = useState(0);
     const [limit, setLimit] = useState(5);
@@ -309,6 +314,15 @@ export default function DetailCommissionTable() {
         }
         setOrderDetails(fetchedOrderDetails);
     };
+    const getDataRevenueCommissionAndBonus = async () => {
+        const res = await GetApi(`/admin/get/revenue-commission/${selectedMonth}/${selectedYear}`, localStorage.getItem('token'));
+        if (res.data.message === 'Success') {
+            setRevenue(res.data.data.revenue);
+            setCommission(res.data.data.commission);
+            setBonus(res.data.data.bonus);
+            setQuantity(res.data.data.quantity);
+        }
+    };
 
     const resetFilter = () => {
         setCtvFilter('ALL');
@@ -320,7 +334,7 @@ export default function DetailCommissionTable() {
         if (step != 1) getDataOrder(ctvFilter);
     }, [step]);
     useEffect(() => {
-        if (orders.length > 0 && count > 0 && searchTerm === '')
+        if (orders.length > 0 && count > 0 && searchTerm === '' && ctvFilter === 'ALL')
             if (limit * (page + 1) > orders.length && orders.length < count) {
                 setStep((prev) => prev + 1);
             }
@@ -330,6 +344,7 @@ export default function DetailCommissionTable() {
         if (selectedMonth && selectedYear) {
             getDataOrder(ctvFilter);
             getDataCTVName();
+            getDataRevenueCommissionAndBonus();
         }
     }, [selectedMonth, selectedYear]);
 
@@ -442,7 +457,7 @@ export default function DetailCommissionTable() {
             );
         }, 0);
 
-    const bonus = calculateBonus(totalQuantity);
+    const totalBonus = calculateBonus(totalQuantity);
 
     return (
         <>
@@ -477,7 +492,7 @@ export default function DetailCommissionTable() {
                                                 Hoa hồng
                                             </Typography>
                                             <Typography variant="body2" noWrap>
-                                                {formatPrice(totalCommission)}
+                                                {formatPrice(commission)}
                                             </Typography>
                                         </Box>
                                     </Grid>
@@ -514,7 +529,7 @@ export default function DetailCommissionTable() {
                                                 Số lượng
                                             </Typography>
                                             <Typography variant="body2" noWrap>
-                                                {totalQuantity || 0}
+                                                {quantity || 0}
                                             </Typography>
                                         </Box>
                                     </Grid>
@@ -582,7 +597,7 @@ export default function DetailCommissionTable() {
                                                 Tổng
                                             </Typography>
                                             <Typography variant="body2" noWrap>
-                                                {formatPrice(totalCommission + bonus)}
+                                                {formatPrice(commission + bonus)}
                                             </Typography>
                                         </Box>
                                     </Grid>
@@ -616,7 +631,7 @@ export default function DetailCommissionTable() {
                                                 Doanh thu
                                             </Typography>
                                             <Typography variant="body2" noWrap>
-                                                {formatPrice(totalRevenue)}
+                                                {formatPrice(revenue)}
                                             </Typography>
                                         </Box>
                                     </Grid>
@@ -707,7 +722,7 @@ export default function DetailCommissionTable() {
                             <TableCell align="center">STT</TableCell>
                             <TableCell>Mã đơn hàng</TableCell>
                             <TableCell>Ngày tạo đơn</TableCell>
-                            <TableCell>CTV</TableCell> 
+                            <TableCell>CTV</TableCell>
                             <TableCell>Tiền Cod</TableCell>
                             <TableCell>Giá CTV</TableCell>
                             <TableCell>Giá nhập</TableCell>
