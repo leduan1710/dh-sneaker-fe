@@ -23,6 +23,7 @@ import {
     DialogContent,
     DialogContentText,
     DialogActions,
+    Autocomplete,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import UploadTwoToneIcon from '@mui/icons-material/UploadTwoTone';
@@ -149,21 +150,12 @@ const OrderDetail: React.FC = () => {
 
         if (res.data.message == 'Success') {
             setOrder(res.data.order);
-            setCustomerName(res.data.order.customerName);
-            setCustomerPhone(res.data.order.customerPhone);
-            setCustomerAddress(res.data.order.addressDetail);
-            setShippingMethod(res.data.order.shipMethod);
-            setOrderNote(res.data.order.ctvNote);
-            setShippingFee(formatCurrency(res.data.order.shipFee.toString()));
-            setTotalCOD(formatCurrency(res.data.order.CODPrice.toString()));
-            setProvince(res.data.order.address?.province);
-            setDistrict(res.data.order.address?.district);
-            setWard(res.data.order.address?.ward);
-            setNoteImage(res.data.order.noteImageList);
+            setField(res.data.order);
             setOrderDetails(res.data.orderDetails);
         }
         store.dispatch(change_is_loading(false));
     };
+
     const getDataProvince = async () => {
         const resProvince = await axios('https://partner.viettelpost.vn/v2/categories/listProvinceById?provinceId=-1');
         if (resProvince.data.status == 200) {
@@ -191,7 +183,19 @@ const OrderDetail: React.FC = () => {
             }
         }
     };
-
+    const setField = (order: any) => {
+        setCustomerName(order.customerName);
+        setCustomerPhone(order.customerPhone);
+        setCustomerAddress(order.addressDetail);
+        setShippingMethod(order.shipMethod);
+        setOrderNote(order.ctvNote);
+        setShippingFee(formatCurrency(order.shipFee.toString()));
+        setTotalCOD(formatCurrency(order.CODPrice.toString()));
+        setProvince(order.address?.province);
+        setDistrict(order.address?.district);
+        setWard(order.address?.ward);
+        setNoteImage(order.noteImageList);
+    };
     const handleEditClick = () => {
         setIsEdit(true);
     };
@@ -202,6 +206,7 @@ const OrderDetail: React.FC = () => {
 
     const handleCancelClick = () => {
         setIsEdit(false);
+        setField(order);
     };
 
     const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -237,7 +242,7 @@ const OrderDetail: React.FC = () => {
             formData.append('customerName', customerName);
             formData.append('shipMethod', shippingMethod);
             formData.append('paid', 'true');
-            formData.append('CODPrice', totalCOD.replace(',', '').toString());
+            formData.append('CODPrice', totalCOD.replace(/,/g, '').toString());
             formData.append('oldNoteImageList', JSON.stringify(noteImage));
 
             formData.append('shipFee', '0');
@@ -293,8 +298,8 @@ const OrderDetail: React.FC = () => {
             );
             formData.append('shipMethod', shippingMethod);
             formData.append('paid', 'true');
-            formData.append('CODPrice', totalCOD.replace(',', '').toString());
-            formData.append('shipFee', shippingFee.replace(',', '').toString());
+            formData.append('CODPrice', totalCOD.replace(/,/g, '').toString());
+            formData.append('shipFee', shippingFee.replace(/,/g, '').toString());
             formData.append('oldNoteImageList', JSON.stringify(noteImage));
 
             // Upload hình ảnh nếu có
@@ -572,93 +577,92 @@ const OrderDetail: React.FC = () => {
                             />
 
                             <FormControl fullWidth sx={{ mb: 1 }}>
-                                <InputLabel>Tỉnh/Thành Phố</InputLabel>
-                                <Select
-                                    value={province?.PROVINCE_ID || ''}
-                                    onChange={(e) => {
-                                        const selectedProvince = provinceList.find(
-                                            (p: any) => p.PROVINCE_ID === e.target.value,
-                                        );
-                                        setProvince(selectedProvince);
+                                <Autocomplete
+                                    options={provinceList}
+                                    getOptionLabel={(option) => option.PROVINCE_NAME}
+                                    value={province || null}
+                                    onChange={(event, newValue) => {
+                                        setProvince(newValue);
                                         setDistrict(null);
                                         setWard(null);
                                         setDistrictList([]);
                                         setWardList([]);
                                     }}
-                                    sx={{
-                                        '& .MuiOutlinedInput-notchedOutline': {
-                                            borderRadius: '3px',
-                                        },
-                                    }}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Tỉnh/Thành Phố"
+                                            variant="outlined"
+                                            sx={{
+                                                '& .MuiOutlinedInput-notchedOutline': {
+                                                    borderRadius: '3px',
+                                                },
+                                            }}
+                                        />
+                                    )}
                                     readOnly={!isEdit}
-                                    label={'Tỉnh/Thành Phố'}
-                                >
-                                    {provinceList.map((prov: any) => (
-                                        <MenuItem key={prov.PROVINCE_ID} value={prov.PROVINCE_ID}>
-                                            {prov.PROVINCE_NAME}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
+                                    isOptionEqualToValue={(option, value) => option.PROVINCE_ID === value.PROVINCE_ID}
+                                />
                             </FormControl>
 
                             <Grid container spacing={2} sx={{ mb: 1 }}>
                                 <Grid item xs={6}>
                                     <FormControl fullWidth>
-                                        <InputLabel>{province ? 'Quận/Huyện' : 'Vui lòng chọn tỉnh/TP'} </InputLabel>
-                                        <Select
-                                            value={district?.DISTRICT_ID || ''}
-                                            onChange={(e) => {
-                                                const selectedDistrict = districtList.find(
-                                                    (d: any) => d.DISTRICT_ID === e.target.value,
-                                                );
-                                                setDistrict(selectedDistrict);
+                                        <Autocomplete
+                                            options={districtList}
+                                            getOptionLabel={(option) => formatTitle(option.DISTRICT_NAME)}
+                                            value={district || null}
+                                            onChange={(event, newValue) => {
+                                                setDistrict(newValue);
                                                 setWard(null);
                                                 setWardList([]);
                                             }}
-                                            sx={{
-                                                '& .MuiOutlinedInput-notchedOutline': {
-                                                    borderRadius: '3px',
-                                                },
-                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    label={province ? 'Quận/Huyện' : 'Vui lòng chọn tỉnh/TP'}
+                                                    variant="outlined"
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-notchedOutline': {
+                                                            borderRadius: '3px',
+                                                        },
+                                                    }}
+                                                    disabled={!province}
+                                                />
+                                            )}
                                             readOnly={!isEdit}
-                                            disabled={!province}
-                                            label={'Quận/huyện'}
-                                        >
-                                            {districtList.map((dist: any) => (
-                                                <MenuItem key={dist.DISTRICT_ID} value={dist.DISTRICT_ID}>
-                                                    {formatTitle(dist.DISTRICT_NAME)}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
+                                            isOptionEqualToValue={(option, value) =>
+                                                option.DISTRICT_ID === value.DISTRICT_ID
+                                            }
+                                        />
                                     </FormControl>
                                 </Grid>
 
                                 <Grid item xs={6}>
                                     <FormControl fullWidth>
-                                        <InputLabel>{district ? 'Phường/Xã' : 'Vui lòng chọn quận/huyện'}</InputLabel>
-                                        <Select
-                                            value={ward?.WARDS_ID || ''}
-                                            onChange={(e) => {
-                                                const selectedWard = wardList.find(
-                                                    (w: any) => w.WARDS_ID === e.target.value,
-                                                );
-                                                setWard(selectedWard);
+                                        <Autocomplete
+                                            options={wardList}
+                                            getOptionLabel={(option) => formatTitle(option.WARDS_NAME)}
+                                            value={ward || null}
+                                            onChange={(event, newValue) => {
+                                                setWard(newValue);
                                             }}
-                                            sx={{
-                                                '& .MuiOutlinedInput-notchedOutline': {
-                                                    borderRadius: '3px',
-                                                },
-                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    label={district ? 'Phường/Xã' : 'Vui lòng chọn quận/huyện'}
+                                                    variant="outlined"
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-notchedOutline': {
+                                                            borderRadius: '3px',
+                                                        },
+                                                    }}
+                                                    disabled={!district}
+                                                />
+                                            )}
                                             readOnly={!isEdit}
-                                            disabled={!district}
-                                            label={'Phường/Xã'}
-                                        >
-                                            {wardList.map((w: any) => (
-                                                <MenuItem key={w.WARDS_ID} value={w.WARDS_ID}>
-                                                    {formatTitle(w.WARDS_NAME)}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
+                                            isOptionEqualToValue={(option, value) => option.WARDS_ID === value.WARDS_ID}
+                                        />
                                     </FormControl>
                                 </Grid>
                             </Grid>
@@ -781,7 +785,7 @@ const OrderDetail: React.FC = () => {
                                 </Typography>
 
                                 <Typography variant="h6" sx={{ fontSize: 19, fontWeight: 600 }}>
-                                    {formatPrice(totalAmount + Number(shippingFee.replace(',', '')))}
+                                    {formatPrice(totalAmount + Number(shippingFee.replace(/,/g, '')))}
                                 </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
@@ -790,7 +794,11 @@ const OrderDetail: React.FC = () => {
                                 </Typography>
 
                                 <Typography variant="h6" sx={{ fontSize: 19, fontWeight: 600 }}>
-                                    {formatPrice(Number(totalCOD.replace(',', '')) - totalAmount + Number(shippingFee.replace(',', '')))}
+                                    {formatPrice(
+                                        Number(totalCOD.replace(/,/g, '')) -
+                                            totalAmount -
+                                            Number(shippingFee.replace(/,/g, '')),
+                                    )}
                                 </Typography>
                             </Box>
                         </Box>

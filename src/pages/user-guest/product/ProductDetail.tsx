@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Grid, Paper, Typography, Button, Box, Breadcrumbs, IconButton, Divider } from '@mui/material';
-import { useStore } from 'react-redux';
+import { useSelector, useStore } from 'react-redux';
 import { add_list_item_in_cart, change_is_loading, set_number_cart } from '../../../reducers/Actions';
 import { GetGuestApi } from '../../../untils/Api';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -11,9 +11,13 @@ import { addCheckout, addCheckoutBuyAll, addToListCartStore, formatPrice, toastS
 import SizeGuideDialog from './SizeGuideDialog';
 import { HOST_BE } from '../../../common/Common';
 import RelatedProducts from '../../../components/user-guest/home/RelatedProduct';
+import { ReducerProps } from '../../../reducers/ReducersProps';
+import { AlertLogin } from '../../../components/alert/Alert';
 
 const ProductDetail: React.FC = () => {
     const { productId } = useParams();
+    const user = useSelector((state: ReducerProps) => state.user);
+
     const [product, setProduct] = useState<any>(undefined);
     const [selectedProductDetail, setSelectedProductDetail] = useState<any>(undefined);
     const [productDetails, setProductDetails] = useState<any>(undefined);
@@ -71,14 +75,14 @@ const ProductDetail: React.FC = () => {
         window.scrollTo(0, 0);
         getData();
     }, [productId]);
-    const sortedProductDetails = [...productDetails? productDetails : []].sort((a, b) => {
-    const sizeAMatch = a.sizeName.match(/\d+/);
-    const sizeBMatch = b.sizeName.match(/\d+/);
+    const sortedProductDetails = [...(productDetails ? productDetails : [])].sort((a, b) => {
+        const sizeAMatch = a.sizeName.match(/\d+/);
+        const sizeBMatch = b.sizeName.match(/\d+/);
 
-    const sizeA = sizeAMatch ? parseInt(sizeAMatch[0], 10) : Infinity; // Nếu không tìm thấy, coi như lớn nhất
-    const sizeB = sizeBMatch ? parseInt(sizeBMatch[0], 10) : Infinity; // Nếu không tìm thấy, coi như lớn nhất
+        const sizeA = sizeAMatch ? parseInt(sizeAMatch[0], 10) : Infinity; // Nếu không tìm thấy, coi như lớn nhất
+        const sizeB = sizeBMatch ? parseInt(sizeBMatch[0], 10) : Infinity; // Nếu không tìm thấy, coi như lớn nhất
 
-    return sizeA - sizeB;
+        return sizeA - sizeB;
     });
     return (
         <>
@@ -359,7 +363,12 @@ const ProductDetail: React.FC = () => {
                                         height: '55px',
                                     }}
                                     onClick={() => {
-                                        handleBuyNow();
+                                        if(!user.id)
+                                        {
+                                            AlertLogin();
+                                        }else{
+                                            handleBuyNow();
+                                        }
                                     }}
                                 >
                                     Mua ngay

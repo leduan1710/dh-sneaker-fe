@@ -18,6 +18,7 @@ import {
     Avatar,
     styled,
     Stack,
+    Autocomplete,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import UploadTwoToneIcon from '@mui/icons-material/UploadTwoTone';
@@ -596,90 +597,89 @@ const Checkout: React.FC = () => {
                         />
 
                         <FormControl fullWidth sx={{ mb: 1 }}>
-                            <InputLabel>Tỉnh/Thành Phố</InputLabel>
-                            <Select
-                                value={province?.PROVINCE_ID || ''}
-                                onChange={(e) => {
-                                    const selectedProvince = provinceList.find(
-                                        (p: any) => p.PROVINCE_ID === e.target.value,
-                                    );
-                                    setProvince(selectedProvince);
+                            <Autocomplete
+                                options={provinceList}
+                                getOptionLabel={(option) => option.PROVINCE_NAME}
+                                value={province || null}
+                                onChange={(event, newValue) => {
+                                    setProvince(newValue);
                                     setDistrict(null);
                                     setWard(null);
                                     setDistrictList([]);
                                     setWardList([]);
                                 }}
-                                sx={{
-                                    '& .MuiOutlinedInput-notchedOutline': {
-                                        borderRadius: '3px',
-                                    },
-                                }}
-                                label={'Tỉnh/Thành Phố'}
-                            >
-                                {provinceList.map((prov: any) => (
-                                    <MenuItem key={prov.PROVINCE_ID} value={prov.PROVINCE_ID}>
-                                        {prov.PROVINCE_NAME}
-                                    </MenuItem>
-                                ))}
-                            </Select>
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Tỉnh/Thành Phố"
+                                        variant="outlined"
+                                        sx={{
+                                            '& .MuiOutlinedInput-notchedOutline': {
+                                                borderRadius: '3px',
+                                            },
+                                        }}
+                                    />
+                                )}
+                                isOptionEqualToValue={(option, value) => option.PROVINCE_ID === value.PROVINCE_ID}
+                            />
                         </FormControl>
 
                         <Grid container spacing={2} sx={{ mb: 1 }}>
                             <Grid item xs={6}>
                                 <FormControl fullWidth>
-                                    <InputLabel>{province ? 'Quận/Huyện' : 'Vui lòng chọn tỉnh/TP'} </InputLabel>
-                                    <Select
-                                        value={district?.DISTRICT_ID || ''}
-                                        onChange={(e) => {
-                                            const selectedDistrict = districtList.find(
-                                                (d: any) => d.DISTRICT_ID === e.target.value,
-                                            );
-                                            setDistrict(selectedDistrict);
+                                    <Autocomplete
+                                        options={districtList}
+                                        getOptionLabel={(option) => formatTitle(option.DISTRICT_NAME)}
+                                        value={district || null}
+                                        onChange={(event, newValue) => {
+                                            setDistrict(newValue);
                                             setWard(null);
                                             setWardList([]);
                                         }}
-                                        sx={{
-                                            '& .MuiOutlinedInput-notchedOutline': {
-                                                borderRadius: '3px',
-                                            },
-                                        }}
-                                        disabled={!province}
-                                        label={'Quận/huyện'}
-                                    >
-                                        {districtList.map((dist: any) => (
-                                            <MenuItem key={dist.DISTRICT_ID} value={dist.DISTRICT_ID}>
-                                                {formatTitle(dist.DISTRICT_NAME)}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                label={province ? 'Quận/Huyện' : 'Vui lòng chọn tỉnh/TP'}
+                                                variant="outlined"
+                                                sx={{
+                                                    '& .MuiOutlinedInput-notchedOutline': {
+                                                        borderRadius: '3px',
+                                                    },
+                                                }}
+                                                disabled={!province}
+                                            />
+                                        )}
+                                        isOptionEqualToValue={(option, value) =>
+                                            option.DISTRICT_ID === value.DISTRICT_ID
+                                        }
+                                    />
                                 </FormControl>
                             </Grid>
 
                             <Grid item xs={6}>
                                 <FormControl fullWidth>
-                                    <InputLabel>{district ? 'Phường/Xã' : 'Vui lòng chọn quận/huyện'}</InputLabel>
-                                    <Select
-                                        value={ward?.WARDS_ID || ''}
-                                        onChange={(e) => {
-                                            const selectedWard = wardList.find(
-                                                (w: any) => w.WARDS_ID === e.target.value,
-                                            );
-                                            setWard(selectedWard);
+                                    <Autocomplete
+                                        options={wardList}
+                                        getOptionLabel={(option) => formatTitle(option.WARDS_NAME)}
+                                        value={ward || null}
+                                        onChange={(event, newValue) => {
+                                            setWard(newValue);
                                         }}
-                                        sx={{
-                                            '& .MuiOutlinedInput-notchedOutline': {
-                                                borderRadius: '3px',
-                                            },
-                                        }}
-                                        disabled={!district}
-                                        label={'Phường/Xã'}
-                                    >
-                                        {wardList.map((w: any) => (
-                                            <MenuItem key={w.WARDS_ID} value={w.WARDS_ID}>
-                                                {formatTitle(w.WARDS_NAME)}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                label={district ? 'Phường/Xã' : 'Vui lòng chọn quận/huyện'}
+                                                variant="outlined"
+                                                sx={{
+                                                    '& .MuiOutlinedInput-notchedOutline': {
+                                                        borderRadius: '3px',
+                                                    },
+                                                }}
+                                                disabled={!district}
+                                            />
+                                        )}
+                                        isOptionEqualToValue={(option, value) => option.WARDS_ID === value.WARDS_ID}
+                                    />
                                 </FormControl>
                             </Grid>
                         </Grid>
@@ -808,7 +808,7 @@ const Checkout: React.FC = () => {
                             </Typography>
 
                             <Typography variant="h6" sx={{ fontSize: 19, fontWeight: 600 }}>
-                                {formatPrice(totalAmount + Number(shippingFee.replace(',', '')))}
+                                {formatPrice(totalAmount + Number(shippingFee.replace(/,/g, '')))}
                             </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
@@ -818,9 +818,9 @@ const Checkout: React.FC = () => {
 
                             <Typography variant="h6" sx={{ fontSize: 19, fontWeight: 600 }}>
                                 {formatPrice(
-                                    Number(totalCOD.replace(',', '')) -
-                                        totalAmount +
-                                        Number(shippingFee.replace(',', '')),
+                                    Number(totalCOD.replace(/,/g, '')) -
+                                        totalAmount -
+                                        Number(shippingFee.replace(/,/g, '')),
                                 )}
                             </Typography>
                         </Box>

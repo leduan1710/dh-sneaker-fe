@@ -278,7 +278,10 @@ export default function DetailCommissionTable() {
             );
 
             if (res.data.message == 'Success') {
-                setOrders((prev) => [...prev, ...res.data.orders.orders]);
+                if (step != 1) setOrders((prev) => [...prev, ...res.data.orders.orders]);
+                else {
+                    setOrders(res.data.orders.orders)
+                }
                 setCount(res.data.orders.count);
                 await getOrderDetails(res.data.orders.orders);
             }
@@ -315,7 +318,10 @@ export default function DetailCommissionTable() {
         setOrderDetails(fetchedOrderDetails);
     };
     const getDataRevenueCommissionAndBonus = async () => {
-        const res = await GetApi(`/admin/get/revenue-commission/${selectedMonth}/${selectedYear}`, localStorage.getItem('token'));
+        const res = await GetApi(
+            `/admin/get/revenue-commission/${selectedMonth}/${selectedYear}`,
+            localStorage.getItem('token'),
+        );
         if (res.data.message === 'Success') {
             setRevenue(res.data.data.revenue);
             setCommission(res.data.data.commission);
@@ -394,7 +400,7 @@ export default function DetailCommissionTable() {
         return matchesStatus && matchesCtv && matchesShipMethod;
     });
 
-    const paginatedOrders = filteredOrders.slice(page * limit, page * limit + limit);
+    let paginatedOrders = filteredOrders.slice(page * limit, page * limit + limit);
     // filter Id
     const typingTimeoutRef = useRef<any>(null);
     if (typingTimeoutRef.current) {
@@ -458,7 +464,6 @@ export default function DetailCommissionTable() {
         }, 0);
 
     const totalBonus = calculateBonus(totalQuantity);
-
     return (
         <>
             <TableContainer className="relative" component={Paper}>
@@ -492,7 +497,9 @@ export default function DetailCommissionTable() {
                                                 Hoa hồng
                                             </Typography>
                                             <Typography variant="body2" noWrap>
-                                                {formatPrice(commission)}
+                                                {ctvFilter === 'ALL'
+                                                    ? formatPrice(commission)
+                                                    : formatPrice(totalCommission)}
                                             </Typography>
                                         </Box>
                                     </Grid>
@@ -529,7 +536,7 @@ export default function DetailCommissionTable() {
                                                 Số lượng
                                             </Typography>
                                             <Typography variant="body2" noWrap>
-                                                {quantity || 0}
+                                                {ctvFilter === 'ALL' ? quantity : totalQuantity || 0}
                                             </Typography>
                                         </Box>
                                     </Grid>
@@ -563,7 +570,7 @@ export default function DetailCommissionTable() {
                                                 Thưởng
                                             </Typography>
                                             <Typography variant="body2" noWrap>
-                                                {formatPrice(bonus)}
+                                                {ctvFilter === 'ALL' ? formatPrice(bonus) : formatPrice(totalBonus)}
                                             </Typography>
                                         </Box>
                                     </Grid>
@@ -597,7 +604,9 @@ export default function DetailCommissionTable() {
                                                 Tổng
                                             </Typography>
                                             <Typography variant="body2" noWrap>
-                                                {formatPrice(commission + bonus)}
+                                                {ctvFilter === 'ALL'
+                                                    ? formatPrice(commission + bonus)
+                                                    : formatPrice(totalCommission + totalBonus)}
                                             </Typography>
                                         </Box>
                                     </Grid>
@@ -631,7 +640,7 @@ export default function DetailCommissionTable() {
                                                 Doanh thu
                                             </Typography>
                                             <Typography variant="body2" noWrap>
-                                                {formatPrice(revenue)}
+                                                {ctvFilter === 'ALL' ? formatPrice(revenue) : formatPrice(totalRevenue)}
                                             </Typography>
                                         </Box>
                                     </Grid>
@@ -751,7 +760,7 @@ export default function DetailCommissionTable() {
                     labelRowsPerPage="Số đơn mỗi trang"
                     component="div"
                     count={
-                        ctvFilter === 'ALL'
+                        ctvFilter === 'ALL' && statusFilter === 'ALL' && shipMethodFilter === 'ALL'
                             ? searchTerm === ''
                                 ? count
                                 : filteredOrders.length

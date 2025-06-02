@@ -17,7 +17,6 @@ function DetailCommissionManagement() {
     const { t } = useTranslation();
     const user = useSelector((state: ReducerProps) => state.user);
     const [orders, setOrders] = useState<OrderModel[]>();
-
     return (
         <>
             <PageTitleWrapper>

@@ -191,7 +191,8 @@ function Row(props: RowProps) {
                             )}
 
                             <Typography variant="body1" gutterBottom component="div">
-                                <strong>Ghi chú:</strong> <span style={{ fontWeight: 'bold', color: '#C0392B' }}>{order.ctvNote}</span>
+                                <strong>Ghi chú:</strong>{' '}
+                                <span style={{ fontWeight: 'bold', color: '#C0392B' }}>{order.ctvNote}</span>
                                 {order.noteImageList.length > 0 && (
                                     <span
                                         style={{ cursor: 'pointer', color: 'blue', marginLeft: '10px' }}
@@ -300,6 +301,7 @@ export default function NewOrderTable() {
     const user = useSelector((state: ReducerProps) => state.user);
     const [orders, setOrders] = useState<OrderModel[]>([]);
     const [orderDetails, setOrderDetails] = useState<OrderDetail[]>([]);
+    const [searchTerm, setSearchTerm] = useState<string>('');
 
     // Pagination state
     const [page, setPage] = useState(0);
@@ -356,12 +358,55 @@ export default function NewOrderTable() {
     };
 
     const paginatedOrders = orders.slice(page * limit, page * limit + limit);
+    const typingTimeoutRef = useRef<any>(null);
+    if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+    }
+    const filterById = async (searchTerm: string) => {
+        if (searchTerm != '') {
+            store.dispatch(change_is_loading(true));
+            const res = await PostApi(
+                `/admin/search/new-order-by-phone`,
+                localStorage.getItem('token'),
+                { searchTerm: searchTerm },
+            );
+            if (res.data.message == 'Success') {
+                setOrders(res.data.order);
+                await getOrderDetails(res.data.order);
+                setPage(0);
+            }
+            store.dispatch(change_is_loading(false));
+        } else {
+            getDataOrder();
+        }
+    };
 
+    useEffect(() => {
+        typingTimeoutRef.current = setTimeout(() => {
+            filterById(searchTerm);
+        }, 500);
+    }, [searchTerm]);
     return (
         <>
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-                <TableContainer >
-                    <Table >
+                <TableContainer>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Input
+                                value={searchTerm}
+                                className="border border-gray-300 rounded-lg p-1"
+                                sx={{ display: 'block', width: 350, marginRight: 2 }}
+                                placeholder={'Tìm kiếm'}
+                                onChange={(e) => {
+                                    filterSpecialInput(e.target.value, setSearchTerm);
+                                }}
+                            />
+                            <IconButton color="primary">
+                                <SearchIcon />
+                            </IconButton>
+                        </Box>
+                    </Box>
+                    <Table>
                         <TableHead>
                             <TableRow>
                                 <TableCell />
