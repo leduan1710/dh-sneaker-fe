@@ -615,9 +615,9 @@ export default function DetailCommissionTable() {
                         onChange={(e) => setSetlectedYear(Number(e.target.value))}
                         label={'Năm'}
                     >
-                        {Array.from({ length: 2 }, (_, index) => (
-                            <MenuItem key={currentYear - index} value={currentYear - index}>
-                                {currentYear - index}
+                        {Array.from({ length: currentYear - 2024 }, (_, index) => (
+                            <MenuItem key={2025 + index} value={2025 + index}>
+                                {2025 + index}
                             </MenuItem>
                         ))}
                     </Select>

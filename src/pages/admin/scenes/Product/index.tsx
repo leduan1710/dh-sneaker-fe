@@ -23,7 +23,6 @@ function ProductManagement() {
     const [styles, setStyles] = useState<any>([]);
     const [colors, setColors] = useState<any>([]);
     const [types, setTypes] = useState<any>([]);
-    const [products, setProducts] = useState<any>([]);
     const store = useStore();
     //
     const [open, setOpen] = useState(false);

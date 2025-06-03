@@ -8,6 +8,7 @@ import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard';
 import StoreTwoToneIcon from '@mui/icons-material/StoreTwoTone';
 import AssignmentTurnedInTwoToneIcon from '@mui/icons-material/AssignmentTurnedInTwoTone';
 import LocalOfferTwoToneIcon from '@mui/icons-material/LocalOfferTwoTone';
+import UndoIcon from '@mui/icons-material/Undo';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import BarChartTwoToneIcon from '@mui/icons-material/BarChartTwoTone';
 import CategoryIcon from '@mui/icons-material/Category';
@@ -259,6 +260,17 @@ function SidebarMenu() {
                                     startIcon={<AssignmentTurnedInTwoToneIcon />}
                                 >
                                     Quản lý đơn hàng
+                                </Button>
+                            </ListItem>
+                            <ListItem component="div">
+                                <Button
+                                    disableRipple
+                                    component={RouterLink}
+                                    onClick={closeSidebar}
+                                    to="/admin/management/return-orders"
+                                    startIcon={<UndoIcon />}
+                                >
+                                    Quản lý đơn đổi hoàn
                                 </Button>
                             </ListItem>
                             {user.role === 'ADMIN' && (

@@ -136,7 +136,7 @@ function Row(props: RowProps) {
 
                 <TableCell align="center">
                     <Select
-                        value={order.status}
+                        value={order.isReturn ? 'true' : 'false'}
                         variant="standard"
                         onChange={(e) => {
                             setNewStatus(e.target.value);
@@ -146,21 +146,12 @@ function Row(props: RowProps) {
                             height: '30px',
                             padding: '5px',
                             backgroundColor:
-                                order.status === 'SUCCESS'
+                                order.isReturn
                                     ? 'rgba(76, 175, 80, 0.1)'
-                                    : order.status === 'CANCEL'
-                                    ? 'rgba(244, 67, 54, 0.1)'
-                                    : order.status === 'BOOM'
-                                    ? 'rgba(255, 152, 0, 0.1)'
-                                    : 'rgba(33, 150, 243, 0.1)',
-                            color:
-                                order.status === 'SUCCESS'
-                                    ? '#43A047'
-                                    : order.status === 'CANCEL'
-                                    ? '#D32F2F'
-                                    : order.status === 'BOOM'
-                                    ? '#FF9800'
-                                    : '#1976D2',
+                                    : 
+                                    'rgba(244, 67, 54, 0.1)',
+                                    
+                            color: order.isReturn ? '#43A047' :  '#D32F2F',
                             fontSize: 14,
                             '& .MuiSelect-select': {
                                 paddingTop: '6px',
@@ -168,9 +159,8 @@ function Row(props: RowProps) {
                             },
                         }}
                     >
-                        <MenuItem value="SUCCESS">Thành công</MenuItem>
-                        <MenuItem value="CANCEL">Đã hủy</MenuItem>
-                        <MenuItem value="BOOM">Boom</MenuItem>
+                        <MenuItem value="true">Đã nhận</MenuItem>
+                        <MenuItem value="false">Chưa nhận</MenuItem>
                     </Select>
                 </TableCell>
                 <TableCell align="right">
@@ -271,7 +261,7 @@ function Row(props: RowProps) {
     );
 }
 
-export default function OrderTable() {
+export default function ReturnOrderTable() {
     const { t } = useTranslation();
     const store = useStore();
     const location = useLocation();
@@ -289,14 +279,17 @@ export default function OrderTable() {
     const [statusFilter, setStatusFilter] = useState<string>('ALL');
     const [shipMethodFilter, setShipMethodFilter] = useState<string>('ALL');
     const [ctvFilter, setCtvFilter] = useState('ALL');
+    const [isReturnFilter, setIsReturnFilter] = useState('ALL');
+
     const [ctvNames, setCtvNames] = useState<string[]>([]);
 
     const getDataOrder = async () => {
         store.dispatch(change_is_loading(true));
         if (ctvFilter === 'ALL') {
-            const res = await PostApi(`/admin/get-orders/${30}/${step}`, localStorage.getItem('token'), {
+            const res = await PostApi(`/admin/get-return-orders/${30}/${step}`, localStorage.getItem('token'), {
                 status: statusFilter,
                 shipMethod: shipMethodFilter,
+                isReturn: isReturnFilter,
             });
 
             if (res.data.message == 'Success') {
@@ -309,11 +302,12 @@ export default function OrderTable() {
             }
         } else {
             const res = await PostApi(
-                `/admin/get-orders-by-ctv/${ctvFilter}/${30}/${step}`,
+                `/admin/get-return-orders-by-ctv/${ctvFilter}/${30}/${step}`,
                 localStorage.getItem('token'),
                 {
                     status: statusFilter,
                     shipMethod: shipMethodFilter,
+                    isReturn: isReturnFilter,
                 },
             );
 
@@ -359,10 +353,11 @@ export default function OrderTable() {
         setCtvFilter('ALL');
         setShipMethodFilter('ALL');
         setStatusFilter('ALL');
+        setIsReturnFilter('ALL');
     };
     useEffect(() => {
         getDataOrder();
-    }, [ctvFilter, statusFilter, shipMethodFilter]);
+    }, [ctvFilter, statusFilter, shipMethodFilter, isReturnFilter]);
 
     useEffect(() => {
         if (step != 1) getDataOrder();
@@ -421,6 +416,12 @@ export default function OrderTable() {
         setPage(0);
     };
 
+    const handleIsReturnChange = (event: SelectChangeEvent<string>) => {
+        setIsReturnFilter(event.target.value as string);
+        setStep(1);
+        setPage(0);
+    };
+
     const paginatedOrders = orders.slice(page * limit, page * limit + limit);
     // filter Id
     const [searchTerm, setSearchTerm] = useState<string>('');
@@ -432,7 +433,7 @@ export default function OrderTable() {
         if (searchTerm != '') {
             store.dispatch(change_is_loading(true));
             const res = await PostApi(
-                `/admin/search/order-by-phone-or-delivering-code`,
+                `/admin/search/return-order-by-phone-or-delivering-code`,
                 localStorage.getItem('token'),
                 { searchTerm: searchTerm },
             );
@@ -460,7 +461,6 @@ export default function OrderTable() {
                     <InputLabel>Trạng thái</InputLabel>
                     <Select value={statusFilter} onChange={handleStatusChange} label="Trạng thái">
                         <MenuItem value="ALL">Tất cả</MenuItem>
-                        <MenuItem value="SUCCESS">Thành công</MenuItem>
                         <MenuItem value="BOOM">Boom</MenuItem>
                         <MenuItem value="CANCEL">Đã hủy</MenuItem>
                     </Select>
@@ -487,11 +487,19 @@ export default function OrderTable() {
                         ))}
                     </Select>
                 </FormControl>
+                <FormControl variant="outlined" sx={{ minWidth: 200 }}>
+                    <InputLabel>Trạng thái hoàn</InputLabel>
+                    <Select value={isReturnFilter} onChange={handleIsReturnChange} label="Trạng thái hoàn">
+                        <MenuItem value="ALL">Tất cả</MenuItem>
+                        <MenuItem value="true">Đã nhận hàng</MenuItem>
+                        <MenuItem value="false">Chưa nhận hàng</MenuItem>
+                    </Select>
+                </FormControl>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Input
                         value={searchTerm}
                         className="border border-gray-300 rounded-lg p-1"
-                        sx={{ display: 'block', width: 350, marginRight: 2 }}
+                        sx={{ display: 'block', width: 300, marginRight: 2 }}
                         placeholder={'Tìm kiếm'}
                         onChange={(e) => {
                             filterSpecialInput(e.target.value, setSearchTerm);
