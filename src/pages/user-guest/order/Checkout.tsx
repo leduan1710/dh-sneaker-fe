@@ -80,7 +80,7 @@ const Checkout: React.FC = () => {
 
     const handleShippingMethodChange = (event: any) => {
         if (event.target.value === 'VIETTELPOST') setShippingFee('30000');
-        if (event.target.value === 'GGDH') setShippingFee('60000');
+        else if (event.target.value === 'GGDH') setShippingFee('60000');
         else setShippingFee('0');
         setShippingMethod(event.target.value);
     };
@@ -581,7 +581,7 @@ const Checkout: React.FC = () => {
                         />
                     </RadioGroup>
                 </FormControl>
-                {(shippingMethod === 'VIETTELPOST' || shippingMethod === 'GRAB' ||shippingMethod === 'GGDH') && (
+                {(shippingMethod === 'VIETTELPOST' || shippingMethod === 'GRAB' || shippingMethod === 'GGDH') && (
                     <>
                         {shippingMethod === 'GRAB' && (
                             <TextField
