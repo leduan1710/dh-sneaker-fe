@@ -77,9 +77,16 @@ export default function OrderTable() {
     const [orders, setOrders] = useState<any[]>([]);
     const [orderDetails, setOrderDetails] = useState<any[]>([]);
 
+    const [revenue, setRevenue] = useState(0);
+    const [commission, setCommission] = useState(0);
+    const [bonus, setBonus] = useState(0);
+    const [quantity, setQuantity] = useState(0);
+
     // Pagination state
     const [page, setPage] = useState(0);
     const [limit, setLimit] = useState(5);
+    const [count, setCount] = useState(0);
+    const [step, setStep] = useState<number>(1);
 
     const currentMonth = new Date().getMonth() + 1;
     const currentYear = new Date().getFullYear();
@@ -102,6 +109,7 @@ export default function OrderTable() {
         }
         store.dispatch(change_is_loading(false));
     };
+
     const getOrderDetails = async (orders: any[]) => {
         const fetchedOrderDetails: any[] = [];
         const orderDetailIdList: string[] = [];
@@ -119,9 +127,23 @@ export default function OrderTable() {
         }
         setOrderDetails(fetchedOrderDetails);
     };
-
+    const getDataRevenueCommissionAndBonus = async () => {
+        const res = await GetApi(
+            `/admin/get/revenue-commission-by-ctvName/${user.name}/${selectedMonth}/${selectedYear}`,
+            localStorage.getItem('token'),
+        );
+        if (res.data.message === 'Success') {
+            setRevenue(res.data.data.revenue);
+            setCommission(res.data.data.commission);
+            setBonus(res.data.data.bonus);
+            setQuantity(res.data.data.quantity);
+        }
+    };
     useEffect(() => {
-        if (user.id && selectedMonth) getDataOrder();
+        if (user.id && selectedMonth) {
+            getDataOrder();
+            getDataRevenueCommissionAndBonus();
+        }
     }, [selectedMonth, user, selectedYear]);
 
     const handlePageChange = (event: unknown, newPage: number) => {
@@ -155,28 +177,6 @@ export default function OrderTable() {
         clearTimeout(typingTimeoutRef.current);
     }
 
-    const totalCommission = orders.reduce((total, order) => {
-        return total + order.commission;
-    }, 0);
-
-    const totalQuantity = orders
-        .filter((order) => order.status === 'SUCCESS')
-        .reduce((total, order) => {
-            const orderDetailsForOrder = orderDetails.filter((detail) => detail.orderId === order.id);
-            const filteredDetails = orderDetailsForOrder.filter((detail) => !detail.isJibbitz);
-            return total + filteredDetails.reduce((sum, detail) => sum + detail.quantity, 0);
-        }, 0);
-
-    const calculateBonus = (totalQuantity: number) => {
-        if (totalQuantity >= 300) return 700000;
-        if (totalQuantity >= 200) return 400000;
-        if (totalQuantity >= 150) return 250000;
-        if (totalQuantity >= 100) return 150000;
-        if (totalQuantity >= 50) return 60000;
-        if (totalQuantity >= 30) return 300000;
-        return 0;
-    };
-    const bonus = calculateBonus(totalQuantity);
     const paginatedOrders = filteredOrders.slice(page * limit, page * limit + limit);
 
     return (
@@ -204,7 +204,7 @@ export default function OrderTable() {
                                             Hoa hồng
                                         </Typography>
                                         <Typography variant="body2" sx={{ fontSize: 14 }} noWrap>
-                                            {formatPrice(totalCommission)}
+                                            {formatPrice(commission)}
                                         </Typography>
                                     </Box>
                                 </Grid>
@@ -234,7 +234,7 @@ export default function OrderTable() {
                                             Số lượng
                                         </Typography>
                                         <Typography variant="body2" sx={{ fontSize: 14 }} noWrap>
-                                            {totalQuantity || 0}
+                                            {quantity || 0}
                                         </Typography>
                                     </Box>
                                 </Grid>
@@ -294,7 +294,7 @@ export default function OrderTable() {
                                             Tổng
                                         </Typography>
                                         <Typography variant="body2" sx={{ fontSize: 14 }} noWrap>
-                                            {formatPrice(totalCommission + bonus)}
+                                            {formatPrice(commission + bonus)}
                                         </Typography>
                                     </Box>
                                 </Grid>
@@ -423,12 +423,8 @@ export default function OrderTable() {
                                         formatPrice(order.CODPrice),
                                         formatPrice(totalCtvPrice),
                                         formatPrice(order.shipFee),
-                                        order.status === 'PROCESSING' || order.status === 'CANCEL'
-                                            ? formatPrice(0)
-                                            : order.status === 'BOOM'
-                                            ? formatPrice(-60000)
-                                            : formatPrice(order.CODPrice - order.shipFee - totalCtvPrice),
-                                        order.status === 'SUCCESS'
+                                        order.commission,
+                                        order.status === 'SUCCESS' && order.shipMethod !== 'GGDH'
                                             ? orderDetails
                                                   .filter((detail) => detail.orderId === order.id)
                                                   .reduce(

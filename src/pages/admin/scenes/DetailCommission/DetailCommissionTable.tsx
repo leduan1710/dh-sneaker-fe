@@ -132,10 +132,10 @@ function Row(props: RowProps) {
                         ? formatPrice(0)
                         : order.status === 'BOOM'
                         ? formatPrice(-60000)
-                        : formatPrice(order.CODPrice - order.shipFee - totalCtvPrice)}
+                        : formatPrice(order.commission)}
                 </TableCell>
                 <TableCell align="center">
-                    {order.status === 'SUCCESS'
+                    {order.status === 'SUCCESS' && order.shipMethod !== 'GGDH'
                         ? orderDetails.reduce((total, detail) => {
                               return !detail.isJibbitz ? total + detail.quantity : total;
                           }, 0)

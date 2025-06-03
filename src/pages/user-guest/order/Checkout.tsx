@@ -849,11 +849,15 @@ const Checkout: React.FC = () => {
                             </Typography>
 
                             <Typography variant="h6" sx={{ fontSize: 19, fontWeight: 600 }}>
-                                {formatPrice(
-                                    Number(totalCOD.replace(/,/g, '')) -
-                                        totalAmount -
-                                        Number(shippingFee.replace(/,/g, '')),
-                                )}
+                                {shippingMethod === 'GGDH'
+                                    ? formatPrice(
+                                          Number(totalCOD.replace(/,/g, '')) - Number(shippingFee.replace(/,/g, '')),
+                                      )
+                                    : formatPrice(
+                                          Number(totalCOD.replace(/,/g, '')) -
+                                              totalAmount -
+                                              Number(shippingFee.replace(/,/g, '')),
+                                      )}
                             </Typography>
                         </Box>
                     </Box>
