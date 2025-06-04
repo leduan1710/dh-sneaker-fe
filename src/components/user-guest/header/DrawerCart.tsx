@@ -71,7 +71,7 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
                 nav('/checkout');
             }
         } else {
-            toastWarning('');
+            toastWarning('Chọn sản phẩm muốn mua');
         }
     };
     //
@@ -79,6 +79,8 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
         const list_cart = JSON.parse(localStorage.getItem('listCart') || '[]');
         //total item
         if (listCart.length > 0) {
+            console.log(listCart, listItemInCart);
+
             const totalItem = listCart.reduce((accumulator: any, currentValue: any) => {
                 if (currentValue.isCheck) {
                     return accumulator + currentValue.quantity;
@@ -97,6 +99,7 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
                 }
             }, 0);
             setTotalPrice(totalPrice);
+            console.log(totalItem, totalPrice);
         }
     };
 
@@ -114,7 +117,6 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
     //
     useEffect(() => {
         if (localStorage.getItem('listCart')) getDataInCart();
-        getTotalPriceAndItem();
     }, [numberCart]);
     useEffect(() => {
         getTotalPriceAndItem();
@@ -123,9 +125,10 @@ const DrawerCart: React.FC<DrawerCartProps> = (props) => {
     useEffect(() => {
         if (open) {
             getTotalPriceAndItem();
+        }else{
+            setIsCheckAll(false)
         }
     }, [open]);
-
     const DrawerList = (
         <Box sx={{ width: '100%' }} role="presentation">
             <div className="pt-3 pl-3 pb-3 flex justify-start items-center bg-general sticky top-0 right-0 left-0 z-10">

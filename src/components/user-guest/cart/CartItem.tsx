@@ -98,11 +98,12 @@ const CartItem: React.FC<CartItemProps> = (props) => {
     }, []);
     useEffect(() => {
         if (isCheck_F != isCheck) {
-            if (productDetailInStore.isCheck) {
-            } else {
-                setIsCheck(isCheck_F);
-                handleCheck();
-            }
+            if (productDetailInStore)
+                if (productDetailInStore.isCheck) {
+                } else {
+                    setIsCheck(isCheck_F);
+                    handleCheck();
+                }
         }
     }, [isCheck_F]);
     return (

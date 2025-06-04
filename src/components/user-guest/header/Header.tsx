@@ -266,7 +266,12 @@ const Header: React.FC<HeaderProps> = (props) => {
                     <div className="flex items-center justify-end flex-grow">
                         <HeaderNotifications />
                         <span onClick={() => setOpenCart(true)} className="mr-3 cursor-pointer">
-                            <Badge badgeContent={numberCart} color="error">
+                            <Badge
+                                badgeContent={listCart.reduce((total: number, item: any) => {
+                                    return total + item.quantity;
+                                }, 0)}
+                                color="error"
+                            >
                                 <LocalMallIcon sx={{ color: 'rgba(7, 110, 145, 0.89)' }} />
                             </Badge>
                         </span>
@@ -315,9 +320,7 @@ const Header: React.FC<HeaderProps> = (props) => {
                             </SwiperSlide>
                         ))}
                         <SwiperSlide>
-                            <a
-                                style={{ color: 'black', textAlign: 'center', textDecoration: 'none' }}
-                            >
+                            <a style={{ color: 'black', textAlign: 'center', textDecoration: 'none' }}>
                                 <p>
                                     {' '}
                                     <b>CLICK&amp;COLLECT</b> - Mua ONLINE Nhận NHANH tại cửa hàng.{' '}

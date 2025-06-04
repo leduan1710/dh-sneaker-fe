@@ -145,13 +145,9 @@ function Row(props: RowProps) {
                             width: '150px',
                             height: '30px',
                             padding: '5px',
-                            backgroundColor:
-                                order.isReturn
-                                    ? 'rgba(76, 175, 80, 0.1)'
-                                    : 
-                                    'rgba(244, 67, 54, 0.1)',
-                                    
-                            color: order.isReturn ? '#43A047' :  '#D32F2F',
+                            backgroundColor: order.isReturn ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)',
+
+                            color: order.isReturn ? '#43A047' : '#D32F2F',
                             fontSize: 14,
                             '& .MuiSelect-select': {
                                 paddingTop: '6px',
@@ -461,6 +457,7 @@ export default function ReturnOrderTable() {
                     <InputLabel>Trạng thái</InputLabel>
                     <Select value={statusFilter} onChange={handleStatusChange} label="Trạng thái">
                         <MenuItem value="ALL">Tất cả</MenuItem>
+                        <MenuItem value="SUCCESS">Thành công</MenuItem>
                         <MenuItem value="BOOM">Boom</MenuItem>
                         <MenuItem value="CANCEL">Đã hủy</MenuItem>
                     </Select>

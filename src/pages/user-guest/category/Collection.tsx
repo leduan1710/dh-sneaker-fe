@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     Container,
     Grid,
@@ -26,7 +26,7 @@ import ColorFilterSection from '../../../components/user-guest/category/ColorFil
 import HomeIcon from '@mui/icons-material/Home';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import TuneIcon from '@mui/icons-material/Tune';
-import { GetGuestApi, PostGuestApi } from '../../../untils/Api';
+import { GetGuestApi, PostApi, PostGuestApi } from '../../../untils/Api';
 import { useStore } from 'react-redux';
 import { change_is_loading } from '../../../reducers/Actions';
 import Footer from '../../../components/user-guest/footer/Footer';
@@ -63,14 +63,15 @@ const ProductCollection = () => {
     const [optionColor, setOptionColor] = useState<any>(undefined);
     const [optionSize, setOptionSize] = useState<any>(undefined);
 
-    const [limit, setLimit] = useState<number>(60);
+    const [limit, setLimit] = useState<number>(20);
     const [step, setStep] = useState<number>(1);
+    const [page, setPage] = useState<number>(1);
+    const [count, setCount] = useState<number>(0);
+
     const [listProduct, setListProduct] = useState<any>([]);
-    // const [listProductCurrent, setListProductCurrent] = useState<any>(undefined);
-    const [req, setReq] = useState<boolean>(true);
-    const [currentPage, setCurrentPage] = useState<number>(1);
 
     const [searchTerm, setSearchTerm] = useState('');
+    const [req, setReq] = useState<boolean>(true);
 
     const [optionsFilter, setOptionsFilter] = useState<optionsFilterProps>({
         sort: null,
@@ -113,25 +114,17 @@ const ProductCollection = () => {
             );
             if (resProducts.data.message == 'Success') {
                 const filterProduct = resProducts.data.products.products.filter((product: any) => product != null);
+                setCount(resProducts.data.products.count);
                 if (step == 1) {
                     setListProduct(filterProduct);
                 } else {
                     setListProduct((prev: any) => prev.concat(filterProduct));
                 }
-                setReq(false);
             }
             store.dispatch(change_is_loading(false));
         }
     };
-    const handleReq = () => {
-        setLimit(60);
-        setStep(1);
-        setCurrentPage(1);
-        if (optionsFilter.sort == 'desc' || optionsFilter.sort == 'asc') {
-            setCurrentPage(1);
-        }
-        setReq(true);
-    };
+
     const handleFilterUpdate = () => {
         setOptionsFilter({
             sort: sortOption.length > 0 ? sortOption : null,
@@ -170,11 +163,8 @@ const ProductCollection = () => {
         });
     };
 
-    const filteredProducts = listProduct.filter((product: any) =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
-
     const clearFilters = () => {
+        setSortOption('');
         setSelectedSizes([]);
         setSelectedColors([]);
         setSelectedStyles([]);
@@ -186,31 +176,60 @@ const ProductCollection = () => {
     };
 
     const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
-        setCurrentPage(value);
-        setStep(value);
+        setPage(value);
+        if (limit * value > listProduct.length && listProduct.length < count && searchTerm === '') {
+            setStep((prev) => prev + 1);
+        }
     };
+
     useEffect(() => {
         handleFilterUpdate();
-        handleReq();
     }, [selectedSizes, selectedColors, selectedStyles, selectedTypes, sortOption]);
 
     useEffect(() => {
-        getDataFilter();
-        getProductByCategory();
-    }, []);
-    useEffect(() => {
-        if (req) {
-            getProductByCategory();
+        setStep(1);
+        setPage(1);
+        if (optionsFilter.sort == 'desc' || optionsFilter.sort == 'asc') {
+            setPage(1);
         }
-    }, [req]);
+        if (searchTerm == '') getProductByCategory();
+    }, [optionsFilter]);
 
-    // useEffect(() => {
-    //     setListProductCurrent(listProduct.slice(0 + (currentPage - 1) * 24, 24 + (currentPage - 1) * 24));
-    // }, [listProduct]);
+    useEffect(() => {
+        if (step != 1) getProductByCategory();
+    }, [step]);
 
-    // useEffect(() => {
-    //     setListProductCurrent(listProduct.slice(currentPage == 1 ? 0 : (currentPage - 1) * 24, 24 * currentPage));
-    // }, [currentPage]);
+    useEffect(() => {
+        getDataFilter();
+    }, []);
+
+    const searchByName = async (searchTerm: string) => {
+        if (searchTerm != '') {
+            store.dispatch(change_is_loading(true));
+            const res = await PostApi(`/api/search/product-by-name-and-category`, localStorage.getItem('token'), {
+                searchTerm: searchTerm,
+                categoryName,
+            });
+
+            if (res.data.message == 'Success') {
+                clearFilters();
+                setListProduct(res.data.products);
+                setPage(1);
+            }
+            store.dispatch(change_is_loading(false));
+        } else getProductByCategory();
+    };
+
+    const typingTimeoutRef = useRef<any>(null);
+    if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+    }
+
+    useEffect(() => {
+        typingTimeoutRef.current = setTimeout(() => {
+            searchByName(searchTerm);
+        }, 500);
+    }, [searchTerm]);
 
     const filterSize =
         optionSize && optionSize.length > 0 ? (
@@ -260,10 +279,9 @@ const ProductCollection = () => {
             />
         ) : null;
 
-    console.log(listProduct.length, Math.ceil(listProduct.length / limit));
     return (
         <>
-            <Container sx={{ pt: 1, mt: {xs: '190px', md: '165px'} }} maxWidth="xl">
+            <Container sx={{ pt: 1, mt: { xs: '190px', md: '165px' } }} maxWidth="xl">
                 <Typography
                     variant="h4"
                     sx={{
@@ -313,7 +331,10 @@ const ProductCollection = () => {
                                 }}
                             >
                                 {/* Hiển thị tiêu chí lọc đã chọn */}
-                                {(selectedSizes.length > 0 || selectedColors.length > 0 || selectedStyles.length > 0 || selectedTypes.length > 0) && (
+                                {(selectedSizes.length > 0 ||
+                                    selectedColors.length > 0 ||
+                                    selectedStyles.length > 0 ||
+                                    selectedTypes.length > 0) && (
                                     <Box sx={{ mt: 1, mb: 2 }}>
                                         <Box
                                             sx={{
@@ -517,35 +538,33 @@ const ProductCollection = () => {
 
                         {/* Danh sách sản phẩm */}
                         <Grid container spacing={2}>
-                            {filteredProducts
-                                .slice((currentPage - 1) * 20, currentPage * 20)
-                                .map((product: any, index: number) => {
-                                    const colorInfo =
-                                        optionColor && optionColor.length > 0
-                                            ? optionColor.find((color: any) => color.id === product.colorId)
-                                            : null;
+                            {listProduct.slice((page - 1) * 20, page * 20).map((product: any, index: number) => {
+                                const colorInfo =
+                                    optionColor && optionColor.length > 0
+                                        ? optionColor.find((color: any) => color.id === product.colorId)
+                                        : null;
 
-                                    const colorCode = colorInfo ? colorInfo.colorCode : '#000000';
+                                const colorCode = colorInfo ? colorInfo.colorCode : '#000000';
 
-                                    return (
-                                        <Grid item xs={6} sm={4} md={3} key={index}>
-                                            <ProductCard
-                                                productId={product.id}
-                                                imageUrl={product.image}
-                                                title={product.name}
-                                                price={product.sellPrice}
-                                                salePrice={product.virtualPrice}
-                                                rating={'★★★★★'}
-                                                color={colorCode}
-                                            />
-                                        </Grid>
-                                    );
-                                })}
+                                return (
+                                    <Grid item xs={6} sm={4} md={3} key={index}>
+                                        <ProductCard
+                                            productId={product.id}
+                                            imageUrl={product.image}
+                                            title={product.name}
+                                            price={product.sellPrice}
+                                            salePrice={product.virtualPrice}
+                                            rating={'★★★★★'}
+                                            color={colorCode}
+                                        />
+                                    </Grid>
+                                );
+                            })}
                         </Grid>
                         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
                             <Pagination
-                                count={Math.ceil(listProduct.length / 20)}
-                                page={currentPage}
+                                count={searchTerm === '' ? Math.ceil(count / 20) : Math.ceil(listProduct.length/20)}
+                                page={page}
                                 onChange={handlePageChange}
                                 variant="outlined"
                                 shape="rounded"
@@ -557,7 +576,10 @@ const ProductCollection = () => {
                 {/* Drawer cho lọc sản phẩm */}
                 <Drawer anchor="right" open={openDrawer} onClose={toggleDrawer}>
                     <Box sx={{ width: 250, padding: 2 }}>
-                        {(selectedSizes.length > 0 || selectedColors.length > 0 || selectedStyles.length > 0 || selectedTypes.length > 0)  && (
+                        {(selectedSizes.length > 0 ||
+                            selectedColors.length > 0 ||
+                            selectedStyles.length > 0 ||
+                            selectedTypes.length > 0) && (
                             <Box sx={{ mt: 2, mb: 2 }}>
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <Typography variant="body1">Lọc Theo:</Typography>
