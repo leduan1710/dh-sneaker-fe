@@ -310,15 +310,42 @@ export default function NewOrderTable() {
     // Pagination state
     const [page, setPage] = useState(0);
     const [limit, setLimit] = useState(5);
+    const [count, setCount] = useState(0);
+    const [step, setStep] = useState<number>(1);
 
     const getDataOrder = async () => {
         store.dispatch(change_is_loading(true));
-        const res = await GetApi(`/admin/get-new-orders/${20}/1`, localStorage.getItem('token'));
+        if (ctvFilter === 'ALL') {
+            const res = await PostApi(`/admin/get-new-orders/${15}/${step}`, localStorage.getItem('token'), {
+                shipMethod: shipMethodFilter,
+            });
 
-        if (res.data.message == 'Success') {
-            setOrders(res.data.orders);
-            await getOrderDetails(res.data.orders);
-            setPage(0);
+            if (res.data.message == 'Success') {
+                if (step != 1) setOrders((prev) => [...prev, ...res.data.orders.orders]);
+                else {
+                    setOrders(res.data.orders.orders);
+                }
+                setCount(res.data.orders.count);
+
+                await getOrderDetails(res.data.orders.orders);
+            }
+        } else {
+            const res = await PostApi(
+                `/admin/get-new-orders-by-ctv/${ctvFilter}/${15}/${step}`,
+                localStorage.getItem('token'),
+                {
+                    shipMethod: shipMethodFilter,
+                },
+            );
+
+            if (res.data.message == 'Success') {
+                if (step != 1) setOrders((prev) => [...prev, ...res.data.orders.orders]);
+                else {
+                    setOrders(res.data.orders.orders);
+                }
+                setCount(res.data.orders.count);
+                await getOrderDetails(res.data.orders.orders);
+            }
         }
         store.dispatch(change_is_loading(false));
     };
@@ -348,9 +375,20 @@ export default function NewOrderTable() {
             setCtvNames(names);
         }
     };
+
     useEffect(() => {
-        if (user) getDataOrder();
-    }, [user]);
+        if (step != 1) getDataOrder();
+    }, [step]);
+
+    useEffect(() => {
+        if (orders.length > 0 && count > 0 && searchTerm === '')
+            if (limit * (page + 1) > orders.length && orders.length < count) {
+                setStep((prev) => prev + 1);
+            }
+    }, [orders]);
+    useEffect(() => {
+        getDataOrder();
+    }, [ctvFilter, shipMethodFilter]);
     useEffect(() => {
         getDataCTVName();
     }, []);
@@ -363,6 +401,9 @@ export default function NewOrderTable() {
     }, [status]);
     const handlePageChange = (event: unknown, newPage: number) => {
         setPage(newPage);
+        if (limit * (newPage + 1) > orders.length && orders.length < count && searchTerm === '') {
+            setStep((prev) => prev + 1);
+        }
     };
 
     const handleLimitChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -380,14 +421,7 @@ export default function NewOrderTable() {
         setPage(0);
     };
 
-    const filteredOrders = orders.filter((order) => {
-        const matchesCtv = ctvFilter === 'ALL' || order.ctvName === ctvFilter;
-        const matchesShipMethod = shipMethodFilter === 'ALL' || order.shipMethod === shipMethodFilter;
-
-        return matchesCtv && matchesShipMethod;
-    });
-
-    const paginatedOrders = filteredOrders.slice(page * limit, page * limit + limit);
+    const paginatedOrders = orders.slice(page * limit, page * limit + limit);
 
     const typingTimeoutRef = useRef<any>(null);
     if (typingTimeoutRef.current) {
@@ -491,7 +525,7 @@ export default function NewOrderTable() {
                     rowsPerPageOptions={[5, 10, 25]}
                     labelRowsPerPage="Số đơn mỗi trang"
                     component="div"
-                    count={orders.length}
+                    count={count}
                     rowsPerPage={limit}
                     page={page}
                     onPageChange={handlePageChange}

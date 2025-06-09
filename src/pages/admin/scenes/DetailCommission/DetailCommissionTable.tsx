@@ -363,6 +363,7 @@ export default function DetailCommissionTable() {
     useEffect(() => {
         if (step != 1) getDataOrder(ctvFilter);
     }, [step]);
+    
     useEffect(() => {
         if (orders.length > 0 && count > 0 && searchTerm === '' && ctvFilter === 'ALL')
             if (limit * (page + 1) > orders.length && orders.length < count) {

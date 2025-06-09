@@ -50,8 +50,11 @@ interface NoteDialogProps {
 const NoteDialog: React.FC<NoteDialogProps> = (props) => {
     const { t } = useTranslation();
     const { onClose, open, commission, onUpdate } = props;
-    const [commissionNote, setCommissionNote] = useState(commission?.note);
+    const [commissionNote, setCommissionNote] = useState('');
 
+    useEffect(() => {
+        if (commission) setCommissionNote(commission?.note);
+    }, [commission]);
     const handleClose = () => {
         onClose();
     };
