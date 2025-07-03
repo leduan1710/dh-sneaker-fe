@@ -321,7 +321,7 @@ export default function CommissionStatisticTable() {
                                     <TableCell>{commission.ctvName}</TableCell>
                                     <TableCell>{formatPrice(commission.commission)}</TableCell>
                                     <TableCell>{formatPrice(commission.bonus)}</TableCell>
-                                    <TableCell>{formatPrice(commission.total)}</TableCell>
+                                    <TableCell>{formatPrice(commission.commission + commission.bonus)}</TableCell>
                                     <TableCell>
                                         <Box
                                             sx={{
